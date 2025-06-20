@@ -113,13 +113,3 @@ Contributions are welcome\! If you have ideas for improvements, bug reports, or 
 
 This project is licensed under the MIT License - see the [LICENSE](https://www.google.com/search?q=LICENSE) file for details.
 
------
-
-**Next Steps:**
-
-  * **Replace `YOUR_GITHUB_RELEASES_URL_HERE`** with the actual URL to your GitHub releases page once you've created a release.
-  * **Create a `LICENSE` file** in your repository with the MIT license text.
-  * Consider adding a `CONTRIBUTING.md` file if you want to provide more detailed guidelines for contributions.
-  * You might want to add a small section on **building from source** if you'd like users to be able to compile it themselves, assuming you'll include the QuickJS source or instructions.
-
-This `README.md` should give users a clear understanding of what your `js` tool does, how to use it, and why it's a valuable addition to their command-line toolkit\!
