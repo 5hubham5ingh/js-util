@@ -109,7 +109,3 @@ print(std.evalScript(expression))
 
 Contributions are welcome\! If you have ideas for improvements, bug reports, or want to add new features, please open an issue or submit a pull request.
 
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](https://www.google.com/search?q=LICENSE) file for details.
-
