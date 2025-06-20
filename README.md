@@ -17,7 +17,7 @@ Traditional command-line tools for text processing often rely on specialized syn
 
 `js` is distributed as a single binary.
 
-1.  **Download the latest release:** Grab the appropriate `js` binary for your Linux system from the [releases page](https://www.google.com/search?q=YOUR_GITHUB_RELEASES_URL_HERE).
+1.  **Download the latest release:** Grab the appropriate `js` binary for your Linux system from the [releases page](https://github.com/5hubham5ingh/js-util/releases).
 2.  **Make it executable:**
     ```bash
     chmod +x js
