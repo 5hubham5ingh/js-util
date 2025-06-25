@@ -17,12 +17,15 @@ Traditional command-line tools for text processing often rely on specialized syn
 
 `js` is distributed as a single binary.
 
-1.  **Download the latest release:** Grab the appropriate `js` binary for your Linux system from the [releases page](https://github.com/5hubham5ingh/js-util/releases).
-2.  **Make it executable:**
+1.  **Download the latest release:** Grab the appropriate `js` binary for your Linux system from the [releases page](https://github.com/5hubham5ingh/js-util/releases) or run
+```bash
+curl -L $(curl -s https://api.github.com/repos/5hubham5ingh/js-util/releases/latest | grep -Po '"browser_download_url": "\K[^"]+' | grep js) -o js
+```
+3.  **Make it executable:**
     ```bash
     chmod +x js
     ```
-3.  **Move it to your PATH:**
+4.  **Move it to your PATH:**
     ```bash
     sudo mv js /usr/local/bin/
     ```
@@ -105,6 +108,11 @@ globalThis.stringify = JSON.stringify
 print(std.evalScript(expression))
 ```
 
+## TODO
+- `-p` flag for autoprint.
+- `e()` to exec.
+- `.for()` alias for `forEach`
+- `cwd` for current working directory
 ## Contributing
 
 Contributions are welcome\! If you have ideas for improvements, bug reports, or want to add new features, please open an issue or submit a pull request.
