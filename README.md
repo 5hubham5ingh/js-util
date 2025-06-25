@@ -113,6 +113,7 @@ print(std.evalScript(expression))
 - `e()` to exec.
 - `.for()` alias for `forEach`
 - `cwd` for current working directory
+- `ls` an array containing files in cwd
 ## Contributing
 
 Contributions are welcome\! If you have ideas for improvements, bug reports, or want to add new features, please open an issue or submit a pull request.
