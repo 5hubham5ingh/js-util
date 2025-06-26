@@ -21,16 +21,19 @@ globalThis.stdin = std.in.readAsString()
 globalThis.parse = JSON.parse
 globalThis.stringify = JSON.stringify
 
+let pwdCached;
 Object.defineProperty(globalThis, 'pwd', {
-  get: () => os.getcwd()[0]
+  get: () => pwdCached ?? (pwdCached = os.getcwd()[0])
 });
 
+let hdCached;
 Object.defineProperty(globalThis, 'hd', {
-  get: () => std.getenv("HOME")
+  get: () => hdCached ?? (hdCached = std.getenv("HOME"))
 });
 
+let lsCached;
 Object.defineProperty(globalThis, 'ls', {
-  get: () => os.readdir(globalThis.pwd)[0].filter(f => f != '.' && f != '..')
+  get: () => lsCached ?? (lsCached = os.readdir(globalThis.pwd)[0].filter(f => f != '.' && f != '..'))
 });
 
 globalThis.e = exec
