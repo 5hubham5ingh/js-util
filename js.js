@@ -20,9 +20,19 @@ globalThis.os = os
 globalThis.stdin = std.in.readAsString()
 globalThis.parse = JSON.parse
 globalThis.stringify = JSON.stringify
-globalThis.pwd = os.getcwd()[0]
-globalThis.hd = std.getenv("HOME");
-globalThis.ls = os.readdir(pwd)[0].filter(f => f != '.' && f != '..')
+
+Object.defineProperty(globalThis, 'pwd', {
+  get: () => os.getcwd()[0]
+});
+
+Object.defineProperty(globalThis, 'hd', {
+  get: () => std.getenv("HOME")
+});
+
+Object.defineProperty(globalThis, 'ls', {
+  get: () => os.readdir(globalThis.pwd)[0].filter(f => f != '.' && f != '..')
+});
+
 globalThis.e = exec
 globalThis.ea = execAsync
 
