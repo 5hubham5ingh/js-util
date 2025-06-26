@@ -100,10 +100,6 @@ globalThis.os = os
 // Read stdin once and make it globally available
 globalThis.stdin = std.in.readAsString()
 
-// Provide aliases for common JSON functions
-globalThis.parse = JSON.parse
-globalThis.stringify = JSON.stringify
-
 // Evaluate the user's JavaScript expression and print its result
 print(std.evalScript(expression))
 ```
