@@ -1,4 +1,5 @@
 import * as std from "std"
+import { exec as execAsync, execSync as exec } from "../qjs-ext-lib/src/process.js"
 import * as os from "os"
 
 let p;
@@ -20,7 +21,10 @@ globalThis.stdin = std.in.readAsString()
 globalThis.parse = JSON.parse
 globalThis.stringify = JSON.stringify
 globalThis.pwd = os.getcwd()[0]
+globalThis.hd = std.getenv("HOME");
 globalThis.ls = os.readdir(pwd)[0].filter(f => f != '.' && f != '..')
+globalThis.e = exec
+globalThis.ea = execAsync
 
 Array.prototype.for = function(cb) { for (const e of this) cb(e) }
 
