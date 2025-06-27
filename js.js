@@ -24,7 +24,7 @@ Object.defineProperty(globalThis, 'ls', {
   get: () => lsCached ?? (lsCached = os.readdir(globalThis.pwd)[0].filter(f => f != '.' && f != '..'))
 });
 
-Array.prototype.for = function(cb) { for (const e of this) cb(e) }
+Array.prototype.for = function(cb) { for (const e of this) cb(e); return this }
 
 Array.prototype.remove = function(...items) {
   for (const item of items) {
@@ -33,6 +33,7 @@ Array.prototype.remove = function(...items) {
       this.splice(index, 1);
     }
   }
+  return this
 };
 
 Array.prototype.removeAll = function(...items) {
@@ -42,6 +43,7 @@ Array.prototype.removeAll = function(...items) {
       this.splice(index, 1);
     }
   }
+  return this
 };
 
 
