@@ -140,16 +140,82 @@ These are available in your JavaScript expressions:
 * `os`: QuickJS `os` module.
 
 ---
+## Prototype Extensions
 
-### Prototype Extensions
+### Array.prototype Extensions
 
-The following utility methods are added:
+These methods are added to the `Array` prototype to enhance data manipulation.
 
-* `Array.prototype.for(cb)`: Alias for `forEach`.
-* `Array.prototype.remove(...items)`: Removes the **first occurrence** of each item.
-* `Array.prototype.removeAll(...items)`: Removes **all occurrences** of each item.
-* `String.prototype.body(start,end,line,word)`: Filter string body by starting line, ending line, particular line, particular word.
-* `String.prototype.write(filePath,mode)`: Write sting to the file.
+*   **`.for(callback)`**: A chainable alias for `forEach`. It executes the `callback` function once for each array element and returns the original array, allowing further method calls.
+    *   `callback(element, index, array)`: The function to execute.
+    *   **Example**: `[1, 2, 3].for(n => console.log(n)).map(n => n * 2);`
+
+*   **`.remove(...items)`**: Mutates the array by removing the **first occurrence** of each specified item. Returns the modified array.
+    *   `...items`: One or more items to remove from the array.
+    *   **Example**: `['a', 'b', 'c', 'b'].remove('b', 'a'); // Returns and mutates to ['c', 'b']`
+
+*   **`.removeAll(...items)`**: Mutates the array by removing **all occurrences** of each specified item. Returns the modified array.
+    *   `...items`: One or more items to remove from the array.
+    *   **Example**: `['a', 'b', 'c', 'b'].removeAll('b'); // Returns and mutates to ['a', 'c']`
+
+*   **`.toCsvString(delimiter = ',')`**: Converts an array into a CSV-formatted string. This method intelligently handles both arrays of objects and arrays of arrays.
+    *   **If the array contains objects**: It uses the keys of the first object as the CSV header row. Each subsequent object becomes a data row.
+    *   **If the array contains other arrays**: It treats each inner array as a row. No header is automatically generated.
+    *   **Example (Array of Objects)**:
+        ```javascript
+        const users = [{id: 1, name: "A, B"}, {id: 2, name: 'C "D"'}];
+        users.toCsvString();
+        // Returns: 'id,name\n1,"A, B"\n2,"C ""D"""'
+        ```
+    *   **Example (Array of Arrays)**:
+        ```javascript
+        const data = [['id', 'name'], ['1', 'one']];
+        data.toCsvString();
+        // Returns: 'id,name\n1,one'
+        ```
+
+*   **`.toCsvJson(delimiter = ',')`**: A utility method that first converts the array to a CSV string via `.toCsvString()` and then parses that string back into an array of JSON objects using `String.prototype.toCsvJson`. This is useful for normalizing data structures.
+
+### String.prototype Extensions
+
+These methods are added to the `String` prototype for powerful text processing and I/O.
+
+*   **`.body(start?, end?, line?, word?)`**: Extracts a portion of a multi-line string. Parameters are applied sequentially.
+    *   `start` (number): The starting line index (0-based) to slice from.
+    *   `end` (number): The ending line index (exclusive) to slice to.
+    *   `line` (number): From the resulting slice of lines, selects a single line by its index.
+    *   `word` (number): From the selected line, splits it by whitespace and selects a single word by its index.
+    *   **Example**:
+        ```javascript
+        const text = "line 0\nline 1 word1 word2\nline 2";
+        text.body(1, 3);         // Returns: "line 1 word1 word2\nline 2"
+        text.body(0, 3, 1);      // Returns: "line 1 word1 word2"
+        text.body(0, 3, 1, 2);   // Returns: "word2"
+        ```
+
+*   **`.write(filePath, mode = 'w+')`**: Writes the string's content to a specified file, overwriting it by default.
+    *   `filePath` (string): The path to the file.
+    *   `mode` (string): The file open mode (e.g., `'w+'` for write/truncate, `'a+'` for append).
+    *   **Example**: `"Hello, World!".write('./greeting.txt');`
+
+*   **`.parseJson()`**: A convenient shortcut for `JSON.parse(string)`. Parses a JSON string into a JavaScript object.
+    *   **Example**: `'{"id": 1}'.parseJson(); // Returns: {id: 1}`
+
+*   **`.toCsvArray(delimiter = ',')`**: Parses a CSV-formatted string into an array of arrays, where each inner array represents a row of cells. It correctly handles quoted fields containing delimiters and escaped quotes.
+    *   **Example**: `'h1,h2\n"a,b","c""d"'.toCsvArray(); // Returns: [['h1','h2'], ['a,b', 'c"d']]`
+
+*   **`.toCsvJson(delimiter = ',')`**: Parses a CSV-formatted string into an array of JSON objects. It assumes the first line of the string is the header row, which it uses for the object keys.
+    *   **Example**:
+        ```javascript
+        const csv = 'id,name\n1,Alice\n2,Bob';
+        csv.toCsvJson();
+        // Returns: [{id: '1', name: 'Alice'}, {id: '2', name: 'Bob'}]
+        ```
+
+### Object.prototype Extensions
+
+*   **`.stringify(replacer = null, space = 2)`**: A shortcut for `JSON.stringify(this, replacer, space)`, providing a quick way to pretty-print any object.
+    *   **Example**: `{a:1, b:2}.stringify();`
 
 Refer to [QuickJS documentation](https://bellard.org/quickjs/quickjs.html#Standard-library) for more on `std` and `os`.
 
