@@ -1,4 +1,3 @@
-````markdown
 # js: JavaScript-powered Stream Manipulation
 
 `js` is a lightweight, command-line utility that allows you to process and transform `stdin` using the power and flexibility of JavaScript. Think of it as a modern, more readable alternative to tools like `awk` or `sed` for complex text manipulation.
@@ -24,7 +23,6 @@ Traditional command-line tools for text processing often rely on specialized syn
 1.  **Download the latest release:** Grab the appropriate `js` binary for your Linux system from the [releases page](https://github.com/5hubham5ingh/js-util/releases) or run
 ```bash
 curl -L $(curl -s [https://api.github.com/repos/5hubham5ingh/js-util/releases/latest](https://api.github.com/repos/5hubham5ingh/js-util/releases/latest) | grep -Po '"browser_download_url": "\K[^"]+' | grep js) -o js
-````
 
 3.  **Make it executable:**
     ` bash     chmod +x js      `
@@ -125,5 +123,3 @@ Refer to the [QuickJS documentation](https://www.google.com/search?q=https://bel
 
 Contributions are welcome\! If you have ideas for improvements, bug reports, or want to add new features, please open an issue or submit a pull request.
 
-```
-```
