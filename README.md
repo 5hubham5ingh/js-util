@@ -149,6 +149,7 @@ The following utility methods are added:
 * `Array.prototype.remove(...items)`: Removes the **first occurrence** of each item.
 * `Array.prototype.removeAll(...items)`: Removes **all occurrences** of each item.
 * `String.prototype.body(start,end,line,word)`: Filter string body by starting line, ending line, particular line, particular word.
+* `String.prototype.write(filePath,mode)`: Write sting to the file.
 
 Refer to [QuickJS documentation](https://bellard.org/quickjs/quickjs.html#Standard-library) for more on `std` and `os`.
 
