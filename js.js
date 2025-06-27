@@ -61,8 +61,15 @@ String.prototype.body = function(start, end, line, word) {
   return file?.join("\n") || ""
 }
 
+String.prototype.write = function(path, mode = "w+") {
+  const file = std.open(path, mode)
+  if (!file) throw Error("Failed to open file " + path);
+  file.puts(this)
+  file.close()
+  return this
+}
 
-let p;
+let p = () => { };
 const scriptArgsToUse = [];
 
 for (const arg of scriptArgs) {
