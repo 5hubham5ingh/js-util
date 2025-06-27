@@ -132,6 +132,7 @@ These are available in your JavaScript expressions:
 * `stringify(value)`: Alias for `JSON.stringify()`.
 * `e(command, args...)`: Executes a shell command synchronously and returns output.
 * `ea(command, args...)`: Executes asynchronously; returns a promise.
+* `read(filePath)`: Read file as utf-8 encoded string.
 * `pwd`: Current working directory.
 * `hd`: User's home directory.
 * `ls`: Array of files/directories in current directory.
@@ -140,13 +141,14 @@ These are available in your JavaScript expressions:
 
 ---
 
-### Array Prototype Extensions
+### Prototype Extensions
 
 The following utility methods are added:
 
 * `Array.prototype.for(cb)`: Alias for `forEach`.
 * `Array.prototype.remove(...items)`: Removes the **first occurrence** of each item.
 * `Array.prototype.removeAll(...items)`: Removes **all occurrences** of each item.
+* `String.prototype.body(start,end,line,word)`: Filter string body by starting line, ending line, particular line, particular word.
 
 Refer to [QuickJS documentation](https://bellard.org/quickjs/quickjs.html#Standard-library) for more on `std` and `os`.
 
