@@ -8,6 +8,7 @@ globalThis.parse = JSON.parse
 globalThis.stringify = JSON.stringify
 globalThis.e = exec
 globalThis.ea = execAsync
+globalThis.read = std.loadFile
 
 let pwdCached;
 Object.defineProperty(globalThis, 'pwd', {
@@ -45,6 +46,20 @@ Array.prototype.removeAll = function(...items) {
   }
   return this
 };
+
+String.prototype.body = function(start, end, line, word) {
+  let file = this
+  if (!file) return ""
+  file = file.split("\n").slice(start, end)
+  if (line !== undefined) {
+    file = file[line]
+    if (word !== undefined) {
+      return file.split(/\s+/).filter(word => word)[word] || ""
+    }
+    return file || ""
+  }
+  return file?.join("\n") || ""
+}
 
 
 let p;
