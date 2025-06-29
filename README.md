@@ -235,6 +235,10 @@ If `-p` was used, the result is printed. Otherwise, output is only produced if y
 
 ---
 
+## TODO
+- .then to Array, string and function prototypes
+- .exec and .execAsync
+
 ## Contributing
 
 Contributions are welcome! If you have ideas for improvements, bug reports, or want to add new features, please [open an issue](https://github.com/5hubham5ingh/js-util/issues) or submit a pull request.
