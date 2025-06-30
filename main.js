@@ -6,8 +6,8 @@ globalThis.std = std
 globalThis.os = os
 globalThis.parse = JSON.parse
 globalThis.stringify = JSON.stringify
-globalThis.e = exec
-globalThis.ea = execAsync
+globalThis.exec = exec
+globalThis.execAsync = execAsync
 globalThis.read = std.loadFile
 
 let pwdCached;
