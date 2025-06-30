@@ -125,6 +125,14 @@ js [flags] "YOUR_JAVASCRIPT_EXPRESSION"
     .write('departments.csv')"
     ```
 
+*   Execute commands concurrently:
+    ```bash
+    js -p "await ls.filter(f => f.endsWith('.png'))
+    .map(img => 'magick ' + img + ' -resize 1920x1080 ' + cwd + '/resized_' + img)
+    .pipe(cmds => Promise.all(cmds.for(asyncAsync))"
+    ```
+
+
 ---
 
 ## Global Variables and Functions
@@ -220,6 +228,10 @@ If `-p` was used, the result is printed. Otherwise, output is only produced if y
 ---
 
 ## TODO
+
+- Implement console.table.
+- Coloured output.
+- Styled output.
 
 ## Contributing
 
