@@ -74,6 +74,10 @@ Array.prototype.toCsvJson = function(delimiter = ',') {
 
 Array.prototype.pipe = function(cb) { return cb(this) }
 
+Array.prototype.exec = exec
+
+Array.prototype.execAsync = execAsync
+
 
 String.prototype.pipe = function(cb) { return cb(this) }
 
@@ -147,6 +151,10 @@ String.prototype.toCsvJson = function(delimiter = ',') {
     return obj;
   });
 };
+
+String.prototype.exec = exec
+
+String.prototype.execAsync = execAsync
 
 
 Number.prototype.pipe = function(cb) { return cb(this) }
