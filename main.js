@@ -74,9 +74,9 @@ Array.prototype.toCsvJson = function(delimiter = ',') {
 
 Array.prototype.pipe = function(cb) { return cb(this) }
 
-Array.prototype.exec = exec
+Array.prototype.exec = function() { return exec(this) }
 
-Array.prototype.execAsync = execAsync
+Array.prototype.execAsync = function() { return execAsync(this) }
 
 
 String.prototype.pipe = function(cb) { return cb(this) }
@@ -152,9 +152,9 @@ String.prototype.toCsvJson = function(delimiter = ',') {
   });
 };
 
-String.prototype.exec = exec
+String.prototype.exec = function() { return (exec(this)) }
 
-String.prototype.execAsync = execAsync
+String.prototype.execAsync = function() { return execAsync(this) }
 
 
 Number.prototype.pipe = function(cb) { return cb(this) }
