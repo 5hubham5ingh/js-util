@@ -75,7 +75,6 @@ describe("Global Properties", () => {
   });
 
   it("should return and cache 'hd' (HOME directory)", () => {
-    // We cannot mock std.getenv as it's read-only.
     const firstHd = globalThis.hd;
     const secondHd = globalThis.hd;
     assert(typeof firstHd === 'string' && firstHd.length > 0, "hd should return a non-empty string");
@@ -90,6 +89,12 @@ describe("Object.prototype Modifications", () => {
     const expected = '{\n  "a": 1,\n  "b": "test"\n}';
     assert.deepEqual(obj.stringify(), expected);
   });
+
+  it(".pipe(callBack) should call the callBack with 'this' as argument and return it", () => {
+    const obj = { name: "test", count: 3 }
+    const expected = 3
+    assert.deepEqual(obj.pipe(v => v.count), expected)
+  })
 });
 
 
@@ -125,8 +130,22 @@ describe("Array.prototype Modifications", () => {
     const expected = [{ name: 'John', age: '30' }, { name: 'Jane', age: '25' }];
     assert.deepEqual(arr.toCsvJson(), expected);
   });
+
+  it(".pipe(callBack) should call the callback with 'this' as argument and return it.", () => {
+    const arr = [1, 23, 43]
+    const expected = 23
+    assert.deepEqual(arr.pipe(v => v[1]), expected)
+  })
 });
 
+describe("Number.prototype Modifications", () => {
+
+  it(".pipe(callBack) should call the callback with 'this' as argument and return it.", () => {
+    const num = 5
+    const expected = 25
+    assert.deepEqual(num.pipe(n => n * n), expected)
+  })
+})
 
 describe("String.prototype Modifications", () => {
   const multiLineString = "line 1\nline 2: a b c\nline 3\nline 4\nline 5";
@@ -178,6 +197,12 @@ describe("String.prototype Modifications", () => {
     const expected = [{ name: "Alice", age: "30", city: "New York" }];
     assert.deepEqual(csv.toCsvJson(), expected);
   });
+
+  it(".pipe(callBack) should call the callBack with 'this' as argument and return it.", () => {
+    const name = "test string prototype.pipe"
+    const expected = "string"
+    assert.deepEqual(name.pipe(s => s.slice(5, 11)), expected)
+  })
 });
 
 runTests();
