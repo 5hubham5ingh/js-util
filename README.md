@@ -1,7 +1,7 @@
 
 # js: JavaScript-powered Stream Manipulation
 
-**`js`** is a lightweight command-line utility that allows you to process and transform `stdin` using the power and flexibility of JavaScript. Think of it as a modern, more readable alternative to tools like `awk` or `sed` for complex text manipulation.
+**`js`** is a lightweight command-line utility that brings the simplicity and readability of a modern scripting language over cryptic and numerous syntax for different tools like awk, sed, jq, etc to your commands.
 
 It's built with QuickJS, compiling to a standalone binary for Linux, making it incredibly fast and portable.
 
@@ -69,10 +69,12 @@ js [flags] "YOUR_JAVASCRIPT_EXPRESSION"
     js -p "10 * 5"  # Output: 50
     ```
 
-*   **Count lines from a file:**
+*   **Extract content from a file:**
 
     ```bash
-    cat my_file.txt | js -p -r "sin.split('\n').length - 1"
+    cat my_file.txt | js -p -r "sin.body(4,14)" # Select lines 4 to 14
+    js -p "read('my_file.txt').body(10, 15, 3, 5)" # Select lines 10 to 15 then line 3 then word 5
+
     ```
 
 *   **Extract and transform JSON using `.pipe()`:**
@@ -88,28 +90,39 @@ js [flags] "YOUR_JAVASCRIPT_EXPRESSION"
     Name: Alice, Age: 30
     ```
 
-*   **Filter lines and print using `for` and `p`:**
+*   **Filter lines and print using `for` and `print`:**
 
     ```bash
-    cat access.log | js -r "sin.split('\n').filter(line => line.includes('ERROR')).for(p)"
+    cat access.log | js -r "sin.split('\n').filter(line => line.includes('ERROR')).for(print)"
     ```
 
-*   **List `.js` files in current directory:**
+*   **List `TODO` in files in current directory:**
 
     ```bash
-    js -p "ls.filter(f => f.endsWith('.js'))"
+    js -p "ls.filter(f => f.endsWith('.md') && read(f).includes('TODO'))"
     ```
 
-*   **Execute a shell command and print output:**
+*   **Execute a shell command and process the output:**
 
     ```bash
-    js -p "'echo Hello from QuickJS'.exec()"
+    js -p "'curl -s https://jsonplaceholder.typicode.com/users'.exec()
+    .parseJson()
+    .pipe(users => users.map(u => [u.id, u.name, u.company.name]))
+    .pipe( data => [['id','name','company'], ...data])
+    .toCsvString()
+    .write('report.csv')"
     ```
 
-*   **Navigate and get home directory:**
+*   **Process CSV and JSON files:**
 
     ```bash
-    js -p "`Current: ${pwd}, Home: ${hd}`"
+    js -p "read('departments.json').parseJson()
+    .reduce((m,d)=>(m[d.id]=d,m),{})
+    .pipe(depts=>read('employees.csv')
+    .toCsvJson()
+    .map(e=>({id:e.employee_id,name:e.name,dept:depts[e.department_id]?.department_name||'N/A',loc:depts[e.department_id]?.location||'N/A'}))
+    .toCsvString()
+    .write('departments.csv')"
     ```
 
 ---
