@@ -136,6 +136,18 @@ describe("Array.prototype Modifications", () => {
     const expected = 23
     assert.deepEqual(arr.pipe(v => v[1]), expected)
   })
+
+  it(".exec() should execute the array as shell command.", () => {
+    const arr = ["echo", "test"]
+    const expected = "test"
+    assert.deepEqual(arr.exec(), expected)
+  })
+
+  it(".execAsync() should execute the array as command asynchronously and return a promise.", () => {
+    const arr = ['echo', 'test']
+    const expected = "test"
+    assert(arr.execAsync().then(v => v), expected)
+  })
 });
 
 describe("Number.prototype Modifications", () => {
@@ -202,6 +214,18 @@ describe("String.prototype Modifications", () => {
     const name = "test string prototype.pipe"
     const expected = "string"
     assert.deepEqual(name.pipe(s => s.slice(5, 11)), expected)
+  })
+
+  it(".exec() should execute the string as command and return result.", () => {
+    const str = 'echo test'
+    const expected = 'test'
+    assert(str.exec(), expected)
+  })
+
+  it(".execAsync() should execute the string as command and return a promise.", () => {
+    const str = 'echo test'
+    const expected = 'test'
+    assert(str.execAsync().then(v => v), expected)
   })
 });
 
