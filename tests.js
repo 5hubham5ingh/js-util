@@ -1,4 +1,4 @@
-import "./js.js";
+import "./main.js";
 
 let totalTests = 0;
 let passedTests = 0;
@@ -60,8 +60,12 @@ describe("Global Properties", () => {
   });
 
   it("should define aliases for exec functions", () => {
-    assert(typeof globalThis.e === 'function', "globalThis.e (execSync) should be a function");
+    assert(typeof globalThis.exec === 'function', "globalThis.exec (execSync) should be a function");
   });
+
+  it("should define aliases for execAsync functions", () => {
+    assert(typeof globalThis.execAsync === 'function', "globalThis.execAsync should be a function");
+  })
 
   it("should return and cache 'pwd'", () => {
     const firstPwd = globalThis.pwd;
