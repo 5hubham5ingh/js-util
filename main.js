@@ -29,6 +29,8 @@ Object.prototype.stringify = function(replacer = null, space = 2) {
   return JSON.stringify(this, replacer, space);
 };
 
+Object.prototype.pipe = function(cb) { return cb(this) }
+
 Array.prototype.stringify = function(replacer = null, space = 2) {
   return JSON.stringify(this, replacer, space)
 }
@@ -54,6 +56,26 @@ Array.prototype.removeAll = function(...items) {
   }
   return this
 };
+
+Array.prototype.toCsvString = function(delimiter = ',') {
+  return this.map(row =>
+    row.map(cell => {
+      const str = String(cell);
+      const needsQuotes = str.includes(delimiter) || str.includes('"') || str.includes('\n') || str.includes('\r');
+      const escaped = str.replace(/"/g, '""');
+      return needsQuotes ? `"${escaped}"` : escaped;
+    }).join(delimiter)
+  ).join('\n');
+};
+
+Array.prototype.toCsvJson = function(delimiter = ',') {
+  return this.toCsvString(delimiter).toCsvJson(delimiter)
+}
+
+Array.prototype.pipe = function(cb) { return cb(this) }
+
+
+String.prototype.pipe = function(cb) { return cb(this) }
 
 String.prototype.body = function(start, end, line, word) {
   let file = this
@@ -126,20 +148,9 @@ String.prototype.toCsvJson = function(delimiter = ',') {
   });
 };
 
-Array.prototype.toCsvString = function(delimiter = ',') {
-  return this.map(row =>
-    row.map(cell => {
-      const str = String(cell);
-      const needsQuotes = str.includes(delimiter) || str.includes('"') || str.includes('\n') || str.includes('\r');
-      const escaped = str.replace(/"/g, '""');
-      return needsQuotes ? `"${escaped}"` : escaped;
-    }).join(delimiter)
-  ).join('\n');
-};
 
-Array.prototype.toCsvJson = function(delimiter = ',') {
-  return this.toCsvString(delimiter).toCsvJson(delimiter)
-}
+Number.prototype.pipe = function(cb) { return cb(this) }
+
 
 let p = () => { };
 const scriptArgsToUse = [];
