@@ -125,6 +125,20 @@ describe("Array.prototype Modifications", () => {
     assert.deepEqual(arr.toCsvString(), expected);
   });
 
+  it(".toCsvArray() should convert a JSON object into an array of arrays of csv format", () => {
+    const arr = [
+      { head1: "val1", head2: "val2" },
+      { head1: "val3", head2: "val4" }
+    ]
+    const expected = [
+      ["head1", "head2"],
+      ["val1", "val2"],
+      ["val3", "val4"]
+    ]
+
+    assert.deepEqual(arr.toCsvArray(), expected)
+  })
+
   it(".toCsvJson() should convert an array of arrays to JSON objects", () => {
     const arr = [['name', 'age'], ['John', '30'], ['Jane', '25']];
     const expected = [{ name: 'John', age: '30' }, { name: 'Jane', age: '25' }];
