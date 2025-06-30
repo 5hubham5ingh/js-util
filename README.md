@@ -129,7 +129,8 @@ js [flags] "YOUR_JAVASCRIPT_EXPRESSION"
     ```bash
     js -p "await ls.filter(f => f.endsWith('.png'))
     .map(img => 'magick ' + img + ' -resize 1920x1080 ' + cwd + '/resized_' + img)
-    .pipe(cmds => Promise.all(cmds.for(asyncAsync))"
+    .map(cmd => cmd.execAsync())
+    .pipe(Promise.all)"
     ```
 
 
