@@ -36,6 +36,8 @@ Object.prototype.stringify = function(replacer = null, space = 2) {
 
 Object.prototype.pipe = function(cb) { return cb(this) }
 
+Object.prototype.log = function() { print(this); return this }
+
 Array.prototype.stringify = function(replacer = null, space = 2) {
   return JSON.stringify(this, replacer, space)
 }
@@ -216,23 +218,14 @@ String.prototype.exec = function() { return (exec(this)) }
 
 String.prototype.execAsync = function() { return execAsync(this) }
 
+String.prototype.log = function() { print(this); return this; }
+
 
 Number.prototype.pipe = function(cb) { return cb(this) }
 
-
-let p = () => { };
-const scriptArgsToUse = [];
-
-for (const arg of scriptArgs) {
-  switch (arg) {
-    case "-p":
-      p = (...all) => print(...all);
-      break;
-    default:
-      scriptArgsToUse.push(arg);
-  }
-}
+Number.prototype.log = function() { print(this); return this }
 
 
-const expression = scriptArgsToUse.slice(1, scriptArgsToUse.length).join('');
-p(std.evalScript(expression)); 
+
+const expression = scriptArgs.slice(1, scriptArgs.length).join('');
+std.evalScript(expression)
