@@ -57,8 +57,6 @@ js [flags] "YOUR_JAVASCRIPT_EXPRESSION"
 
 *   `-p`: **Print result.** Enables the `p` global function (an alias for `print`) and ensures the result of your evaluated expression is printed to stdout. **This flag is generally required to see the output.**
 
-*   `-r`: **Read stdin.** Reads the entire standard input into the global `sin` variable as a string.
-
 ---
 
 ### Examples
@@ -72,7 +70,7 @@ js [flags] "YOUR_JAVASCRIPT_EXPRESSION"
 *   **Extract content from a file:**
 
     ```bash
-    cat my_file.txt | js -p -r "sin.body(4,14)" # Select lines 4 to 14
+    cat my_file.txt | js -p "stdin.body(4,14)" # Select lines 4 to 14
     js -p "read('my_file.txt').body(10, 15, 3, 5)" # Select lines 10 to 15 then line 3 then word 5
 
     ```
@@ -82,7 +80,7 @@ js [flags] "YOUR_JAVASCRIPT_EXPRESSION"
     Suppose `input.json` contains: `{"name": "Alice", "age": 30}`
 
     ```bash
-    cat input.json | js -p -r "sin.parseJson().pipe(d => `Name: ${d.name}, Age: ${d.age}`)"
+    cat input.json | js -p "stdin.parseJson().pipe(d => `Name: ${d.name}, Age: ${d.age}`)"
     ```
 
     Output:
@@ -93,7 +91,7 @@ js [flags] "YOUR_JAVASCRIPT_EXPRESSION"
 *   **Filter lines and print using `for` and `print`:**
 
     ```bash
-    cat access.log | js -r "sin.split('\n').filter(line => line.includes('ERROR')).for(print)"
+    cat access.log | js "stdin.split('\n').filter(line => line.includes('ERROR')).for(print)"
     ```
 
 *   **List `TODO` in files in current directory:**
@@ -138,7 +136,7 @@ js [flags] "YOUR_JAVASCRIPT_EXPRESSION"
 
 These are available in your JavaScript expressions:
 
-*   `sin`: (With `-r`) A string containing the full piped input.
+*   `stdin`: A string containing the full piped input.
 *   `print(value)`: Prints a value followed by a newline.
 *   `p(value)`: (With `-p`) Alias for `print()`.
 *   `parse(jsonString)`: Alias for `JSON.parse()`.
@@ -218,9 +216,8 @@ Refer to [QuickJS documentation](https://bellard.org/quickjs/quickjs.html#Standa
 
 1.  Iterates over `scriptArgs` (QuickJS command-line arguments).
 2.  Defines `p()` if `-p` flag is present.
-3.  Reads `stdin` into `sin` if `-r` flag is present.
-4.  Joins remaining args into a single JavaScript expression.
-5.  Executes the expression using `std.evalScript`.
+3.  Joins remaining args into a single JavaScript expression.
+4.  Executes the expression using `std.evalScript`.
 
 If `-p` was used, the result is printed. Otherwise, output is only produced if you explicitly call `print()`.
 
