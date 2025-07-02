@@ -162,6 +162,7 @@ A `.pipe(callback)` method has been added to the `Object`, `Array`, `String`, an
 
 *   **`.stringify(replacer = null, space = 2)`**: A shortcut for `JSON.stringify(this, replacer, space)`, providing a quick way to pretty-print any object.
 *   **`.pipe(callback)`**: Passes the object to the callback and returns its result.
+*   `.log()`: Prints the object to the console.
 
 ### Array.prototype
 
@@ -196,10 +197,12 @@ A `.pipe(callback)` method has been added to the `Object`, `Array`, `String`, an
 *   **`.pipe(callback)`**: Passes the string to the callback and returns its result.
 *   **`.exec()`**: Treats the string as a shell command and executes it synchronously.
 *   **`.execAsync()`**: Asynchronously executes the string as a shell command.
+*   `.log()`: Prints the string to the console.
 
 ### Number.prototype
 
 *   **`.pipe(callback)`**: Passes the number to the callback and returns its result.
+*   `.log()`: Prints the number to the console.
 
 Refer to [QuickJS documentation](https://bellard.org/quickjs/quickjs.html#Standard-library) for more on `std` and `os`.
 
