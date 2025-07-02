@@ -127,10 +127,8 @@ js [flags] "YOUR_JAVASCRIPT_EXPRESSION"
 
 *   Execute commands concurrently:
     ```bash
-    js -p "await ls.filter(f => f.endsWith('.png'))
-    .map(img => 'magick ' + img + ' -resize 1920x1080 ' + cwd + '/resized_' + img)
-    .map(cmd => cmd.execAsync())
-    .pipe(Promise.all)"
+    js -p "await Promise.all(ls.filter(f => f.endsWith('.png'))
+    .map(img => ('magick ' + img + ' -resize 1920x1080 ' + cwd + '/resized_' + img).execAsync))"
     ```
 
 
