@@ -25,6 +25,11 @@ Object.defineProperty(globalThis, 'ls', {
   get: () => lsCached ?? (lsCached = os.readdir(globalThis.pwd)[0].filter(f => f != '.' && f != '..'))
 });
 
+let stdinCached;
+Object.defineProperty(globalThis, 'stdin', {
+  get: () => stdinCached ?? (stdinCached = std.in.readAsString())
+})
+
 Object.prototype.stringify = function(replacer = null, space = 2) {
   return JSON.stringify(this, replacer, space);
 };
@@ -222,9 +227,6 @@ for (const arg of scriptArgs) {
   switch (arg) {
     case "-p":
       p = (...all) => print(...all);
-      break;
-    case "-r":
-      globalThis.sin = std.in.readAsString()
       break;
     default:
       scriptArgsToUse.push(arg);
