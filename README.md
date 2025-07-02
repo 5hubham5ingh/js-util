@@ -53,10 +53,6 @@ Now, `js` should be available globally in your terminal.
 js [flags] "YOUR_JAVASCRIPT_EXPRESSION"
 ```
 
-### Flags
-
-*   `-p`: **Print result.** Enables the `p` global function (an alias for `print`) and ensures the result of your evaluated expression is printed to stdout. **This flag is generally required to see the output.**
-
 ---
 
 ### Examples
@@ -64,14 +60,14 @@ js [flags] "YOUR_JAVASCRIPT_EXPRESSION"
 *   **Print a simple calculation:**
 
     ```bash
-    js -p "10 * 5"  # Output: 50
+    js  "10 * 5"  # Output: 50
     ```
 
 *   **Extract content from a file:**
 
     ```bash
-    cat my_file.txt | js -p "stdin.body(4,14)" # Select lines 4 to 14
-    js -p "read('my_file.txt').body(10, 15, 3, 5)" # Select lines 10 to 15 then line 3 then word 5
+    cat my_file.txt | js  "stdin.body(4,14)" # Select lines 4 to 14
+    js  "read('my_file.txt').body(10, 15, 3, 5)" # Select lines 10 to 15 then line 3 then word 5
 
     ```
 
@@ -80,7 +76,7 @@ js [flags] "YOUR_JAVASCRIPT_EXPRESSION"
     Suppose `input.json` contains: `{"name": "Alice", "age": 30}`
 
     ```bash
-    cat input.json | js -p "stdin.parseJson().pipe(d => `Name: ${d.name}, Age: ${d.age}`)"
+    cat input.json | js  "stdin.parseJson().pipe(d => `Name: ${d.name}, Age: ${d.age}`)"
     ```
 
     Output:
@@ -97,13 +93,13 @@ js [flags] "YOUR_JAVASCRIPT_EXPRESSION"
 *   **List `TODO` in files in current directory:**
 
     ```bash
-    js -p "ls.filter(f => f.endsWith('.md') && read(f).includes('TODO'))"
+    js  "ls.filter(f => f.endsWith('.md') && read(f).includes('TODO'))"
     ```
 
 *   **Execute a shell command and process the output:**
 
     ```bash
-    js -p "'curl -s https://jsonplaceholder.typicode.com/users'.exec()
+    js  "'curl -s https://jsonplaceholder.typicode.com/users'.exec()
     .parseJson()
     .pipe(users => users.map(u => [u.id, u.name, u.company.name]))
     .pipe( data => [['id','name','company'], ...data])
@@ -114,7 +110,7 @@ js [flags] "YOUR_JAVASCRIPT_EXPRESSION"
 *   **Process CSV and JSON files:**
 
     ```bash
-    js -p "read('departments.json').parseJson()
+    js  "read('departments.json').parseJson()
     .reduce((m,d)=>(m[d.id]=d,m),{})
     .pipe(depts=>read('employees.csv')
     .toCsvJson()
@@ -125,7 +121,7 @@ js [flags] "YOUR_JAVASCRIPT_EXPRESSION"
 
 *   Execute commands concurrently:
     ```bash
-    js -p "await Promise.all(ls.filter(f => f.endsWith('.png'))
+    js  "await Promise.all(ls.filter(f => f.endsWith('.png'))
     .map(img => ('magick ' + img + ' -resize 1920x1080 ' + cwd + '/resized_' + img).execAsync))"
     ```
 
@@ -138,7 +134,6 @@ These are available in your JavaScript expressions:
 
 *   `stdin`: A string containing the full piped input.
 *   `print(value)`: Prints a value followed by a newline.
-*   `p(value)`: (With `-p`) Alias for `print()`.
 *   `parse(jsonString)`: Alias for `JSON.parse()`.
 *   `stringify(value)`: Alias for `JSON.stringify()`.
 *   `exec(command)`: Executes a shell command synchronously and returns its stdout as a string. `command` can be a string or an array of strings (e.g., `['ls', '-l']`).
@@ -215,11 +210,9 @@ Refer to [QuickJS documentation](https://bellard.org/quickjs/quickjs.html#Standa
 `js` processes command-line arguments to configure its behavior:
 
 1.  Iterates over `scriptArgs` (QuickJS command-line arguments).
-2.  Defines `p()` if `-p` flag is present.
-3.  Joins remaining args into a single JavaScript expression.
+3.  Joins args into a single JavaScript expression.
 4.  Executes the expression using `std.evalScript`.
 
-If `-p` was used, the result is printed. Otherwise, output is only produced if you explicitly call `print()`.
 
 ---
 
