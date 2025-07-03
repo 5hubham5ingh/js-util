@@ -198,6 +198,8 @@ A `.pipe(callback)` method has been added to the `Object`, `Array`, `String`, an
 *   **`.exec()`**: Treats the string as a shell command and executes it synchronously.
 *   **`.execAsync()`**: Asynchronously executes the string as a shell command.
 *   `.log()`: Prints the string to the console.
+*   `.words`: Prints number of words, separated by space, in the string.
+*   `.lines`: Prints number of lines, separated by newline character in the string.
 
 ### Number.prototype
 
