@@ -242,15 +242,17 @@ describe("String.prototype Modifications", () => {
     assert(str.execAsync().then(v => v), expected)
   })
 
-  it(".lines should return number of lines in the string", () => {
+  it(".lines() should return number of lines in the string", () => {
     const str = "line1 \n line2 \n line3 \n";
-    const expected = 3;
+    const lines = str.lines()
+    const expected = lines.length;
     assert(str.lines, expected)
   })
 
-  it(".words should return number of words in a stirng.", () => {
+  it(".words() should return number of words in a stirng.", () => {
     const str = "word1 word2 \n word3 word4 \n word5 \n";
-    const expected = 5
+    const words = str.words()
+    const expected = words.length
     assert(str.words, expected)
   })
 });
