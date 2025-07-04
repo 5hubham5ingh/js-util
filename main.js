@@ -220,22 +220,9 @@ String.prototype.execAsync = function() { return execAsync(this) }
 
 String.prototype.log = function() { print(this); return this; }
 
-Object.defineProperties(String.prototype, {
-  words: {
-    get: function() {
-      const wordCount = this.split(/\s+/).filter(word => word.length > 0).length;
-      return wordCount;
-    }
-  },
-  lines: {
-    get: function() {
-      if (this.length === 0) {
-        return 0;
-      }
-      return this.split(/\r\n|\r|\n/).length;
-    }
-  },
-});
+String.prototype.lines = function() { return this.split(/\r\n|\r|\n/) };
+
+String.prototype.words = function() { return this.split(/\s+/).filter(w => w.length) }
 
 Number.prototype.pipe = function(cb) { return cb(this) }
 
