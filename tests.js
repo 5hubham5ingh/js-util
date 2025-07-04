@@ -241,6 +241,18 @@ describe("String.prototype Modifications", () => {
     const expected = 'test'
     assert(str.execAsync().then(v => v), expected)
   })
+
+  it(".lines should return number of lines in the string", () => {
+    const str = "line1 \n line2 \n line3 \n";
+    const expected = 3;
+    assert(str.lines, expected)
+  })
+
+  it(".words should return number of words in a stirng.", () => {
+    const str = "word1 word2 \n word3 word4 \n word5 \n";
+    const expected = 5
+    assert(str.words, expected)
+  })
 });
 
 runTests();
