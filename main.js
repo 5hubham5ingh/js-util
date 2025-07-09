@@ -28,10 +28,10 @@ Object.defineProperty(globalThis, 'HD', {
 
 let lsCached;
 Object.defineProperty(globalThis, 'ls', {
-  get: () => lsCached ?? (lsCached = os.readdir(globalThis.pwd)[0].filter(f => f != '.' && f != '..'))
+  get: () => lsCached ?? (lsCached = os.readdir(os.getcwd()[0])[0].filter(f => f != '.' && f != '..'))
 });
 Object.defineProperty(globalThis, 'LS', {
-  get: () => (lsCached = os.readdir(globalThis.pwd)[0].filter(f => f != '.' && f != '..'))
+  get: () => (lsCached = os.readdir(os.getcwd()[0])[0].filter(f => f != '.' && f != '..'))
 });
 
 let stdinCached;
@@ -46,6 +46,10 @@ Object.prototype.stringify = function(replacer = null, space = 2) {
 Object.prototype.pipe = function(cb) { return cb(this) }
 
 Object.prototype.log = function() { print(this); return this }
+
+Object.prototype.cd = function(dir = std.getenv("HOME")) {
+  return os.chdir(dir) === 0 ? true : false
+}
 
 Array.prototype.stringify = function(replacer = null, space = 2) {
   return JSON.stringify(this, replacer, space)
