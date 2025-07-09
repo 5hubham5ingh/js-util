@@ -14,15 +14,24 @@ let pwdCached;
 Object.defineProperty(globalThis, 'pwd', {
   get: () => pwdCached ?? (pwdCached = os.getcwd()[0])
 });
+Object.defineProperty(globalThis, 'PWD', {
+  get: () => (pwdCached = os.getcwd()[0])
+});
 
 let hdCached;
 Object.defineProperty(globalThis, 'hd', {
   get: () => hdCached ?? (hdCached = std.getenv("HOME"))
 });
+Object.defineProperty(globalThis, 'HD', {
+  get: () => (hdCached = std.getenv("HOME"))
+});
 
 let lsCached;
 Object.defineProperty(globalThis, 'ls', {
   get: () => lsCached ?? (lsCached = os.readdir(globalThis.pwd)[0].filter(f => f != '.' && f != '..'))
+});
+Object.defineProperty(globalThis, 'LS', {
+  get: () => (lsCached = os.readdir(globalThis.pwd)[0].filter(f => f != '.' && f != '..'))
 });
 
 let stdinCached;
