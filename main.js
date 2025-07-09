@@ -233,6 +233,24 @@ String.prototype.lines = function() { return this.split(/\r\n|\r|\n/) };
 
 String.prototype.words = function() { return this.split(/\s+/).filter(w => w.length) }
 
+String.prototype.isDir = function() {
+  const [stat, err] = os.stat(this)
+  if (err) throw Error("Failed to read stat for " + this)
+  return (stat.mode & os.S_IFMT) === os.S_IFDIR
+}
+
+String.prototype.isFile = function() {
+  const [stat, err] = os.stat(this)
+  if (err) throw Error("Failed to read stat for " + this)
+  return (stat.mode & os.S_IFMT) === os.S_IFREG
+}
+
+String.prototype.isSymLink = function() {
+  const [stat, err] = os.stat(this)
+  if (err) throw Error("Failed to read stat for " + this)
+  return (stat.mode & os.S_IFMT) === os.S_IFLNK
+}
+
 Number.prototype.pipe = function(cb) { return cb(this) }
 
 Number.prototype.log = function() { print(this); return this }
