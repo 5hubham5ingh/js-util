@@ -10,16 +10,19 @@ globalThis.exec = exec
 globalThis.execAsync = execAsync
 globalThis.read = std.loadFile
 
+let pwdCached;
 Object.defineProperty(globalThis, 'pwd', {
-  get: () => os.getcwd()[0]
+  get: () => pwdCached ?? (pwdCached = os.getcwd()[0])
 });
 
+let hdCached;
 Object.defineProperty(globalThis, 'hd', {
-  get: () => std.getenv("HOME")
+  get: () => hdCached ?? (hdCached = std.getenv("HOME"))
 });
 
+let lsCached;
 Object.defineProperty(globalThis, 'ls', {
-  get: () => os.readdir(globalThis.pwd)[0].filter(f => f != '.' && f != '..')
+  get: () => lsCached ?? (lsCached = os.readdir(globalThis.pwd)[0].filter(f => f != '.' && f != '..'))
 });
 
 let stdinCached;
