@@ -10,12 +10,14 @@ globalThis.exec = exec
 globalThis.execAsync = execAsync
 globalThis.read = std.loadFile
 
+for (const envVar of ['HOME', 'PATH', 'USER', 'LOGNAME', 'SHELL', 'PWD', 'OLDPWD', 'TERM', 'LANG', 'LC_ALL', 'LC_CTYPE', 'LC_COLLATE', 'LC_MESSAGES', 'LC_MONETARY', 'LC_NUMERIC', 'LC_TIME', 'MAIL', 'MAILPATH', 'TZ', 'HISTFILE', 'HISTSIZE', 'PS1', 'PS2', 'LINES', 'COLUMNS']) {
+  Object.defineProperty(globalThis, envVar, {
+    get: () => std.getenv(envVar),
+  });
+}
+
 Object.defineProperty(globalThis, 'pwd', {
   get: () => os.getcwd()[0]
-});
-
-Object.defineProperty(globalThis, 'HOME', {
-  get: () => std.getenv("HOME")
 });
 
 Object.defineProperty(globalThis, 'ls', {
