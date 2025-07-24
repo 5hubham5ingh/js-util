@@ -14,7 +14,7 @@ Object.defineProperty(globalThis, 'pwd', {
   get: () => os.getcwd()[0]
 });
 
-Object.defineProperty(globalThis, 'hd', {
+Object.defineProperty(globalThis, 'HOME', {
   get: () => std.getenv("HOME")
 });
 
