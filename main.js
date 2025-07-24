@@ -16,7 +16,7 @@ for (const envVar of ['HOME', 'PATH', 'USER', 'LOGNAME', 'SHELL', 'PWD', 'OLDPWD
   });
 }
 
-Object.defineProperty(globalThis, 'pwd', {
+Object.defineProperty(globalThis, 'cwd', {
   get: () => os.getcwd()[0]
 });
 
