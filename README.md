@@ -1,5 +1,5 @@
 
-# js: JavaScript-powered Stream Manipulation
+# js: JavaScript in terminal
 
 **`js`** is a lightweight command-line utility that brings the simplicity and readability of a modern scripting language over cryptic and numerous syntax for different tools like awk, sed, jq, etc to your commands.
 
@@ -9,7 +9,7 @@ It's built with QuickJS, compiling to a standalone binary for Linux, making it i
 
 ## Why `js`?
 
-Traditional command-line tools for text processing often rely on specialized syntaxes that can be difficult to learn and remember. `js` replaces this with familiar JavaScript, enabling you to:
+Traditional, numerous command-line tools often rely on specialized syntaxes that can be difficult to learn and remember. `js` replaces this with familiar JavaScript, enabling you to:
 
 *   **Process standard input with ease:** Treat input as a string and manipulate it using standard JavaScript methods.
 *   **Leverage built-in functions:** Access `JSON.parse`, `JSON.stringify`, `print`, and QuickJS's `std` and `os` modules directly.
