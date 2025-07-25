@@ -2,7 +2,11 @@
 
 `js` is a command-line tool that brings the power and familiarity of JavaScript to your shell. Built on the lightweight and fast [QuickJS](https://bellard.org/quickjs/) engine, `js` provides a rich set of helper methods and global shortcuts to make your command-line scripting more productive, readable, and enjoyable.
 
-Move beyond `awk` and `sed` and embrace the flexibility of JavaScript for your everyday tasks.
+It brings the simplicity and readability of a modern scripting language over cryptic and numerous syntax for different tools like awk, sed, jq, etc to your commands.
+
+> "Everything that can be done in JavaScript will be done in JavaScript."
+>
+> &mdash; Jeff Atwood
 
 ## Features
 
@@ -17,17 +21,28 @@ Move beyond `awk` and `sed` and embrace the flexibility of JavaScript for your e
 
 ## Installation
 
-1.  **Install QuickJS:** Ensure you have [QuickJS](https://bellard.org/quickjs/qjs.html) installed and the `qjs` interpreter is available in your system's `PATH`.
-2.  **Get the script:** Clone this repository or download the `js` script.
-3.  **Place the script in your PATH:** Move the `js` script to a directory in your `PATH`, like `/usr/local/bin`.
+`js` is distributed as a single binary.
+
+1.  **Download the latest release:** Grab the appropriate `js` binary for your Linux system from the [releases page](https://github.com/5hubham5ingh/js-util/releases) or run:
+
     ```bash
-    mv js /usr/local/bin/
+    curl -L $(curl -s https://api.github.com/repos/5hubham5ingh/js-util/releases/latest | grep -Po '"browser_download_url": "\K[^"]+' | grep js) -o js
     ```
-4.  **Make it executable:**
+
+2.  **Make it executable:**
+
     ```bash
-    chmod +x /usr/local/bin/js
+    chmod +x js
     ```
-5.  **Verify dependencies:** Make sure the dependent modules (`qjs-ext-lib/src/process.js` and `justjs/ansiStyle.js`) are located in the correct relative paths from the `js` script as specified in the `import` statements.
+
+3.  **Move it to your PATH:**
+
+    ```bash
+    sudo mv js /usr/local/bin/
+    ```
+
+Now, `js` should be available globally in your terminal.
+
 
 ## Usage
 
