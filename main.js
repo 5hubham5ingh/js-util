@@ -1,6 +1,7 @@
 import * as std from "std"
 import { exec as execAsync, execSync as exec } from "../qjs-ext-lib/src/process.js"
 import * as os from "os"
+import { ansi } from "../justjs/ansiStyle.js"
 
 globalThis.std = std
 globalThis.os = os
@@ -243,6 +244,10 @@ String.prototype.isSymLink = function() {
   const [stat, err] = os.stat(this)
   if (err) throw Error("Failed to read stat for " + this)
   return (stat.mode & os.S_IFMT) === os.S_IFLNK
+}
+
+String.prototype.style = function(styles) {
+  return ansi.format(this, styles)
 }
 
 Number.prototype.pipe = function(cb) { return cb(this) }
