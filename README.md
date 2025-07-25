@@ -196,7 +196,7 @@ js "new Date().toString().border('double', ['magenta', 'bold'])"
 | `.isDir()` | Returns `true` if the string path is a directory. |
 | `.isFile()` | Returns `true` if the string path is a file. |
 | `.isSymLink()` | Returns `true` if the string path is a symbolic link. |
-| `.style(styles)` | Applies ANSI styles to the string. `styles` is an array of style names. <br>**Formatting:** `bold`, `italic`, `underline`. <br>**Colors:** `red`, `green`, `yellow`, `blue`, `magenta`, `cyan`, `white`, `grey`, and their `bright` versions (e.g., `brightRed`). <br>**Backgrounds:** `bg-red`, `bg-green`, etc., and their `bg-bright` versions (e.g., `bg-brightRed`). <br>Example: `['blue', 'bold', 'bg-white']` |
+| `.style(styles)` | Applies ANSI styles to the string. `styles` is an array of style names. <br>**Formatting:** `bold`, `italic`, `underline`. <br>**Colors:** `red`, `green`, `yellow`, `blue`, `magenta`, `cyan`, `white`, `grey`, and their `bright` versions (e.g., `brightRed`) or any rgb or hex color as `#4287f5`,and `rgb(66, 135, 245)`. <br>**Backgrounds:** `bg-red`, `bg-green`, etc., and their `bg-bright` versions (e.g., `bg-brightRed`). <br>Example: `['blue', 'bold', 'bg-white']` |
 | `.stripStyle()` | Removes all ANSI style codes from the string. |
 | `.border(type, style, padding)` | Draws a border around the string. `type` can be `normal`, `thick`, `double`, `rounded`. `style` is an array of styles for the border. |
 | `.stripBorder()`| Removes border characters from a string. |
