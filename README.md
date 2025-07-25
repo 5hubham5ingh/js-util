@@ -1,232 +1,207 @@
+# js - JavaScript for your Shell
 
-# js: JavaScript in terminal
+`js` is a command-line tool that brings the power and familiarity of JavaScript to your shell. Built on the lightweight and fast [QuickJS](https://bellard.org/quickjs/) engine, `js` provides a rich set of helper methods and global shortcuts to make your command-line scripting more productive, readable, and enjoyable.
 
-**`js`** is a lightweight command-line utility that brings the simplicity and readability of a modern scripting language over cryptic and numerous syntax for different tools like awk, sed, jq, etc to your commands.
+Move beyond `awk` and `sed` and embrace the flexibility of JavaScript for your everyday tasks.
 
-It's built with QuickJS, compiling to a standalone binary for Linux, making it incredibly fast and portable.
+## Features
 
----
-
-## Why `js`?
-
-Traditional, numerous command-line tools often rely on specialized syntaxes that can be difficult to learn and remember. `js` replaces this with familiar JavaScript, enabling you to:
-
-*   **Process standard input with ease:** Treat input as a string and manipulate it using standard JavaScript methods.
-*   **Leverage built-in functions:** Access `JSON.parse`, `JSON.stringify`, `print`, and QuickJS's `std` and `os` modules directly.
-*   **Write readable, chainable scripts:** No more wrestling with arcane regular expressions or cryptic commands. Your logic is clear, fluent JavaScript.
-*   **Chain commands:** Integrate `js` seamlessly into your existing shell pipelines.
-*   **Interact with the shell:** Easily execute external commands and access file system information.
-
----
+*   **Seamless JS Execution:** Run JavaScript code directly from your terminal.
+*   **Shell-like Globals:** Access environment variables (`HOME`, `PATH`, etc.) and common commands (`ls`, `cd`, `cwd`) as global JavaScript variables.
+*   **Powerful Piping:** Chain commands and functions together with an intuitive `.pipe()` method available on Objects, Arrays, Strings, and Numbers.
+*   **Effortless I/O:** Read from `stdin` or files (`read()`) and write to files (`.write()`) with ease.
+*   **Process Execution:** Run external commands synchronously (`exec`) or asynchronously (`execAsync`).
+*   **Built-in Data Conversion:** Convert between CSV and JSON formats effortlessly.
+*   **Advanced String & Array Manipulation:** A rich set of prototype methods for common data manipulation tasks.
+*   **Styled Output:** Add colors, styles, and borders to your output for better readability.
 
 ## Installation
 
-`js` is distributed as a single binary.
-
-1.  **Download the latest release:** Grab the appropriate `js` binary for your Linux system from the [releases page](https://github.com/5hubham5ingh/js-util/releases) or run:
-
+1.  **Install QuickJS:** Ensure you have [QuickJS](https://bellard.org/quickjs/qjs.html) installed and the `qjs` interpreter is available in your system's `PATH`.
+2.  **Get the script:** Clone this repository or download the `js` script.
+3.  **Place the script in your PATH:** Move the `js` script to a directory in your `PATH`, like `/usr/local/bin`.
     ```bash
-    curl -L $(curl -s https://api.github.com/repos/5hubham5ingh/js-util/releases/latest | grep -Po '"browser_download_url": "\K[^"]+' | grep js) -o js
+    mv js /usr/local/bin/
     ```
-
-2.  **Make it executable:**
-
+4.  **Make it executable:**
     ```bash
-    chmod +x js
+    chmod +x /usr/local/bin/js
     ```
-
-3.  **Move it to your PATH:**
-
-    ```bash
-    sudo mv js /usr/local/bin/
-    ```
-
-Now, `js` should be available globally in your terminal.
-
----
+5.  **Verify dependencies:** Make sure the dependent modules (`qjs-ext-lib/src/process.js` and `justjs/ansiStyle.js`) are located in the correct relative paths from the `js` script as specified in the `import` statements.
 
 ## Usage
 
-`js` executes JavaScript expressions passed as command-line arguments.
+You can pass any JavaScript expression as an argument to `js`.
 
 ```bash
-js [flags] "YOUR_JAVASCRIPT_EXPRESSION"
+# Basic math
+js "1 + 1"
+# 2
+
+# Access environment variables
+js "PATH"
+# /usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin
+
+# List files in the current directory
+js "ls"
+# [ "file1.txt", "file2.js", "directory1" ]
+
+# Chain operations with .pipe()
+js "ls.pipe(files => files.filter(f => f.endsWith('.js')))"
+# [ "file2.js" ]
+
+# Read a file and get its line count
+js "read('my-file.txt').lines().length"
+# 42
+
+# Execute external commands
+js "exec('ls -la')"
+# ...outputs the result of ls -la
+
+# Read from stdin and process it
+cat package.json | js "stdin.parseJson().version"
+# 1.0.0
+
+# Create a styled border around text
+js "'Hello, World!'.border('rounded', ['green'])"
+
+# Use the full power of JavaScript's Math library, not just simple arithmetic
+js "Math.log(100) * Math.PI"
+# 14.476482730108398
+
+# Prettify and inspect your PATH environment variable
+js "PATH.split(':').join('\\n').border('rounded', ['yellow'])"
+# ╭──────────────────╮
+# │ /usr/local/bin   │
+# │ /usr/bin         │
+# │ /bin             │
+# │ /usr/sbin        │
+# │ /sbin            │
+# ╰──────────────────╯
+
+# Count the number of markdown files in the current directory
+js "ls.filter(f => f.endsWith('.md')).length"
+# 5
+
+# List all subdirectories, styled with an icon
+js "ls.filter(f => f.isDir()).map(dir => \`📁 \${dir}\`.style('yellow')).join('\\n')"
+# 📁 directory1
+# 📁 another_dir
+
+# Find and display all 'import' statements from a source file
+js "read('index.js').lines().filter(l => l.trim().startsWith('import')).log()"
+# [
+#   "import * as std from \"std\"",
+#   "import { exec as execAsync, execSync as exec } from \"../qjs-ext-lib/src/process.js\"",
+#   "import * as os from \"os\"",
+#   "import { ansi } from \"../justjs/ansiStyle.js\""
+# ]
+
+# Get the current git branch by executing a command and parsing its output
+js "exec('git branch').lines().find(line => line.startsWith('*')).replace('* ', '')"
+# "main"
+
+# List all 'dependencies' from a package.json file via stdin
+cat package.json | js "Object.keys(stdin.parseJson().dependencies).log()"
+# [
+#   "some-dependency",
+#   "another-dependency"
+# ]
+
+# Display the current time in a fancy, styled box
+js "new Date().toString().border('double', ['magenta', 'bold'])"
+# ╔═══════════════════════════════════════════════════════════════════╗
+# ║ Fri Jul 25 2025 11:08:00 GMT+0000 (Coordinated Universal Time)    ║
+# ╚═══════════════════════════════════════════════════════════════════╝
 ```
 
----
+## API Reference
 
-### Examples
+### Global Variables & Functions
 
-*   **Print a simple calculation:**
-
-    ```bash
-    js  "10 * 5"  # Output: 50
-    ```
-
-*   **Extract content from a file:**
-
-    ```bash
-    cat my_file.txt | js  "stdin.body(4,14)" # Select lines 4 to 14
-    js  "read('my_file.txt').body(10, 15, 3, 5)" # Select lines 10 to 15 then line 3 then word 5
-
-    ```
-
-*   **Extract and transform JSON using `.pipe()`:**
-
-    Suppose `input.json` contains: `{"name": "Alice", "age": 30}`
-
-    ```bash
-    cat input.json | js  "stdin.parseJson().pipe(d => `Name: ${d.name}, Age: ${d.age}`)"
-    ```
-
-    Output:
-    ```
-    Name: Alice, Age: 30
-    ```
-
-*   **Filter lines and print using `for` and `print`:**
-
-    ```bash
-    cat access.log | js "stdin.split('\n').filter(line => line.includes('ERROR')).for(print)"
-    ```
-
-*   **List `TODO` in files in current directory:**
-
-    ```bash
-    js  "ls.filter(f => f.endsWith('.md') && read(f).includes('TODO'))"
-    ```
-
-*   **Execute a shell command and process the output:**
-
-    ```bash
-    js  "'curl -s https://jsonplaceholder.typicode.com/users'.exec()
-    .parseJson()
-    .pipe(users => users.map(u => [u.id, u.name, u.company.name]))
-    .pipe( data => [['id','name','company'], ...data])
-    .toCsvString()
-    .write('report.csv')"
-    ```
-
-*   **Process CSV and JSON files:**
-
-    ```bash
-    js  "read('departments.json').parseJson()
-    .reduce((m,d)=>(m[d.id]=d,m),{})
-    .pipe(depts=>read('employees.csv')
-    .toCsvJson()
-    .map(e=>({id:e.employee_id,name:e.name,dept:depts[e.department_id]?.department_name||'N/A',loc:depts[e.department_id]?.location||'N/A'}))
-    .toCsvString()
-    .write('departments.csv')"
-    ```
-
-*   Execute commands concurrently:
-    ```bash
-    js  "await Promise.all(ls.filter(f => f.endsWith('.png'))
-    .map(img => ('magick ' + img + ' -resize 1920x1080 ' + cwd + '/resized_' + img).execAsync))"
-    ```
-
+| Name | Type | Description |
+| --- | --- | --- |
+| `std` | `object` | The QuickJS standard library module. |
+| `os` | `object` | The QuickJS operating system module. |
+| `parse(str)` | `function` | Alias for `JSON.parse()`. |
+| `stringify(obj)` | `function` | Alias for `JSON.stringify()`. |
+| `exec(cmd)` | `function` | Executes a command synchronously and returns the output. `cmd` can be a string or an array of strings. |
+| `execAsync(cmd)` | `function` | Executes a command asynchronously and returns a Promise. `cmd` can be a string or an array of strings. |
+| `read(path)` | `function` | Reads a file and returns its content as a string. Alias for `std.loadFile()`. |
+| *Environment Vars* | `string` | Common environment variables like `HOME`, `PATH`, `USER`, `PWD` are available as global strings. |
+| `cwd` | `string` | Gets the current working directory. |
+| `ls` | `array` | Returns an array of file and directory names in the current directory. |
+| `stdin` | `string` | Lazily reads the entire standard input and returns it as a string. |
 
 ---
 
-## Global Variables and Functions
+### `Object.prototype`
 
-These are available in your JavaScript expressions:
-
-*   `stdin`: A string containing the full piped input.
-*   `print(value)`: Prints a value followed by a newline.
-*   `parse(jsonString)`: Alias for `JSON.parse()`.
-*   `stringify(value)`: Alias for `JSON.stringify()`.
-*   `exec(command)`: Executes a shell command synchronously and returns its stdout as a string. `command` can be a string or an array of strings (e.g., `['ls', '-l']`).
-*   `execAsync(command)`: Executes a command asynchronously; returns a promise.
-*   `read(filePath)`: Reads a file as a utf-8 encoded string.
-*   `pwd`: Current working directory.
-*   `hd`: User's home directory.
-*   `ls`: Array of files/directories in the current directory.
-*   `std`: QuickJS `std` module.
-*   `os`: QuickJS `os` module.
+| Method | Description |
+| --- | --- |
+| `.stringify(replacer, space)` | Converts the object to a JSON string. Defaults to 2-space indentation. |
+| `.pipe(callback)` | Passes the object as an argument to the `callback` function and returns the result. |
+| `.log()` | Prints the object to `stdout` and returns the object. |
+| `.cd(dir)` | Changes the current directory. Defaults to `$HOME`. Returns `true` on success. |
 
 ---
 
-## Chaining and Prototype Extensions
+### `Array.prototype`
 
-To facilitate a more fluid, chainable programming style, several native prototypes have been extended.
-
-### The `.pipe()` Method
-
-A `.pipe(callback)` method has been added to the `Object`, `Array`, `String`, and `Number` prototypes. It passes the object it was called on as an argument to the callback function and returns the callback's result. This allows you to insert any custom logic or external function into a method chain without breaking the flow.
-
-**Example**:
-`'input'.pipe(s => s.toUpperCase()).pipe(s => console.log(s));`
-
-### Object.prototype
-
-*   **`.stringify(replacer = null, space = 2)`**: A shortcut for `JSON.stringify(this, replacer, space)`, providing a quick way to pretty-print any object.
-*   **`.pipe(callback)`**: Passes the object to the callback and returns its result.
-*   `.log()`: Prints the object to the console.
-
-### Array.prototype
-
-*   **`.stringify(replacer = null, space = 2)`**: A shortcut for `JSON.stringify(this, replacer, space)`.
-*   **`.for(callback)`**: A chainable alias for `forEach`. It executes the `callback` for each element and returns the original array, allowing further method calls.
-*   **`.remove(...items)`**: Mutates the array by removing the **first occurrence** of each specified item. Returns the modified array.
-*   **`.removeAll(...items)`**: Mutates the array by removing **all occurrences** of each specified item. Returns the modified array.
-*   **`.toCsvString(delimiter = ',')`**: Converts an array of arrays into a CSV-formatted string. It correctly handles quoting for fields containing delimiters, newlines, or quotes.
-    *   **Example**:
-        ```javascript
-        const data = [['id', 'name'], ['1', 'A, B'], ['2', 'C "D"']];
-        data.toCsvString();
-        // Returns: 'id,name\n1,"A, B"\n2,"C ""D"""'
-        ```
-*   **`.pipe(callback)`**: Passes the array to the callback and returns its result.
-*   **`.exec()`**: Treats the array as a command and its arguments (e.g., `['ls', '-l']`) and executes it synchronously.
-*   **`.execAsync()`**: Asynchronously executes the array as a command and its arguments.
-
-### String.prototype
-
-*   **`.body(start?, end?, line?, word?)`**: Extracts a portion of a multi-line string. Parameters are applied sequentially.
-*   **`.write(filePath, mode = 'w+')`**: Writes the string's content to a file.
-*   **`.parseJson()`**: A convenient shortcut for `JSON.parse(string)`.
-*   **`.toCsvArray(delimiter = ',')`**: Parses a CSV-formatted string into an array of arrays.
-*   **`.toCsvJson(delimiter = ',')`**: Parses a CSV string into an array of JSON objects. Assumes the first line is the header row.
-    *   **Example**:
-        ```javascript
-        const csv = 'id,name\n1,Alice\n2,Bob';
-        csv.toCsvJson();
-        // Returns: [{id: '1', name: 'Alice'}, {id: '2', name: 'Bob'}]
-        ```
-*   **`.pipe(callback)`**: Passes the string to the callback and returns its result.
-*   **`.exec()`**: Treats the string as a shell command and executes it synchronously.
-*   **`.execAsync()`**: Asynchronously executes the string as a shell command.
-*   `.log()`: Prints the string to the console.
-*   `.words`: Prints number of words, separated by space, in the string.
-*   `.lines`: Prints number of lines, separated by newline character in the string.
-
-### Number.prototype
-
-*   **`.pipe(callback)`**: Passes the number to the callback and returns its result.
-*   `.log()`: Prints the number to the console.
-
-Refer to [QuickJS documentation](https://bellard.org/quickjs/quickjs.html#Standard-library) for more on `std` and `os`.
+| Method | Description |
+| --- | --- |
+| `.stringify(replacer, space)` | Converts the array to a JSON string. Defaults to 2-space indentation. |
+| `.for(callback)` | Iterates over each element of the array. |
+| `.remove(...items)` | Removes the first occurrence of each specified item from the array. |
+| `.removeAll(...items)` | Removes all occurrences of each specified item from the array. |
+| `.toCsvString(delimiter)` | Converts an array of objects or an array of arrays into a CSV string. |
+| `.toCsvArray()` | Converts an array of objects into an array of arrays, with headers as the first row. |
+| `.toCsvJson(delimiter)` | Converts an array of objects to a CSV string and then back to a JSON object array. |
+| `.pipe(callback)` | Passes the array as an argument to the `callback` function. |
+| `.exec()` | Treats the array as a command and arguments for `exec()`. |
+| `.execAsync()` | Treats the array as a command and arguments for `execAsync()`. |
 
 ---
 
-## How it Works
+### `String.prototype`
 
-`js` processes command-line arguments to configure its behavior:
-
-1.  Iterates over `scriptArgs` (QuickJS command-line arguments).
-3.  Joins args into a single JavaScript expression.
-4.  Executes the expression using `std.evalScript`.
-
+| Method | Description |
+| --- | --- |
+| `.pipe(callback)` | Passes the string as an argument to the `callback` function. |
+| `.body(start, end, line, word)` | Extracts a portion of a multi-line string. |
+| `.write(path, mode)` | Writes the string to a file. Default mode is `"w+"`. |
+| `.parseJson()` | Parses a JSON string into a JavaScript object. |
+| `.toCsvArray(delimiter)` | Converts a CSV formatted string into an array of arrays. |
+| `.toCsvJson(delimiter)` | Converts a CSV formatted string into an array of JSON objects. |
+| `.exec()` | Executes the string as a shell command synchronously. |
+| `.execAsync()` | Executes the string as a shell command asynchronously. |
+| `.log()` | Prints the string to `stdout` and returns the string. |
+| `.lines()` | Splits the string into an array of lines. |
+| `.words()` | Splits the string into an array of words. |
+| `.isDir()` | Returns `true` if the string path is a directory. |
+| `.isFile()` | Returns `true` if the string path is a file. |
+| `.isSymLink()` | Returns `true` if the string path is a symbolic link. |
+| `.style(styles)` | Applies ANSI styles to the string. `styles` is an array of style names (e.g., `['red', 'bold']`). |
+| `.stripStyle()` | Removes all ANSI style codes from the string. |
+| `.border(type, style, padding)` | Draws a border around the string. `type` can be `normal`, `thick`, `double`, `rounded`. `style` is an array of styles for the border. |
+| `.stripBorder()`| Removes border characters from a string. |
 
 ---
+
+### `Number.prototype`
+
+| Method | Description |
+| --- | --- |
+| `.pipe(callback)` | Passes the number as an argument to the `callback` function. |
+| `.log()` | Prints the number to `stdout` and returns the number. |
 
 ## TODO
-
-- Implement console.table.
-- Coloured output.
-- Styled output.
+- Implement console.table
 
 ## Contributing
 
-Contributions are welcome! If you have ideas for improvements, bug reports, or want to add new features, please [open an issue](https://github.com/5hubham5ingh/js-util/issues) or submit a pull request.
+Contributions are welcome! Feel free to open an issue or submit a pull request.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
