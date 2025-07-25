@@ -250,6 +250,58 @@ String.prototype.style = function(styles) {
   return ansi.format(this, styles)
 }
 
+String.prototype.stripStyle = function() {
+  const ansiRegex = /[\u001b\u009b][[()#;?]*.{0,2}(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
+  return this.replace(ansiRegex, '');
+};
+
+String.prototype.border = function(type = 'normal', style, padding = 1) {
+  const str = this
+
+  const borderChars = {
+    normal: { x: "─".style(style), y: "│".style(style), tl: "┌".style(style), tr: "┐".style(style), bl: "└".style(style), br: "┘".style(style) },
+    thick: { x: "━".style(style), y: "┃".style(style), tl: "┏".style(style), tr: "┓".style(style), bl: "┗".style(style), br: "┛".style(style) },
+    double: { x: "═".style(style), y: "║".style(style), tl: "╔".style(style), tr: "╗".style(style), bl: "╚".style(style), br: "╝".style(style) },
+    rounded: { x: "─".style(style), y: "│".style(style), tl: "╭".style(style), tr: "╮".style(style), bl: "╰".style(style), br: "╯".style(style) },
+    hidden: { x: " ".style(style), y: " ".style(style), tl: " ".style(style), tr: " ".style(style), bl: " ".style(style), br: " ".style(style) },
+  };
+
+  const chars = borderChars[type];
+  if (!chars) {
+    return str;
+  }
+
+  const lines = str.split('\n');
+  const horizontalPadding = ' '.repeat(padding);
+
+  const contentWidth = Math.max(
+    0,
+    ...lines.map(line => line.stripStyle().length)
+  );
+
+  if (contentWidth === 0 && lines.length === 1 && lines[0] === '') {
+    return `${chars.tl}${chars.tr}\n${chars.bl}${chars.br}`;
+  }
+
+  const totalInnerWidth = contentWidth + padding * 2;
+
+  const topBorder = chars.tl + chars.x.repeat(totalInnerWidth) + chars.tr;
+  const bottomBorder = chars.bl + chars.x.repeat(totalInnerWidth) + chars.br;
+
+  const middleContent = lines.map(line => {
+    const strippedLength = line.stripStyle().length;
+
+    const rightPaddingCount = totalInnerWidth - strippedLength - padding;
+    const rightPadding = ' '.repeat(rightPaddingCount > 0 ? rightPaddingCount : 0);
+
+    return `${chars.y}${horizontalPadding}${line}${rightPadding}${chars.y}`;
+  }).join('\n');
+
+  return `${topBorder}\n${middleContent}\n${bottomBorder}`;
+}
+
+String.prototype.stripBorder = function() { return this.replace(new RegExp('─|│|┌|┐|└|┘|━|┃|┏|┓|┗|┛|═|║|╔|╗|╚|╝|╭|╮|╰|╯| ', 'g'), ''); }
+
 Number.prototype.pipe = function(cb) { return cb(this) }
 
 Number.prototype.log = function() { print(this); return this }
