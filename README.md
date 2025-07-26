@@ -62,8 +62,8 @@ js "ls"
 # [ "file1.txt", "file2.js", "directory1" ]
 
 # Chain operations with .pipe()
-js "ls.pipe(files => files.filter(f => f.endsWith('.js')))"
-# [ "file2.js" ]
+js "ls.pipe(f => f.filter(f => f.endsWith('.js'))).join('\n').pipe(['fzf','--preview','bat {}'])"
+# ...outputs the result 
 
 # Read a file and get its line count
 js "read('my-file.txt').lines().length"
