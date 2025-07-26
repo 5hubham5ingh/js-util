@@ -1,5 +1,5 @@
 import * as std from "std"
-import { exec as execAsync, execSync as exec } from "../qjs-ext-lib/src/process.js"
+import { exec as execAsync, execSync as exec, ProcessSync } from "../qjs-ext-lib/src/process.js"
 import * as os from "os"
 import { ansi } from "../justjs/ansiStyle.js"
 
@@ -138,14 +138,35 @@ Array.prototype.toCsvJson = function(delimiter = ',') {
   return this.toCsvString(delimiter).toCsvJson(delimiter)
 }
 
-Array.prototype.pipe = function(cb) { return cb(this) }
+Array.prototype.pipe = function(cb) {
+  if (typeof cb === "function") return cb(this)
+  else if (typeof cb === "string" || Array.isArray(cb)) {
+    const input = this.map(e => e.toString()).join(' ')
+    const ps = new ProcessSync(cb, {
+      input,
+    })
+    ps.run()
+    if (ps.success) return ps.stdout;
+    throw Error(ps.stderr)
+  }
+}
 
 Array.prototype.exec = function() { return exec(this) }
 
 Array.prototype.execAsync = function() { return execAsync(this) }
 
 
-String.prototype.pipe = function(cb) { return cb(this) }
+String.prototype.pipe = function(cb) {
+  if (typeof cb === "function") return cb(this)
+  else if (typeof cb === "string" || Array.isArray(cb)) {
+    const ps = new ProcessSync(cb, {
+      input: this,
+    })
+    ps.run()
+    if (ps.success) return ps.stdout;
+    throw Error(ps.stderr)
+  }
+}
 
 String.prototype.body = function(start, end, line, word) {
   let file = this
@@ -302,7 +323,17 @@ String.prototype.border = function(type = 'normal', style, padding = 1) {
 
 String.prototype.stripBorder = function() { return this.replace(new RegExp('─|│|┌|┐|└|┘|━|┃|┏|┓|┗|┛|═|║|╔|╗|╚|╝|╭|╮|╰|╯| ', 'g'), ''); }
 
-Number.prototype.pipe = function(cb) { return cb(this) }
+Number.prototype.pipe = function(cb) {
+  if (typeof cb === "function") return cb(this)
+  else if (typeof cb === "string" || Array.isArray(cb)) {
+    const ps = new ProcessSync(cb, {
+      input: this.toString(),
+    })
+    ps.run()
+    if (ps.success) return ps.stdout;
+    throw Error(ps.stderr)
+  }
+}
 
 Number.prototype.log = function() { print(this); return this }
 
