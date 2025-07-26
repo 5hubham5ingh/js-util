@@ -117,7 +117,7 @@ js "exec('git branch').lines().find(line => line.startsWith('*')).replace('* ', 
 # "main"
 
 # List all 'dependencies' from a package.json file via stdin
-cat package.json | js "Object.keys(stdin.parseJson().dependencies).log()"
+cat package.json | js "stdin.parseJson().dependencies.keys().log()"
 # [
 #   "some-dependency",
 #   "another-dependency"
@@ -128,6 +128,10 @@ js "new Date().toString().border('double', ['magenta', 'bold'])"
 # ╔═══════════════════════════════════════════════════════════════════╗
 # ║ Fri Jul 25 2025 11:08:00 GMT+0000 (Coordinated Universal Time)    ║
 # ╚═══════════════════════════════════════════════════════════════════╝
+
+# Extend functionality by loading external scripts from '~/.config/js/' using `use(scriptName)`
+js "use('colours'); fp = HOME.concat('/.config/pywall/colors'); read(fp).words().map(color.darker).join('\n').write(fp)"
+# Exports colours.js and use functions defined in it, color.darker, to modify pywall colors
 ```
 
 ## API Reference
@@ -147,6 +151,9 @@ js "new Date().toString().border('double', ['magenta', 'bold'])"
 | `cwd` | `string` | Gets the current working directory. |
 | `ls` | `array` | Returns an array of file and directory names in the current directory. |
 | `stdin` | `string` | Lazily reads the entire standard input and returns it as a string. |
+| `use(scriptName)` | `string` | Evaluate the file 'scriptName' from '~/.config/js/' directory as a script (global eval). |
+| `.cd(dir)` | Changes the current directory. Defaults to `$HOME`. Returns `true` on success. |
+
 
 ---
 
@@ -154,10 +161,13 @@ js "new Date().toString().border('double', ['magenta', 'bold'])"
 
 | Method | Description |
 | --- | --- |
-| `.stringify(replacer, space)` | Converts the object to a JSON string. Defaults to 2-space indentation. |
+| `.stringify(replacer, space)` | Same as JSON.stringify, converts the object to a JSON string. Defaults to 2-space indentation. |
 | `.pipe(callback)` | Passes the object as an argument to the `callback` function and returns the result. |
 | `.log()` | Prints the object to `stdout` and returns the object. |
-| `.cd(dir)` | Changes the current directory. Defaults to `$HOME`. Returns `true` on success. |
+| `.values()` | Same as Object.values(), returns values as array from the object. |
+| `.keys()` | Same as Object.keys(), returns keys as array from the object. |
+| `.entries()` | Same as Object.entries(), returns key-value pair from the object. |
+| `.assign(values)` | Same as Object.assign(values), assign values to the object. |
 
 ---
 
@@ -172,7 +182,7 @@ js "new Date().toString().border('double', ['magenta', 'bold'])"
 | `.toCsvString(delimiter)` | Converts an array of objects or an array of arrays into a CSV string. |
 | `.toCsvArray()` | Converts an array of objects into an array of arrays, with headers as the first row. |
 | `.toCsvJson(delimiter)` | Converts an array of objects to a CSV string and then back to a JSON object array. |
-| `.pipe(callback)` | Passes the array as an argument to the `callback` function. |
+| `.pipe(callback)` | Passes the array elements as an argument to the `callback`, which could be a function or an array or string, in which case it's treated as a shell command, and returns the result. |
 | `.exec()` | Treats the array as a command and arguments for `exec()`. |
 | `.execAsync()` | Treats the array as a command and arguments for `execAsync()`. |
 
@@ -182,7 +192,7 @@ js "new Date().toString().border('double', ['magenta', 'bold'])"
 
 | Method | Description |
 | --- | --- |
-| `.pipe(callback)` | Passes the string as an argument to the `callback` function. |
+| `.pipe(callback)` | Passes the string as an argument to the `callback`, which could be a function or an array or string, in which case it's treated as a shell command, and returns the result. |
 | `.body(start, end, line, word)` | Extracts a portion of a multi-line string. |
 | `.write(path, mode)` | Writes the string to a file. Default mode is `"w+"`. |
 | `.parseJson()` | Parses a JSON string into a JavaScript object. |
