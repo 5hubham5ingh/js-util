@@ -42,6 +42,14 @@ Object.prototype.cd = function(dir = std.getenv("HOME")) {
   return os.chdir(dir) === 0 ? true : false
 }
 
+Object.prototype.entries = function() { return Object.entries(this) };
+
+Object.prototype.keys = function() { return Object.keys(this) }
+
+Object.prototype.values = function() { return Object.values(this) };
+
+Object.prototype.assign = function(entries) { return Object.assign(this, entries) }
+
 Array.prototype.stringify = function(replacer = null, space = 2) {
   return JSON.stringify(this, replacer, space)
 }
