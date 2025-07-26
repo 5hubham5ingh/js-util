@@ -14,6 +14,9 @@ globalThis.use = function(scriptName) {
   const scriptPath = HOME.concat('/.config/js/', scriptName, ".js")
   std.loadScript(scriptPath)
 }
+globalThis.cd = function(dir = std.getenv("HOME")) {
+  return os.chdir(dir) === 0 ? true : false
+}
 
 for (const envVar of ['HOME', 'PATH', 'USER', 'LOGNAME', 'SHELL', 'PWD', 'OLDPWD', 'TERM', 'LANG', 'LC_ALL', 'LC_CTYPE', 'LC_COLLATE', 'LC_MESSAGES', 'LC_MONETARY', 'LC_NUMERIC', 'LC_TIME', 'MAIL', 'MAILPATH', 'TZ', 'HISTFILE', 'HISTSIZE', 'PS1', 'PS2', 'LINES', 'COLUMNS']) {
   Object.defineProperty(globalThis, envVar, {
@@ -42,9 +45,6 @@ Object.prototype.pipe = function(cb) { return cb(this) }
 
 Object.prototype.log = function() { print(this); return this }
 
-Object.prototype.cd = function(dir = std.getenv("HOME")) {
-  return os.chdir(dir) === 0 ? true : false
-}
 
 Object.prototype.entries = function() { return Object.entries(this) };
 
