@@ -10,6 +10,10 @@ globalThis.stringify = JSON.stringify
 globalThis.exec = exec
 globalThis.execAsync = execAsync
 globalThis.read = std.loadFile
+globalThis.use = function(scriptName) {
+  const scriptPath = HOME.concat('/.config/js/', scriptName, ".js")
+  std.loadScript(scriptPath)
+}
 
 for (const envVar of ['HOME', 'PATH', 'USER', 'LOGNAME', 'SHELL', 'PWD', 'OLDPWD', 'TERM', 'LANG', 'LC_ALL', 'LC_CTYPE', 'LC_COLLATE', 'LC_MESSAGES', 'LC_MONETARY', 'LC_NUMERIC', 'LC_TIME', 'MAIL', 'MAILPATH', 'TZ', 'HISTFILE', 'HISTSIZE', 'PS1', 'PS2', 'LINES', 'COLUMNS']) {
   Object.defineProperty(globalThis, envVar, {
