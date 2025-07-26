@@ -348,4 +348,4 @@ Number.prototype.log = function() { print(this); return this }
 
 
 const expression = scriptArgs.slice(1, scriptArgs.length).join('');
-std.evalScript(expression)
+await std.evalScript(expression, { async: true })
