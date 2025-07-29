@@ -2,6 +2,8 @@ import * as std from "std"
 import { exec as execAsync, execSync as exec, ProcessSync } from "../qjs-ext-lib/src/process.js"
 import * as os from "os"
 import { ansi } from "../justjs/ansiStyle.js"
+import { printf } from "../qjs-ext-lib/src/std.js"
+import { isatty } from "../qjs-ext-lib/src/os.js"
 
 globalThis.std = std
 globalThis.os = os
@@ -352,4 +354,16 @@ Number.prototype.log = function() { print(this); return this }
 
 
 const expression = scriptArgs.slice(1, scriptArgs.length).join('');
-await std.evalScript(expression, { async: true })
+if (expression.length === 0) {
+  if (!isatty()) {
+    const expression = std.in.readAsString();
+    std.evalScript(expression, { async: true })
+  } else {
+    while (true) {
+      printf("❯ ")
+      const expression = std.in.getline()
+      std.evalScript(expression, { async: true })
+    }
+  }
+} else
+  await std.evalScript(expression, { async: true })
