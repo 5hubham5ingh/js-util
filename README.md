@@ -134,6 +134,14 @@ js "new Date().toString().border('double', ['magenta', 'bold'])"
 # Extend functionality by loading external scripts from '~/.config/js/' using `use(scriptName)`
 js "use('colours'); fp = HOME.concat('/.config/pywall/colors'); read(fp).words().map(color.darker).join('\n').write(fp)"
 # Exports colours.js and use functions defined in it, color.darker, to modify pywall colors
+
+# Execute pre-written scripts
+cat "$(ls ~/scripts/js/ | fzf)" | js
+# Select and execute a JavaScript script from your scripts directory.
+
+# Run interactively
+js
+# Starts a JavaScript REPL (Read-Eval-Print Loop) when no input is provided via stdin or command-line arguments.
 ```
 
 ## API Reference
