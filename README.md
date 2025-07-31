@@ -209,6 +209,7 @@ for (let i = 0; i < Math.max(t1Lines.length, t2Lines.length); i++) {
 | `.keys()` | Same as Object.keys(), returns keys as array from the object. |
 | `.entries()` | Same as Object.entries(), returns key-value pair from the object. |
 | `.assign(values)` | Same as Object.assign(values), assign values to the object. |
+| `.table(columns)` | Format the object as a table for printing. Return a string. |
 
 ---
 
