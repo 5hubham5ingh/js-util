@@ -142,6 +142,37 @@ cat "$(ls ~/scripts/js/ | fzf)" | js
 # Run interactively
 js
 # Starts a JavaScript REPL (Read-Eval-Print Loop) when no input is provided via stdin or command-line arguments.
+
+# Print array of objects as table
+js "const t = [
+  { name: 'Alice', age: 25 },
+  { name: 'Bob', age: 30 },
+  { name: 'Charlie', age: null }
+]; t.table().log()"
+#╔═════════╤═════════╤══════╗
+#║ (index) │ name    │ age  ║
+#╟─────────┼─────────┼──────╢
+#║ 0       │ Alice   │ 25   ║
+#║ 1       │ Bob     │ 30   ║
+#║ 2       │ Charlie │ null ║
+#╚═════════╧═════════╧══════╝
+
+# Print object as table, specify columns to include
+js "const t1Lines = { a: 1, b: 2, c: 3 }.table().split('\n'),
+  t2Lines = [{ id: 1 }, { id: 2, extra: 'yes' }].table(['id']).split('\n');
+
+for (let i = 0; i < Math.max(t1Lines.length, t2Lines.length); i++) {
+  let r1 = t1Lines[i] || '',
+    r2 = t2Lines[i] || '';
+  print(`${r1} ${r2}`);
+}"
+#╔═════════╤═════╤═══════╗ ╔═════════╤════╗
+#║ (index) │ key │ value ║ ║ (index) │ id ║
+#╟─────────┼─────┼───────╢ ╟─────────┼────╢
+#║ a       │ a   │ 1     ║ ║ 0       │ 1  ║
+#║ b       │ b   │ 2     ║ ║ 1       │ 2  ║
+#║ c       │ c   │ 3     ║ ╚═════════╧════╝
+#╚═════════╧═════╧═══════╝
 ```
 
 ## API Reference
