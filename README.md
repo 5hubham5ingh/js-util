@@ -262,8 +262,6 @@ for (let i = 0; i < Math.max(t1Lines.length, t2Lines.length); i++) {
 | `.pipe(callback)` | Passes the number as an argument to the `callback` function. |
 | `.log()` | Prints the number to `stdout` and returns the number. |
 
-## TODO
-- Implement console.table
 
 ## Contributing
 
