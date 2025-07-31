@@ -43,6 +43,8 @@ It brings the simplicity and readability of a modern scripting language over cry
 
 Now, `js` should be available globally in your terminal.
 
+**Build from source:**
+Run `curl -fsSL https://raw.githubusercontent.com/5hubham5ingh/js-util/main/build.sh | sh`
 
 ## Usage
 
