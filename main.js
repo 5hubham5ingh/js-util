@@ -56,6 +56,61 @@ Object.prototype.values = function() { return Object.values(this) };
 
 Object.prototype.assign = function(entries) { return Object.assign(this, entries) }
 
+Object.prototype.table = function(columns) {
+  const data = this
+  if (data == null || typeof data !== 'object') {
+    return;
+  }
+
+  let table = ''
+  const isArray = Array.isArray(data);
+  const rows = isArray ? data : Object.entries(data).map(([key, value]) => ({ key, value }));
+
+  if (!rows.length) {
+    table += '╔════╗\n║ [] ║\n╚════╝\n'
+    return;
+  }
+
+  const keys = columns && columns.length
+    ? columns
+    : [...new Set(rows.flatMap(row => Object.keys(row)))];
+
+  const header = ['(index)', ...keys];
+
+  const getString = (v) => v === null ? 'null' : v === undefined ? 'undefined' : String(v);
+
+  const allRows = [header, ...rows.map((row, i) => {
+    const base = isArray ? i : row.key;
+    const values = keys.map(k => getString(row[k]));
+    return [getString(base), ...values];
+  })];
+
+  const colWidths = header.map((_, colIndex) =>
+    Math.max(...allRows.map(row => getString(row[colIndex]).length))
+  );
+
+  const pad = (s, i) => getString(s).padEnd(colWidths[i], ' ');
+
+  const formatRow = (row) =>
+    '║ ' + row.map(pad).map((v) => v).join(' │ ') + ' ║';
+
+  const makeLine = (left, mid, right, fill) =>
+    left +
+    colWidths.map(w => fill.repeat(w + 2)).join(mid) +
+    right;
+
+  const top = makeLine('╔', '╤', '╗', '═');
+  const separator = makeLine('╟', '┼', '╢', '─');
+  const bottom = makeLine('╚', '╧', '╝', '═');
+
+  const lines = [top, formatRow(header), separator];
+  allRows.slice(1).forEach(row => lines.push(formatRow(row)));
+  lines.push(bottom);
+
+  table += lines.join('\n')
+  return table;
+}
+
 Array.prototype.stringify = function(replacer = null, space = 2) {
   return JSON.stringify(this, replacer, space)
 }
