@@ -4,10 +4,6 @@
 
 It brings the simplicity and readability of a modern scripting language over cryptic and numerous syntax for different tools like awk, sed, jq, etc to your commands.
 
-> "Everything that can be done in JavaScript will be done in JavaScript."
->
-> &mdash; Jeff Atwood
-
 ## Features
 
 *   **Seamless JS Execution:** Run JavaScript code directly from your terminal.
@@ -51,16 +47,12 @@ Run `curl -fsSL https://raw.githubusercontent.com/5hubham5ingh/js-util/main/buil
 You can pass any JavaScript expression as an argument to `js`.
 
 ```bash
-# Basic math
-js "1 + 1"
-# 2
-
 # Access environment variables
-js "PATH"
+js "PATH.log()"
 # /usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin
 
 # List files in the current directory
-js "ls"
+js "ls.log()"
 # [ "file1.txt", "file2.js", "directory1" ]
 
 # Chain operations with .pipe()
@@ -68,26 +60,26 @@ js "ls.pipe(f => f.filter(f => f.endsWith('.js'))).join('\n').pipe(['fzf','--pre
 # ...outputs the result 
 
 # Read a file and get its line count
-js "read('my-file.txt').lines().length"
+js "read('my-file.txt').lines().length.log()"
 # 42
 
 # Execute external commands
-js "exec('ls -la')"
+js "exec('ls -la').log()"
 # ...outputs the result of ls -la
 
 # Read from stdin and process it
-cat package.json | js "stdin.parseJson().version"
+cat package.json | js "stdin.parseJson().version.log()"
 # 1.0.0
 
 # Create a styled border around text
-js "'Hello, World!'.border('rounded', ['green'])"
+js "'Hello, World!'.border('rounded', ['green']).log()"
 
 # Use the full power of JavaScript's Math library, not just simple arithmetic
-js "Math.log(100) * Math.PI"
+js "(Math.log(100) * Math.PI).log()"
 # 14.476482730108398
 
 # Prettify and inspect your PATH environment variable
-js "PATH.split(':').join('\\n').border('rounded', ['yellow'])"
+js "PATH.split(':').join('\\n').border('rounded', ['yellow']).log()"
 # ╭──────────────────╮
 # │ /usr/local/bin   │
 # │ /usr/bin         │
@@ -97,11 +89,11 @@ js "PATH.split(':').join('\\n').border('rounded', ['yellow'])"
 # ╰──────────────────╯
 
 # Count the number of markdown files in the current directory
-js "ls.filter(f => f.endsWith('.md')).length"
+js "ls.filter(f => f.endsWith('.md')).length.log()"
 # 5
 
 # List all subdirectories, styled with an icon
-js "ls.filter(f => f.isDir()).map(dir => \`📁 \${dir}\`.style('yellow')).join('\\n')"
+js "ls.filter(f => f.isDir()).map(dir => \`📁 \${dir}\`.style('yellow')).join('\\n').log()"
 # 📁 directory1
 # 📁 another_dir
 
@@ -115,7 +107,7 @@ js "read('index.js').lines().filter(l => l.trim().startsWith('import')).log()"
 # ]
 
 # Get the current git branch by executing a command and parsing its output
-js "exec('git branch').lines().find(line => line.startsWith('*')).replace('* ', '')"
+js "exec('git branch').lines().find(line => line.startsWith('*')).replace('* ', '').log()"
 # "main"
 
 # List all 'dependencies' from a package.json file via stdin
@@ -126,7 +118,7 @@ cat package.json | js "stdin.parseJson().dependencies.keys().log()"
 # ]
 
 # Display the current time in a fancy, styled box
-js "new Date().toString().border('double', ['magenta', 'bold'])"
+js "new Date().toString().border('double', ['magenta', 'bold']).log()"
 # ╔═══════════════════════════════════════════════════════════════════╗
 # ║ Fri Jul 25 2025 11:08:00 GMT+0000 (Coordinated Universal Time)    ║
 # ╚═══════════════════════════════════════════════════════════════════╝
