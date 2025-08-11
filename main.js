@@ -414,9 +414,17 @@ if (expression.length === 0) {
     const expression = std.in.readAsString();
     std.evalScript(expression, { async: true })
   } else {
-    while (true) {
+    globalThis.history = []
+    Object.defineProperty(globalThis, "clear", {
+      get() {
+        printf("\x1b[2J\x1b[H");
+      }
+    });
+
+    while (true) { // RELP
       printf("❯ ")
       const expression = std.in.getline()
+      history.push(expression)
       std.evalScript(expression, { async: true })
     }
   }
