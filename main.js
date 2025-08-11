@@ -19,6 +19,9 @@ globalThis.use = function(scriptName) {
 globalThis.cd = function(dir = std.getenv("HOME")) {
   return os.chdir(dir) === 0 ? true : false
 }
+globalThis.eval = function(expression) {
+  return std.evalScript(expression);
+}
 
 for (const envVar of ['HOME', 'PATH', 'USER', 'LOGNAME', 'SHELL', 'PWD', 'OLDPWD', 'TERM', 'LANG', 'LC_ALL', 'LC_CTYPE', 'LC_COLLATE', 'LC_MESSAGES', 'LC_MONETARY', 'LC_NUMERIC', 'LC_TIME', 'MAIL', 'MAILPATH', 'TZ', 'HISTFILE', 'HISTSIZE', 'PS1', 'PS2', 'LINES', 'COLUMNS']) {
   Object.defineProperty(globalThis, envVar, {
@@ -391,6 +394,8 @@ String.prototype.border = function(type = 'normal', style, padding = 1) {
 }
 
 String.prototype.stripBorder = function() { return this.replace(new RegExp('─|│|┌|┐|└|┘|━|┃|┏|┓|┗|┛|═|║|╔|╗|╚|╝|╭|╮|╰|╯| ', 'g'), ''); }
+
+String.prototype.eval = function() { return eval(this) }
 
 Number.prototype.pipe = function(cb) {
   if (typeof cb === "function") return cb(this)
