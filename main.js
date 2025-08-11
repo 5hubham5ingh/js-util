@@ -412,26 +412,42 @@ Number.prototype.pipe = function(cb) {
 Number.prototype.log = function() { print(this); return this }
 
 
+const args = scriptArgs.slice(1);
+const is_shebang = scriptArgs.length > 1 && scriptArgs[1].endsWith('.js');
 
-const expression = scriptArgs.slice(1, scriptArgs.length).join('');
-if (expression.length === 0) {
+if (is_shebang) {
+  const filePath = scriptArgs[1];
+  const file = std.open(filePath, "r");
+  if (!file) {
+    throw new Error(`Could not open file: ${filePath}`);
+  }
+  const fileContent = file.readAsString();
+  file.close();
+
+  std.evalScript(fileContent, { async: true });
+
+} else if (args.length === 0) {
   if (!isatty()) {
     const expression = std.in.readAsString();
-    std.evalScript(expression, { async: true })
+    std.evalScript(expression, { async: true });
   } else {
-    globalThis.history = []
+    globalThis.history = [];
     Object.defineProperty(globalThis, "clear", {
       get() {
         printf("\x1b[2J\x1b[H");
-      }
+      },
     });
 
-    while (true) { // RELP
-      printf("❯ ")
-      const expression = std.in.getline()
-      history.push(expression)
-      std.evalScript(expression, { async: true })
+    while (true) {
+      printf("❯ ");
+      const expression = std.in.getline();
+      if (expression === null) break;
+      history.push(expression);
+      std.evalScript(expression, { async: true });
     }
   }
-} else
-  await std.evalScript(expression, { async: true })
+} else {
+  const expression = args.join('');
+  std.evalScript(expression, { async: true });
+}
+

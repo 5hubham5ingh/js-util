@@ -1,8 +1,15 @@
 # js - JavaScript for your Shell
 
-`js` is a command-line tool that brings the power and familiarity of JavaScript to your shell. Built on the lightweight and fast [QuickJS](https://bellard.org/quickjs/) engine, `js` provides a rich set of helper methods and global shortcuts to make your command-line scripting more productive, readable, and enjoyable.
+`js` is an interpreter, "shell", and a command-line tool that brings JavaScript to your shell. 
+Built on the lightweight and fast [QuickJS](https://bellard.org/quickjs/) engine, `js` provides a rich set of helper methods and global shortcuts to make your command-line scripting more productive, readable, and enjoyable.
 
-It brings the simplicity and readability of a modern scripting language over cryptic and numerous syntax for different tools like awk, sed, jq, etc to your commands.
+## Why
+- Traditional shells are great for running commands, but they're slow for complex scripting because they have to start a new process for almost everything. 
+- By performing complex logic, data manipulation, and arithmetic directly in the optimized JavaScript engine, `js` avoids the significant overhead of creating new processes for every operation.
+- Also, it brings the simplicity and readability of a modern scripting language over cryptic and numerous syntax for different tools like awk, sed, jq, etc to your commands.
+
+It is not a drop-in replacement for traditional shells like Bash, Zsh, and Fish. Rather, it's a powerful companion for when you need to write a script that requires modern programming language features, fast data processing, or complex logic.
+Think of it as a tool that lets you combine the best of both worlds: the power of external UNIX utilities with the elegance and performance of a modern scripting language.
 
 ## Features
 
