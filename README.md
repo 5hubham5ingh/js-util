@@ -200,10 +200,11 @@ if (scriptArgs.includes('-i')
     })
   print(screen.join('\n'))
 } else {
-  const wordsCache = HOME.concat("/Downloads/words_alpha.txt")
-  const file = std.open(wordsCache, "r");
+  const wordsCache = HOME.concat("/.cache/words_alpha.txt")
+  let file = std.open(wordsCache, "r");
   if (!file) {
     exec(`curl -o ${wordsCache} https://raw.githubusercontent.com/dwyl/english-words/refs/heads/master/words_alpha.txt`)
+    file = std.open(wordsCache, "r");
   }
   file.readAsString()
     .pipe(`fzf --ansi --preview-window=wrap,70% --bind "space:preview(${cwd + '/' + 'cal.js'} -i {})" --bind 'ctrl-j:preview-down' --bind 'ctrl-k:preview-up'`)
