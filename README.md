@@ -216,8 +216,6 @@ if (scriptArgs.includes('-i')
 chmod +x cal.js
 ./cal.js
 ```
-```
-```
 <img alt="image" src="https://github.com/user-attachments/assets/f3be1429-e641-49d1-a98e-4c749697d5b7" />
 
 
