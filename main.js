@@ -413,17 +413,15 @@ Number.prototype.log = function() { print(this); return this }
 
 
 const args = scriptArgs.slice(1);
-const is_shebang = scriptArgs.length > 1 && scriptArgs[1].endsWith('.js');
+const scriptPath = args[0];
 
-if (is_shebang) {
-  const filePath = scriptArgs[1];
-  const file = std.open(filePath, "r");
-  if (!file) {
-    throw new Error(`Could not open file: ${filePath}`);
-  }
+const [st, err] = scriptPath ? os.stat(scriptPath) : [null, -1];
+
+if (!err && (st.mode & os.S_IFMT) === os.S_IFREG) {
+  const file = std.open(scriptPath, 'r');
+  if (!file) throw new Error(`Could not open file: ${scriptPath}`);
   const fileContent = file.readAsString();
   file.close();
-
   std.evalScript(fileContent, { async: true });
 
 } else if (args.length === 0) {
@@ -432,10 +430,8 @@ if (is_shebang) {
     std.evalScript(expression, { async: true });
   } else {
     globalThis.history = [];
-    Object.defineProperty(globalThis, "clear", {
-      get() {
-        printf("\x1b[2J\x1b[H");
-      },
+    Object.defineProperty(globalThis, 'clear', {
+      get() { printf("\x1b[2J\x1b[H"); },
     });
 
     while (true) {
@@ -447,7 +443,6 @@ if (is_shebang) {
     }
   }
 } else {
-  const expression = args.join('');
+  const expression = args.join(' ');
   std.evalScript(expression, { async: true });
 }
-
