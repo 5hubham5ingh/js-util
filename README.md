@@ -175,7 +175,7 @@ for (let i = 0; i < Math.max(t1Lines.length, t2Lines.length); i++) {
 ```
 
 ## Use as script interpreter
-`cal.js`
+`fzfDict.js`
 ```javascript
 #!/usr/bin/js
 
@@ -213,8 +213,8 @@ if (scriptArgs.includes('-i')
 }
 ```
 ```bash
-chmod +x cal.js
-./cal.js
+chmod +x fzfDict.js
+./fzfDict.js
 ```
 <img alt="image" src="https://github.com/user-attachments/assets/f3be1429-e641-49d1-a98e-4c749697d5b7" />
 
