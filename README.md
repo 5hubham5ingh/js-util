@@ -210,8 +210,8 @@ if (scriptArgs.includes('-i')
   file.close()
 }
 ```
-```
-```
+<img alt="image" src="https://github.com/user-attachments/assets/f3be1429-e641-49d1-a98e-4c749697d5b7" />
+
 
 ## API Reference
 
