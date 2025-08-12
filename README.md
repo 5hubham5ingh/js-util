@@ -174,6 +174,45 @@ for (let i = 0; i < Math.max(t1Lines.length, t2Lines.length); i++) {
 #╚═════════╧═════╧═══════╝
 ```
 
+## Use as script interpreter
+```javascript
+#!/usr/bin/js
+
+if (scriptArgs.includes('-i')
+) {
+  const screen = [];
+  const word = scriptArgs[scriptArgs.indexOf('-i') + 1];
+
+  exec(`curl -s https://api.dictionaryapi.dev/api/v2/entries/en/${word}`)
+    .parseJson()
+    .pipe((res) => {
+      if (Array.isArray(res)) {
+        const { word, phonetic, meanings } = res[0];
+        screen.push(word.toUpperCase().style('bold'), phonetic?.style('italic'), '');
+        return meanings
+      }
+      const { title, message, resolution } = res;
+      screen.push(word.toUpperCase().style('bold'), title.style(['bold', 'red']), message, resolution)
+      return [];
+    })
+    .for(({ partOfSpeech, definitions }) => {
+      screen.push(partOfSpeech?.style(['bold', 'italic']), ...definitions?.map(({ definition }) => `- ${definition}`), '')
+    })
+  print(screen.join('\n'))
+} else {
+  const wordsCache = HOME.concat("/Downloads/words_alpha.txt")
+  const file = std.open(wordsCache, "r");
+  if (!file) {
+    exec(`curl -o ${wordsCache} https://raw.githubusercontent.com/dwyl/english-words/refs/heads/master/words_alpha.txt`)
+  }
+  file.readAsString()
+    .pipe(`fzf --ansi --preview-window=wrap,70% --bind "space:preview(${cwd + '/' + 'cal.js'} -i {})" --bind 'ctrl-j:preview-down' --bind 'ctrl-k:preview-up'`)
+  file.close()
+}
+```
+```
+```
+
 ## API Reference
 
 ### Global Variables & Functions
