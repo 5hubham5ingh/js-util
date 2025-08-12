@@ -175,6 +175,7 @@ for (let i = 0; i < Math.max(t1Lines.length, t2Lines.length); i++) {
 ```
 
 ## Use as script interpreter
+`cal.js`
 ```javascript
 #!/usr/bin/js
 
