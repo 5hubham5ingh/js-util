@@ -208,7 +208,7 @@ if (scriptArgs.includes('-i')
     file = std.open(wordsCache, "r");
   }
   file.readAsString()
-    .pipe(`fzf --ansi --preview-window=wrap,70% --bind "space:preview(${cwd + '/' + 'cal.js'} -i {})" --bind 'ctrl-j:preview-down' --bind 'ctrl-k:preview-up'`)
+    .pipe(`fzf --ansi --preview-window=wrap,70% --bind "space:preview(${cwd + '/' + 'fzfDict.js'} -i {})" --bind 'ctrl-j:preview-down' --bind 'ctrl-k:preview-up'`)
   file.close()
 }
 ```
