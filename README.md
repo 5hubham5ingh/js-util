@@ -156,21 +156,14 @@ js "const t = [
 #║ 2       │ Charlie │ null ║
 #╚═════════╧═════════╧══════╝
 
-# Print object as table, specify columns to include
-js "const t1Lines = { a: 1, b: 2, c: 3 }.table().split('\n'),
-  t2Lines = [{ id: 1 }, { id: 2, extra: 'yes' }].table(['id']).split('\n');
-
-for (let i = 0; i < Math.max(t1Lines.length, t2Lines.length); i++) {
-  let r1 = t1Lines[i] || '',
-    r2 = t2Lines[i] || '';
-  print(`${r1} ${r2}`);
-}"
-#╔═════════╤═════╤═══════╗ ╔═════════╤════╗
-#║ (index) │ key │ value ║ ║ (index) │ id ║
-#╟─────────┼─────┼───────╢ ╟─────────┼────╢
-#║ a       │ a   │ 1     ║ ║ 0       │ 1  ║
-#║ b       │ b   │ 2     ║ ║ 1       │ 2  ║
-#║ c       │ c   │ 3     ║ ╚═════════╧════╝
+# Print object as table, specify columns to include, join strings horizontally
+js "({ a: 1, b: 2, c: 3 }).table().join([{ id: 1 }, { id: 2, extra: 'yes' }].table(['id'])).log()"
+#╔═════════╤═════╤═══════╗╔═════════╤════╗
+#║ (index) │ key │ value ║║ (index) │ id ║
+#╟─────────┼─────┼───────╢╟─────────┼────╢
+#║ a       │ a   │ 1     ║║ 0       │ 1  ║
+#║ b       │ b   │ 2     ║║ 1       │ 2  ║
+#║ c       │ c   │ 3     ║╚═════════╧════╝
 #╚═════════╧═════╧═══════╝
 ```
 

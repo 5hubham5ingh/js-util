@@ -397,6 +397,28 @@ String.prototype.stripBorder = function() { return this.replace(new RegExp('─|
 
 String.prototype.eval = function() { return eval(this) }
 
+String.prototype.join = function(secondString) {
+  const linesFromFirstString = this.split('\n')
+  const linesFromSecondString = secondString.split('\n')
+  if (linesFromFirstString.length < linesFromSecondString.length) {
+    const maxLineWidth = Math.max(...linesFromFirstString.map(line => line.stripStyle().length))
+    const emptyLine = " ".repeat(maxLineWidth)
+    const emptyLines = new Array(linesFromSecondString.length - linesFromFirstString.length).fill(emptyLine)
+    linesFromFirstString.push(...emptyLines)
+  } else if (linesFromFirstString.length > linesFromSecondString.length) {
+    const maxLineWidth = Math.max(...linesFromSecondString.map(line => line.stripStyle().length))
+    const emptyLine = " ".repeat(maxLineWidth)
+    const emptyLines = new Array(linesFromFirstString.length - linesFromSecondString.length).fill(emptyLine)
+    linesFromFirstString.push(...emptyLines)
+  }
+  const maxLine = Math.max(linesFromSecondString.length, linesFromFirstString.length)
+  const combinedLines = []
+  for (let i = 0; i < maxLine; i++) {
+    combinedLines.push(`${linesFromFirstString[i] ?? ''}${linesFromSecondString[i] ?? ''}`)
+  }
+  return combinedLines.join('\n')
+}
+
 Number.prototype.pipe = function(cb) {
   if (typeof cb === "function") return cb(this)
   else if (typeof cb === "string" || Array.isArray(cb)) {
