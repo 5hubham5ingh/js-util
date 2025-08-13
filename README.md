@@ -156,8 +156,15 @@ js "const t = [
 #║ 2       │ Charlie │ null ║
 #╚═════════╧═════════╧══════╝
 
-# Print object as table, specify columns to include, join strings horizontally
-js "({ a: 1, b: 2, c: 3 }).table().join([{ id: 1 }, { id: 2, extra: 'yes' }].table(['id'])).log()"
+# Print object as table, specify columns to include, join strings horizontally and stack vertically with specific alignment.
+js "'Testing table(), join() and stack()'.border()
+    .stack(({ a: 1, b: 2, c: 3 }).table()
+      .join([{ id: 1 }, { id: 2, extra: 'yes' }].table(['id'])),
+      'center'
+    ).log()"
+# ┌─────────────────────────────────────┐ 
+# │ Testing table(), join() and stack() │ 
+# └─────────────────────────────────────┘ 
 #╔═════════╤═════╤═══════╗╔═════════╤════╗
 #║ (index) │ key │ value ║║ (index) │ id ║
 #╟─────────┼─────┼───────╢╟─────────┼────╢
