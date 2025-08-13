@@ -409,7 +409,7 @@ String.prototype.join = function(secondString) {
     const maxLineWidth = Math.max(...linesFromSecondString.map(line => line.stripStyle().length))
     const emptyLine = " ".repeat(maxLineWidth)
     const emptyLines = new Array(linesFromFirstString.length - linesFromSecondString.length).fill(emptyLine)
-    linesFromFirstString.push(...emptyLines)
+    linesFromSecondString.push(...emptyLines)
   }
   const maxLine = Math.max(linesFromSecondString.length, linesFromFirstString.length)
   const combinedLines = []
@@ -417,6 +417,39 @@ String.prototype.join = function(secondString) {
     combinedLines.push(`${linesFromFirstString[i] ?? ''}${linesFromSecondString[i] ?? ''}`)
   }
   return combinedLines.join('\n')
+}
+
+const ALIGN = {
+  LEFT: 'left',
+  RIGHT: 'right',
+  CENTER: 'center'
+}
+
+String.prototype.stack = function(secondString, align = ALIGN.LEFT) {
+  const linesFromFirstString = this.split('\n');
+  const linesFromSecondString = secondString.split('\n')
+  const combinedLines = [...linesFromFirstString, ...linesFromSecondString]
+  const maxLineWidth = Math.max(...combinedLines.map(line => line.stripStyle().length))
+
+  const stackedLines = []
+  switch (align) {
+    case ALIGN.LEFT:
+      stackedLines.push(...combinedLines.map(line => line.padEnd(maxLineWidth)))
+      break;
+    case ALIGN.RIGHT:
+      stackedLines.push(...combinedLines.map(line => line.padStart(maxLineWidth)))
+      break;
+    case ALIGN.CENTER:
+      stackedLines.push(...combinedLines.map(line => {
+        const lineVisibleLength = line.stripStyle().length
+        const gap = maxLineWidth - lineVisibleLength
+        const leftPaddingCount = parseInt(gap / 2)
+        const rightPaddingCount = gap - leftPaddingCount
+        return " ".repeat(leftPaddingCount) + line + " ".repeat(rightPaddingCount)
+      }))
+      break;
+  }
+  return stackedLines.join('\n')
 }
 
 Number.prototype.pipe = function(cb) {
