@@ -175,7 +175,7 @@ js "({ a: 1, b: 2, c: 3 }).table().join([{ id: 1 }, { id: 2, extra: 'yes' }].tab
 if (scriptArgs.includes('-i')
 ) {
   const screen = [];
-  const word = scriptArgs[scriptArgs.indexOf('-i') + 1];
+  const word = scriptArgs[scriptArgs.indexOf('-i') + 1].split(' ').join('\n');
 
   exec(`curl -s https://api.dictionaryapi.dev/api/v2/entries/en/${word}`)
     .parseJson()
@@ -197,7 +197,7 @@ if (scriptArgs.includes('-i')
   const wordsCache = HOME.concat("/.cache/words_alpha.txt")
   let file = std.open(wordsCache, "r");
   if (!file) {
-    exec(`curl -o ${wordsCache} https://raw.githubusercontent.com/dwyl/english-words/refs/heads/master/words_alpha.txt`)
+    exec(`curl -o ${wordsCache} https://raw.githubusercontent.com/meetDeveloper/freeDictionaryAPI/refs/heads/master/meta/wordList/english.txt`)
     file = std.open(wordsCache, "r");
   }
   file.readAsString()
