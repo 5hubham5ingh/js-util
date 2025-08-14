@@ -61,10 +61,6 @@ Object.prototype.assign = function(entries) { return Object.assign(this, entries
 
 Object.prototype.table = function(columns) {
   const data = this
-  if (data == null || typeof data !== 'object') {
-    return;
-  }
-
   let table = ''
   const isArray = Array.isArray(data);
   const rows = isArray ? data : Object.entries(data).map(([key, value]) => ({ key, value }));
@@ -78,14 +74,12 @@ Object.prototype.table = function(columns) {
     ? columns
     : [...new Set(rows.flatMap(row => Object.keys(row)))];
 
-  const header = ['(index)', ...keys];
+  const header = [...keys];
 
   const getString = (v) => v === null ? 'null' : v === undefined ? 'undefined' : String(v);
 
-  const allRows = [header, ...rows.map((row, i) => {
-    const base = isArray ? i : row.key;
-    const values = keys.map(k => getString(row[k]));
-    return [getString(base), ...values];
+  const allRows = [header, ...rows.map(row => {
+    return keys.map(k => getString(row[k]));
   })];
 
   const colWidths = header.map((_, colIndex) =>
