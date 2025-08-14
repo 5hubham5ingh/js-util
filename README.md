@@ -113,9 +113,16 @@ js "read('index.js').lines().filter(l => l.trim().startsWith('import')).log()"
 #   "import { ansi } from \"../justjs/ansiStyle.js\""
 # ]
 
-# Get the current git branch by executing a command and parsing its output
-js "exec('git branch').lines().find(line => line.startsWith('*')).replace('* ', '').log()"
-# "main"
+# Execute a shell command and process its output
+js "'curl -s https://jsonplaceholder.typicode.com/todos/'.exec().parseJson().slice(0,4).table().log()"
+╔════════╤════╤════════════════════════════════════╤═══════════╗
+║ userId │ id │ title                              │ completed ║
+╟────────┼────┼────────────────────────────────────┼───────────╢
+║ 1      │ 1  │ delectus aut autem                 │ false     ║
+║ 1      │ 2  │ quis ut nam facilis et officia qui │ false     ║
+║ 1      │ 3  │ fugiat veniam minus                │ false     ║
+║ 1      │ 4  │ et porro tempora                   │ true      ║
+╚════════╧════╧════════════════════════════════════╧═══════════╝
 
 # List all 'dependencies' from a package.json file via stdin
 cat package.json | js "stdin.parseJson().dependencies.keys().log()"
@@ -126,9 +133,9 @@ cat package.json | js "stdin.parseJson().dependencies.keys().log()"
 
 # Display the current time in a fancy, styled box
 js "new Date().toString().border('double', ['magenta', 'bold']).log()"
-# ╔═══════════════════════════════════════════════════════════════════╗
-# ║ Fri Jul 25 2025 11:08:00 GMT+0000 (Coordinated Universal Time)    ║
-# ╚═══════════════════════════════════════════════════════════════════╝
+╔═══════════════════════════════════════════════════════════════════╗
+║ Fri Jul 25 2025 11:08:00 GMT+0000 (Coordinated Universal Time)    ║
+╚═══════════════════════════════════════════════════════════════════╝
 
 # Extend functionality by loading external scripts from '~/.config/js/' using `use(scriptName)`
 js "use('colours'); fp = HOME.concat('/.config/pywall/colors'); read(fp).words().map(color.darker).join('\n').write(fp)"
@@ -143,35 +150,35 @@ js
 # Starts a JavaScript REPL (Read-Eval-Print Loop) when no input is provided via stdin or command-line arguments.
 
 # Print array of objects as table
-js "const t = [
+js "const t = [                                   
   { name: 'Alice', age: 25 },
   { name: 'Bob', age: 30 },
   { name: 'Charlie', age: null }
 ]; t.table().log()"
-#╔═════════╤═════════╤══════╗
-#║ (index) │ name    │ age  ║
-#╟─────────┼─────────┼──────╢
-#║ 0       │ Alice   │ 25   ║
-#║ 1       │ Bob     │ 30   ║
-#║ 2       │ Charlie │ null ║
-#╚═════════╧═════════╧══════╝
+╔═════════╤══════╗
+║ name    │ age  ║
+╟─────────┼──────╢
+║ Alice   │ 25   ║
+║ Bob     │ 30   ║
+║ Charlie │ null ║
+╚═════════╧══════╝
 
 # Print object as table, specify columns to include, join strings horizontally and stack vertically with specific alignment.
-js "'Testing table(), join() and stack()'.border()
+js "'Testing join() and stack()'.border()
     .stack(({ a: 1, b: 2, c: 3 }).table()
       .join([{ id: 1 }, { id: 2, extra: 'yes' }].table(['id'])),
       'center'
     ).log()"
-# ┌─────────────────────────────────────┐ 
-# │ Testing table(), join() and stack() │ 
-# └─────────────────────────────────────┘ 
-#╔═════════╤═════╤═══════╗╔═════════╤════╗
-#║ (index) │ key │ value ║║ (index) │ id ║
-#╟─────────┼─────┼───────╢╟─────────┼────╢
-#║ a       │ a   │ 1     ║║ 0       │ 1  ║
-#║ b       │ b   │ 2     ║║ 1       │ 2  ║
-#║ c       │ c   │ 3     ║╚═════════╧════╝
-#╚═════════╧═════╧═══════╝
+┌────────────────────────────┐
+│ Testing join() and stack() │
+└────────────────────────────┘
+    ╔═════╤═══════╗╔════╗     
+    ║ key │ value ║║ id ║     
+    ╟─────┼───────╢╟────╢     
+    ║ a   │ 1     ║║ 1  ║     
+    ║ b   │ 2     ║║ 2  ║     
+    ║ c   │ 3     ║╚════╝     
+    ╚═════╧═══════╝           
 ```
 
 ## Use as script interpreter
