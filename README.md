@@ -182,7 +182,7 @@ js "'Testing table(), join() and stack()'.border()
 if (scriptArgs.includes('-i')
 ) {
   const screen = [];
-  const word = scriptArgs[scriptArgs.indexOf('-i') + 1].split(' ').join('\n');
+  const word = scriptArgs[scriptArgs.indexOf('-i') + 1].split(' ').join('%20');
 
   exec(`curl -s https://api.dictionaryapi.dev/api/v2/entries/en/${word}`)
     .parseJson()
