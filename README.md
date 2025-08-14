@@ -145,10 +145,6 @@ js "use('colours'); fp = HOME.concat('/.config/pywall/colors'); read(fp).words()
 cat "$(ls ~/scripts/js/ | fzf)" | js
 # Select and execute a JavaScript script from your scripts directory.
 
-# Run interactively
-js
-# Starts a JavaScript REPL (Read-Eval-Print Loop) when no input is provided via stdin or command-line arguments.
-
 # Print array of objects as table
 js "const t = [                                   
   { name: 'Alice', age: 25 },
@@ -163,12 +159,15 @@ js "const t = [
 ║ Charlie │ null ║
 ╚═════════╧══════╝
 
+# Run interactively
+js
+# Starts a JavaScript REPL (Read-Eval-Print Loop) when no input is provided via stdin or command-line arguments.
+
 # Print object as table, specify columns to include, join strings horizontally and stack vertically with specific alignment.
-js "'Testing join() and stack()'.border()
-    .stack(({ a: 1, b: 2, c: 3 }).table()
-      .join([{ id: 1 }, { id: 2, extra: 'yes' }].table(['id'])),
-      'center'
-    ).log()"
+❯ t1 = ({ a: 1, b: 2, c: 3 }).table()
+❯ t2 = [{ id: 1 }, { id: 2, extra: 'yes' }].table(['id'])
+❯ h = 'Testing join() and stack()'.border()
+❯ h.stack(t1.join(t2), 'center').log()
 ┌────────────────────────────┐
 │ Testing join() and stack() │
 └────────────────────────────┘
