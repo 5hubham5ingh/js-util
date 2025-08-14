@@ -183,7 +183,6 @@ if (scriptArgs.includes('-i')
 ) {
   const screen = [];
   const word = scriptArgs[scriptArgs.indexOf('-i') + 1].split(' ').join('%20');
-
   exec(`curl -s https://api.dictionaryapi.dev/api/v2/entries/en/${word}`)
     .parseJson()
     .pipe((res) => {
@@ -201,14 +200,14 @@ if (scriptArgs.includes('-i')
     })
   print(screen.join('\n'))
 } else {
-  const wordsCache = HOME.concat("/.cache/words_alpha.txt")
+  const wordsCache = HOME.concat("/.cache/words.txt")
   let file = std.open(wordsCache, "r");
   if (!file) {
     exec(`curl -o ${wordsCache} https://raw.githubusercontent.com/meetDeveloper/freeDictionaryAPI/refs/heads/master/meta/wordList/english.txt`)
     file = std.open(wordsCache, "r");
   }
   file.readAsString()
-    .pipe(`fzf --ansi --preview-window=wrap,70% --bind "space:preview(${os.realpath(scriptArgs[1])[0]} -i {})" --bind 'ctrl-j:preview-down' --bind 'ctrl-k:preview-up'`)
+    .pipe(`fzf --ansi --preview-window=wrap,70% --bind "enter:preview(${os.realpath(scriptArgs[1])[0]} -i {})" --bind 'ctrl-j:preview-down' --bind 'ctrl-k:preview-up'`)
   file.close()
 }
 ```
