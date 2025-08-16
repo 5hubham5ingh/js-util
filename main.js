@@ -4,6 +4,8 @@ import * as os from "os"
 import { ansi } from "../justjs/ansiStyle.js"
 import { printf } from "../qjs-ext-lib/src/std.js"
 import { isatty } from "../qjs-ext-lib/src/os.js"
+import * as enquire from "./enquire.js"
+import { getTerminalSize } from "../justjs/terminal.js"
 
 globalThis.std = std
 globalThis.os = os
@@ -22,6 +24,7 @@ globalThis.cd = function(dir = std.getenv("HOME")) {
 globalThis.eval = function(expression) {
   return std.evalScript(expression);
 }
+globalThis.enquire = enquire;
 
 for (const envVar of Object.keys(std.getenviron())) {
   Object.defineProperty(globalThis, envVar, {
@@ -34,7 +37,67 @@ Object.defineProperty(globalThis, 'cwd', {
 });
 
 Object.defineProperty(globalThis, 'ls', {
-  get: () => os.readdir(os.getcwd()[0])[0].filter(f => f != '.' && f != '..')
+  get: () => {
+    const [cwd, err] = os.getcwd();
+    if (err) {
+      throw Error(`Failed to get cwd. Error code: ${err}`);
+    }
+
+    const [list, readErr] = os.readdir(cwd);
+    if (readErr) {
+      throw Error(`Failed to readdir for ${cwd}`)
+    }
+
+    const filteredList = list.filter(f => f !== '.' && f !== '..');
+
+    return filteredList.map(item => {
+      const content = new String(item);
+      let statsCache = null;
+
+      const getStats = () => {
+        if (!statsCache) {
+          const [stats, statErr] = os.lstat(cwd + '/' + item);
+          if (statErr) {
+            throw Error(`Error getting stats for "${item}": ${statErr}`);
+          }
+          statsCache = stats;
+        }
+        return statsCache;
+      };
+
+      Object.defineProperties(content, {
+        isDir: {
+          get: () => {
+            const stats = getStats();
+            return stats ? (stats.mode & os.S_IFMT) === os.S_IFDIR : false;
+          },
+        },
+        isFile: {
+          get: () => {
+            const stats = getStats();
+            return stats ? (stats.mode & os.S_IFMT) === os.S_IFREG : false;
+          },
+        },
+        isLink: {
+          get: () => {
+            const stats = getStats();
+            return stats ? (stats.mode & os.S_IFMT) === os.S_IFLNK : false;
+          },
+        },
+        size: {
+          get: () => getStats()?.size,
+        },
+        createdAt: {
+          get: () => getStats() ? new Date(getStats().ctime) : null,
+        },
+        modifiedAt: {
+          get: () => getStats() ? new Date(getStats().mtime) : null,
+        },
+      });
+
+      return content;
+    });
+  }
 });
 
 let stdinCached;
@@ -446,6 +509,31 @@ String.prototype.stack = function(secondString, align = ALIGN.LEFT) {
   return stackedLines.join('\n')
 }
 
+String.prototype.chunks = function(size) {
+  if (this.length === 0) return this;
+  return this.match(new RegExp(`.{1,${size}}`, "g"));
+}
+
+String.prototype.wrap = function(maxLength = getTerminalSize()[0], byWords = true) {
+  if (byWords) {
+    let line = ''
+    const lines = []
+    for (const word of this.words()) {
+      const next = (line ? line + ' ' + word : word)
+
+      if (next.length <= maxLength) {
+        line = next
+      } else {
+        if (line) lines.push(line)
+        line = word
+      }
+    }
+    if (line) lines.push(line)
+    return lines.join('\n')
+  }
+  return this.chunks(maxLength).join('\n')
+}
+
 Number.prototype.pipe = function(cb) {
   if (typeof cb === "function") return cb(this)
   else if (typeof cb === "string" || Array.isArray(cb)) {
@@ -488,7 +576,7 @@ if (!err && (st.mode & os.S_IFMT) === os.S_IFREG) {
       const expression = std.in.getline();
       if (expression === null) break;
       history.push(expression);
-      std.evalScript(expression, { async: true });
+      std.evalScript(expression,);
     }
   }
 } else {
