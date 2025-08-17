@@ -511,7 +511,7 @@ String.prototype.stack = function(secondString, align = ALIGN.LEFT) {
 
 String.prototype.chunks = function(size) {
   if (this.length === 0) return this;
-  return this.match(new RegExp(`.{1,${size}}`, "g"));
+  return this.match(new RegExp(`.{1,${size}}`, "gs"));
 }
 
 String.prototype.wrap = function(maxLength = getTerminalSize()[0], byWords = true) {
