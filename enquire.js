@@ -1,0 +1,386 @@
+import { printf } from "std"
+import { cursorBackward, cursorHide, cursorMove, cursorRestorePosition, cursorSavePosition, cursorShow, cursorTo, cursorUp, eraseDown, eraseEndLine } from "../justjs/cursor.js"
+import { ttySetRaw } from 'os'
+import { getTerminalSize, handleKeysPressSync, keySequences } from "../justjs/terminal.js"
+
+const [terminalWidth, terminalHeight] = getTerminalSize()
+const maxUiHeight = parseInt(terminalHeight / 2)
+
+const formatLine = (line, lineNumber, totalLines) => {
+  const visible = line.stripStyle()
+  const horizontalGap = terminalWidth - 2 - visible.length
+
+  if (horizontalGap > 0) {
+    return lineNumber === totalLines - 1
+      ? line.padStart(line.length + horizontalGap - 2)
+      : line.padEnd(line.length + horizontalGap - 4)
+  }
+
+  if (horizontalGap < 0) {
+    return line.chunks(terminalWidth - 4).map((l, i) => i === 0 ? l : '  ' + l)
+  }
+
+  return line
+}
+
+const renderBorderedUI = (lines, prevCursorPos) => {
+  const ui = lines.flatMap((line, i) => formatLine(line, i, lines.length))
+
+  if (prevCursorPos) printf(`${prevCursorPos}${eraseDown}`)
+  const borderedUI = ui.join('\n').border('rounded').log()
+
+  return cursorUp(borderedUI.split('\n').length)
+}
+
+const formatMultilineOption = (opt, prefix = '') => {
+  return String(opt)
+    .split('\n')
+    .map((l, i) => i === 0 ? l : prefix + l)
+    .join('\n')
+}
+
+const createNavigationHandlers = (getLength, getIndex, setIndex, renderFn) => ({
+  [keySequences.ArrowUp]: () => {
+    const length = getLength()
+    if (length) {
+      setIndex((getIndex() - 1 + length) % length)
+      renderFn()
+    }
+  },
+  [keySequences.ArrowDown]: () => {
+    const length = getLength()
+    if (length) {
+      setIndex((getIndex() + 1) % length)
+      renderFn()
+    }
+  }
+})
+
+export const ask = (message) => {
+  printf(' ◉ %s ', message)
+  return std.in.getline()
+}
+
+export const confirm = (statement) => {
+  let choice
+  while (true) {
+    printf(' ◉ %s (y/n): ', statement)
+    choice = std.in.getline()?.trim().toLowerCase()
+    if (choice === 'y' || choice === 'n') break
+    print('Invalid input! '.style(['bold', '#bc0300']) + choice)
+  }
+  return choice === 'y'
+}
+
+export const secret = (message) => {
+  ttySetRaw()
+  let secret = ''
+  printf(' ◉ %s: ', message)
+
+  while (true) {
+    const char = std.in.readAsString(1)
+    if (char === keySequences.Enter) {
+      return secret
+    } else if (char === keySequences.Backspace) {
+      secret = secret.slice(0, -1)
+      printf("%s%s", cursorBackward(), eraseEndLine)
+    } else {
+      printf("✳")
+      secret += char
+    }
+  }
+}
+
+export const choose = (options) => {
+  printf("%s", cursorHide)
+  ttySetRaw()
+
+  let index = 0
+  let prevCursorPos
+
+  const renderUi = () => {
+    let lines = options.map((opt, i) => {
+      const line = formatMultilineOption(opt, '  ')
+      return i === index
+        ? `◉ ${line}`.style(['bold'])
+        : `○ ${line}`
+    })
+
+    if (lines.length > maxUiHeight) {
+      lines = lines.slice(index, index + maxUiHeight)
+    }
+    lines.push(" Select one (Enter to confirm) ".style(['#000000', 'bold', 'bg-grey']))
+    prevCursorPos = renderBorderedUI(lines, prevCursorPos)
+  }
+
+  renderUi()
+
+  const handlers = {
+    ...createNavigationHandlers(() => options.length, () => index, (i) => index = i, renderUi),
+    [keySequences.Enter]: (_, q) => q()
+  }
+
+  handleKeysPressSync(handlers)
+  printf(cursorShow)
+
+  return options[index]
+}
+
+export const search = (options) => {
+  printf("%s", cursorHide)
+  ttySetRaw()
+
+  let query = ''
+  let filtered = options.slice()
+  let index = 0
+  let prevCursorPos
+
+  const recompute = () => {
+    filtered = options.filter(opt => String(opt).toLowerCase().includes(query.toLowerCase()))
+    index = 0
+  }
+
+  const renderUi = () => {
+    const lines = []
+
+    // Query input display
+    const queryDisplay = query || "Type to start search...".style(['grey', 'italic'])
+    const queryDisplayWidth = queryDisplay.stripStyle().length
+    const horizontalGap = terminalWidth - 8 - queryDisplayWidth
+
+    if (horizontalGap > 0) {
+      lines.push(queryDisplay.padEnd(queryDisplay.length + horizontalGap).border('rounded'))
+    } else {
+      lines.push(queryDisplay.stripStyle().chunks(terminalWidth - 8).join('\n').border('rounded'))
+    }
+
+    // Options display
+    if (filtered.length === 0) {
+      lines.push("  No matches")
+    } else {
+      let optionLines = []
+      filtered.forEach((opt, i) => {
+        const line = formatMultilineOption(opt, '   ')
+        const lineDisplay = i === index
+          ? ` ◉ ${line}`.style(['bold'])
+          : ` ○ ${line}`
+
+        const lineDisplayWidth = lineDisplay.stripStyle().length
+        const horizontalGap = terminalWidth - 4 - lineDisplayWidth
+
+        if (horizontalGap < 0) {
+          optionLines.push(lineDisplay.chunks(terminalWidth - 4)
+            .map((line, i) => i === 0 ? line : "   " + line)
+            .join('\n'))
+        } else {
+          optionLines.push(lineDisplay)
+        }
+      })
+      if (optionLines.length > maxUiHeight) {
+        optionLines = optionLines.slice(index, index + maxUiHeight)
+      }
+
+      lines.push(...optionLines)
+    }
+
+    if (prevCursorPos) printf('%s%s', prevCursorPos, eraseDown)
+    const ui = lines.join('\n').border('rounded')
+    const uiHeight = ui.split('\n').length - 1
+    printf(ui)
+    prevCursorPos = cursorMove(terminalWidth * -1, uiHeight * -1)
+  }
+
+  renderUi()
+
+  const updateQuery = (ch) => {
+    query += ch
+    recompute()
+    renderUi()
+  }
+
+  const handlers = {
+    ...createNavigationHandlers(() => filtered.length, () => index, (i) => index = i, renderUi),
+    [keySequences.Backspace]: () => {
+      if (query.length) {
+        query = query.slice(0, -1)
+        recompute()
+        renderUi()
+      }
+    },
+    [keySequences.Enter]: (_, q) => { if (filtered.length) q() },
+    [keySequences.smallLetters]: updateQuery,
+    [keySequences.capitalLetters]: updateQuery,
+    [keySequences.numbers]: updateQuery,
+    [keySequences.Space]: updateQuery
+  }
+
+  handleKeysPressSync(handlers)
+  printf(cursorShow)
+
+  return filtered.length ? filtered[index] : undefined
+}
+
+export const select = (options) => {
+  printf("%s", cursorHide)
+  ttySetRaw()
+
+  let index = 0
+  const selected = new Set()
+  let prevCursorPos
+
+  const renderUi = () => {
+    let lines = options.map((opt, i) => {
+      const mark = selected.has(i) ? "◉" : "○"
+      const line = formatMultilineOption(opt, '    ')
+
+      return i === index
+        ? `• ${mark} ${line}`.style(['bold'])
+        : `  ${mark} ${line}`
+    })
+
+    if (lines.length > maxUiHeight) {
+      lines = lines.slice(index, index + maxUiHeight)
+    }
+    lines.push(" Select one or more (Space to toggle, Enter to confirm) ".style(['#000000', 'bold', 'bg-grey']))
+    prevCursorPos = renderBorderedUI(lines, prevCursorPos)
+  }
+
+  renderUi()
+
+  const handlers = {
+    ...createNavigationHandlers(() => options.length, () => index, (i) => index = i, renderUi),
+    [' ']: () => {
+      selected.has(index) ? selected.delete(index) : selected.add(index)
+      renderUi()
+    },
+    [keySequences.Enter]: (_, q) => q()
+  }
+
+  handleKeysPressSync(handlers)
+  printf(cursorShow)
+
+  return [...selected].map(i => options[i])
+}
+
+export const pick = () => {
+  const ICONS = {
+    FOLDER_OPEN: '📂',
+    FOLDER_CLOSED: '📁',
+    FILE: '📄',
+    FILE_DETAILS: '📃'
+  };
+
+  const MAX_DETAIL_HEIGHT = Math.floor(terminalHeight / 3);
+  const CONTENT_WIDTH = terminalWidth - 5;
+
+  let options = ls;
+  let index = 0;
+  let prevCursorPos;
+  const navigationHistory = [];
+
+  printf("%s", cursorHide);
+  ttySetRaw();
+
+  const getDirectoryContents = (dir) => {
+    cd(dir);
+    const contents = ls.map(content =>
+      `${content.isDir ? ICONS.FOLDER_CLOSED : ICONS.FILE}${content}`
+    ).join(' ');
+    cd('..');
+    return contents;
+  };
+
+  const getFileDetails = ({ size, createdAt, modifiedAt }) =>
+    [`Size:${size}`, `Created:${createdAt}`, `Modified:${modifiedAt}`]
+      .map(detail => detail.replace(/\s/g, '_'))
+      .join(' ');
+
+  const getDetails = () => {
+    const currentOption = options[index];
+    const content = currentOption.isDir
+      ? getDirectoryContents(currentOption)
+      : getFileDetails(currentOption);
+
+    return content
+      .wrap(CONTENT_WIDTH)
+      .split('\n')
+      .slice(0, MAX_DETAIL_HEIGHT)
+      .join('\n');
+  };
+
+  const getDisplayIcon = (option, isSelected) => {
+    if (option.isDir) {
+      return isSelected ? ICONS.FOLDER_OPEN : ICONS.FOLDER_CLOSED;
+    }
+    return isSelected ? ICONS.FILE_DETAILS : ICONS.FILE;
+  };
+
+  const renderOptions = () => {
+    let lines = options.map((opt, i) => {
+      const isSelected = i === index;
+      const icon = getDisplayIcon(opt, isSelected);
+      const line = formatMultilineOption(opt, '  ');
+
+      return isSelected
+        ? `❯ ${icon} ${line}`.style(['bold'])
+        : `${icon} ${line}`;
+    });
+
+    // for viewport scrolling
+    if (lines.length > maxUiHeight) {
+      lines = lines.slice(index, index + maxUiHeight);
+    }
+
+    return lines;
+  };
+
+  const renderUi = () => {
+    const lines = [
+      `${cwd !== '/' ? cwd + '/' : '/'}${options[index]}`.style('underline'),
+      ...renderOptions(),
+      '='.repeat(terminalWidth - 4),
+      '  ' + getDetails(),
+      " Select one (Enter to confirm) ".style(['#000000', 'bold', 'bg-grey'])
+    ];
+
+    prevCursorPos = renderBorderedUI(lines, prevCursorPos);
+  };
+
+  const navigateInto = () => {
+    const selectedOption = options[index];
+    if (selectedOption.isDir) {
+      if (!cd(selectedOption)) return;
+      const contents = ls
+      if (contents.length === 0) return;
+      options = contents;
+      navigationHistory.push(index);
+      index = 0;
+      renderUi();
+    }
+  };
+
+  const navigateBack = () => {
+    if (!cd('..')) return;
+    options = ls;
+    index = navigationHistory.pop() ?? 0;
+    renderUi();
+  };
+
+  const handlers = {
+    ...createNavigationHandlers(
+      () => options.length,
+      () => index,
+      (i) => { index = i; },
+      renderUi
+    ),
+    [keySequences.Enter]: (_, quit) => quit(),
+    [keySequences.ArrowRight]: navigateInto,
+    [keySequences.ArrowLeft]: navigateBack
+  };
+
+  renderUi();
+  handleKeysPressSync(handlers);
+  printf(cursorShow);
+
+  return `${cwd !== '/' ? cwd + '/' : '/'}${options[index]}`
+};

@@ -44,11 +44,11 @@ Object.defineProperty(globalThis, 'ls', {
     }
 
     const [list, readErr] = os.readdir(cwd);
+    let filteredList;
     if (readErr) {
-      throw Error(`Failed to readdir for ${cwd}`)
+      filteredList = []
     }
-
-    const filteredList = list.filter(f => f !== '.' && f !== '..');
+    else filteredList = list.filter(f => f !== '.' && f !== '..');
 
     return filteredList.map(item => {
       const content = new String(item);
