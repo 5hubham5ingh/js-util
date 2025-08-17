@@ -1,5 +1,5 @@
 import { printf } from "std"
-import { cursorBackward, cursorHide, cursorMove, cursorRestorePosition, cursorSavePosition, cursorShow, cursorTo, cursorUp, eraseDown, eraseEndLine } from "../justjs/cursor.js"
+import { cursorBackward, cursorHide, cursorMove, cursorRestorePosition, cursorSavePosition, cursorShow, cursorTo, cursorUp, eraseDown, eraseEndLine, eraseStartLine } from "../justjs/cursor.js"
 import { ttySetRaw } from 'os'
 import { getTerminalSize, handleKeysPressSync, keySequences } from "../justjs/terminal.js"
 
@@ -340,7 +340,7 @@ export const pick = () => {
       ...renderOptions(),
       '='.repeat(terminalWidth - 4),
       '  ' + getDetails(),
-      " Select one (Enter to confirm) ".style(['#000000', 'bold', 'bg-grey'])
+      " Select one (Enter to confirm, Arrow to navigate) ".style(['#000000', 'bold', 'bg-grey'])
     ];
 
     prevCursorPos = renderBorderedUI(lines, prevCursorPos);
@@ -384,3 +384,81 @@ export const pick = () => {
 
   return `${cwd !== '/' ? cwd + '/' : '/'}${options[index]}`
 };
+
+export const describe = (buffer = '') => {
+  const CURSOR_CHAR = '█';
+  const CONTENT_WIDTH = terminalWidth - 5;
+  const MAX_BUFFER_HEIGHT = Math.floor(terminalHeight / 2);
+  const HELP_TEXT = " Textarea (press CTRL+D to submit) ".style(['#000000', 'bold', 'bg-grey']);
+  const HELP_PADDED = HELP_TEXT.padStart(HELP_TEXT.stripStyle().length + terminalWidth - 12);
+
+  let prevCursorPos;
+
+  ttySetRaw();
+  printf("%s", cursorHide);
+
+  const processBufferForDisplay = () => {
+    if (!buffer) return [CURSOR_CHAR];
+
+    const lines = buffer.split('\n');
+    const overflowCount = lines.length - MAX_BUFFER_HEIGHT;
+    if (overflowCount > 0) {
+      lines.splice(0, overflowCount);
+    }
+
+    const lastIndex = lines.length - 1;
+    lines[lastIndex] += CURSOR_CHAR;
+
+    return lines.flatMap(line => line.chunks(CONTENT_WIDTH));
+  };
+
+  const renderUi = () => {
+    if (prevCursorPos) {
+      printf(`${prevCursorPos}${eraseDown}`);
+    }
+
+    const displayBuffer = processBufferForDisplay();
+    const ui = [
+      ...displayBuffer,
+      ' ',
+      ' ',
+      HELP_PADDED
+    ].join('\n').border('double').log();
+
+    prevCursorPos = cursorUp(ui.split('\n').length);
+  };
+
+  const handleInput = (char) => {
+    switch (char) {
+      case keySequences["Ctrl+D"]:
+        printf(cursorShow);
+        return { shouldExit: true, result: buffer };
+
+      case keySequences.Enter:
+        buffer += '\n';
+        break;
+
+      case keySequences.Backspace:
+        buffer = buffer.slice(0, -1);
+        break;
+
+      default:
+        buffer += char;
+        break;
+    }
+
+    return { shouldExit: false };
+  };
+
+  while (true) {
+    renderUi();
+
+    const char = std.in.readAsString(1);
+    const result = handleInput(char);
+
+    if (result.shouldExit) {
+      return result.result;
+    }
+  }
+};
+
