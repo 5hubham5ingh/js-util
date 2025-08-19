@@ -2,6 +2,7 @@ import { printf } from "std"
 import { cursorBackward, cursorHide, cursorMove, cursorRestorePosition, cursorSavePosition, cursorShow, cursorTo, cursorUp, eraseDown, eraseEndLine, eraseStartLine } from "../justjs/cursor.js"
 import { ttySetRaw } from 'os'
 import { getTerminalSize, handleKeysPressSync, keySequences } from "../justjs/terminal.js"
+import { colorPicker } from "./colorPicker.js"
 
 const [terminalWidth, terminalHeight] = getTerminalSize()
 const maxUiHeight = parseInt(terminalHeight / 2)
@@ -462,3 +463,4 @@ export const describe = (buffer = '') => {
   }
 };
 
+export const color = colorPicker;
