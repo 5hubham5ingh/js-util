@@ -339,8 +339,9 @@ export const pick = () => {
     const lines = [
       `${cwd !== '/' ? cwd + '/' : '/'}${options[index]}`.style('underline'),
       ...renderOptions(),
-      '='.repeat(terminalWidth - 4),
+      '━'.repeat(terminalWidth - 4),
       '  ' + getDetails(),
+      " ",
       " Select one (Enter to confirm, Arrow to navigate) ".style(['#000000', 'bold', 'bg-grey'])
     ];
 
