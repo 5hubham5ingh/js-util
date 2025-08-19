@@ -576,7 +576,11 @@ if (!err && (st.mode & os.S_IFMT) === os.S_IFREG) {
       const expression = std.in.getline();
       if (expression === null) break;
       history.push(expression);
-      std.evalScript(expression,);
+      try {
+        std.evalScript(expression);
+      } catch (error) {
+        print(error)
+      }
     }
   }
 } else {
