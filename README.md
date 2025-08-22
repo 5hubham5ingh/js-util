@@ -225,10 +225,6 @@ chmod +x fzfDict.js
 
 ### Use for handling user input
 
-You are correct. I apologize for the error. My previous response incorrectly stated the properties of the objects returned by `ls`. I have proofread the code and can confirm that the `ls` objects have the properties `isDir`, `isFile`, `isLink`, `size`, `createdAt`, and `modifiedAt`. I will update the API reference to reflect this.
-
-***
-
 ## API Reference
 
 ---
