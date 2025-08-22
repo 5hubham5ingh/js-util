@@ -50,10 +50,11 @@ const BORDER_CHARS = {
 };
 
 
-const [actualTerminalWidth] = ttyGetWinSize()
-const terminalWidth = actualTerminalWidth - 2
+let actualTerminalWidth, terminalWidth;
 
 export function colorPicker() {
+  [actualTerminalWidth] = ttyGetWinSize()
+  terminalWidth = actualTerminalWidth - 2
   ttySetRaw()
   printf(cursorHide)
   let selectedColor;
