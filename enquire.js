@@ -1,5 +1,5 @@
 import { printf } from "std"
-import { cursorBackward, cursorHide, cursorMove, cursorRestorePosition, cursorSavePosition, cursorShow, cursorTo, cursorUp, eraseDown, eraseEndLine, eraseStartLine } from "../justjs/cursor.js"
+import { cursorBackward, cursorHide, cursorMove, cursorShow, cursorUp, eraseDown, eraseEndLine } from "../justjs/cursor.js"
 import { ttySetRaw } from 'os'
 import { getTerminalSize, handleKeysPressSync, keySequences } from "../justjs/terminal.js"
 import { colorPicker } from "./colorPicker.js"
@@ -465,3 +465,21 @@ export const describe = (buffer = '') => {
 };
 
 export const color = colorPicker;
+
+export const edit = (content = '') => {
+  if (!EDITOR) return describe(content);
+  const fileDir = '/tmp/js/'
+  ensureDir(fileDir)
+  const fileName = String(Math.random())
+  const filePath = fileDir + fileName
+  const file = std.open(filePath, "w+")
+  if (!file) throw Error("Failed to open temp file for the editor. " + String(file) + filePath);
+  if (content) file.puts(content);
+  file.close()
+  os.exec([EDITOR, filePath])
+  const editedFile = std.open(filePath, "r")
+  const fileContent = editedFile.readAsString()
+  editedFile.close();
+  os.remove(filePath)
+  return fileContent;
+};
