@@ -26,6 +26,52 @@ globalThis.eval = function(expression) {
 }
 globalThis.enquire = enquire;
 
+const resolvePath = (path) => {
+  if (path.startsWith('/')) return path;
+
+  if (path.startsWith('~')) return HOME + path.slice(1);
+
+  return os.getcwd() + '/' + path;
+}
+
+globalThis.stat = function(path) {
+  const resolvedPath = resolvePath(path)
+  const [stats, statErr] = os.lstat(resolvedPath);
+  if (statErr) return;
+
+  return {
+    isDir: (stats.mode & os.S_IFMT) === os.S_IFDIR,
+    isFile: (stats.mode & os.S_IFMT) === os.S_IFREG,
+    isLink: (stats.mode & os.S_IFMT) === os.S_IFLNK,
+    size: stats.size,
+    createdAt: new Date(stat.ctime),
+    modifiedAt: new Date(stat.mtime),
+  }
+}
+
+globalThis.ensureDir = (dir) => {
+  if (typeof dir !== "string" || dir.trim() === "") {
+    throw new TypeError("Invalid directory path provided.");
+  }
+
+  const fullPath = resolvePath(dir)
+
+  const parts = fullPath.split('/');
+  let currentPath = '';
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i];
+    if (!part) continue;
+
+    currentPath += (i === 0 ? '' : '/') + part;
+    const statObj = stat(currentPath);
+
+    if (statObj && statObj.isFile) throw Error(`ensureDir :: "${currentPath}" is a file.`);
+    if (statObj && statObj.isDir) continue;
+
+    os.mkdir(currentPath)
+  }
+};
+
 for (const envVar of Object.keys(std.getenviron())) {
   Object.defineProperty(globalThis, envVar, {
     get: () => std.getenv(envVar),
