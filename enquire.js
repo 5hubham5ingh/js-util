@@ -7,6 +7,7 @@ import { colorPicker } from "./colorPicker.js"
 
 const formatLine = (line, lineNumber, totalLines) => {
   const visible = line.stripStyle()
+  const [terminalWidth, terminalHeight] = getTerminalSize()
   const horizontalGap = terminalWidth - 2 - visible.length
 
   if (horizontalGap > 0) {
@@ -95,6 +96,7 @@ export const choose = (options) => {
   printf("%s", cursorHide)
   ttySetRaw()
 
+  const [terminalWidth, terminalHeight] = getTerminalSize()
   let index = 0
   let prevCursorPos
 
@@ -131,6 +133,7 @@ export const search = (options) => {
   printf("%s", cursorHide)
   ttySetRaw()
 
+  const [terminalWidth, terminalHeight] = getTerminalSize()
   let query = ''
   let filtered = options.slice()
   let index = 0
@@ -227,6 +230,7 @@ export const select = (options) => {
   printf("%s", cursorHide)
   ttySetRaw()
 
+  const [terminalWidth, terminalHeight] = getTerminalSize()
   let index = 0
   const selected = new Set()
   let prevCursorPos
@@ -274,6 +278,7 @@ export const pick = () => {
     FILE_DETAILS: '📃'
   };
 
+  const [terminalWidth, terminalHeight] = getTerminalSize()
   const MAX_DETAIL_HEIGHT = parseInt(terminalHeight / 4);
   const CONTENT_WIDTH = terminalWidth - 4;
 
@@ -390,6 +395,8 @@ export const pick = () => {
 };
 
 export const describe = (buffer = '') => {
+
+  const [terminalWidth, terminalHeight] = getTerminalSize()
   const CURSOR_CHAR = '█';
   const CONTENT_WIDTH = terminalWidth - 5;
   const MAX_BUFFER_HEIGHT = Math.floor(terminalHeight / 2);
