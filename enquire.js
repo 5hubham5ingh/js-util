@@ -4,8 +4,6 @@ import { ttySetRaw } from 'os'
 import { getTerminalSize, handleKeysPressSync, keySequences } from "../justjs/terminal.js"
 import { colorPicker } from "./colorPicker.js"
 
-const [terminalWidth, terminalHeight] = getTerminalSize()
-const maxUiHeight = parseInt(terminalHeight / 2)
 
 const formatLine = (line, lineNumber, totalLines) => {
   const visible = line.stripStyle()
@@ -93,6 +91,7 @@ export const secret = (message) => {
 }
 
 export const choose = (options) => {
+  if (!options) return;
   printf("%s", cursorHide)
   ttySetRaw()
 
@@ -107,6 +106,7 @@ export const choose = (options) => {
         : `○ ${line}`
     })
 
+    const maxUiHeight = parseInt(terminalHeight / 2)
     if (lines.length > maxUiHeight) {
       lines = lines.slice(index, index + maxUiHeight)
     }
@@ -177,6 +177,7 @@ export const search = (options) => {
           optionLines.push(lineDisplay)
         }
       })
+      const maxUiHeight = parseInt(terminalHeight / 2)
       if (optionLines.length > maxUiHeight) {
         optionLines = optionLines.slice(index, index + maxUiHeight)
       }
@@ -222,6 +223,7 @@ export const search = (options) => {
 }
 
 export const select = (options) => {
+  if (!options) return;
   printf("%s", cursorHide)
   ttySetRaw()
 
@@ -239,6 +241,7 @@ export const select = (options) => {
         : `  ${mark} ${line}`
     })
 
+    const maxUiHeight = parseInt(terminalHeight / 2)
     if (lines.length > maxUiHeight) {
       lines = lines.slice(index, index + maxUiHeight)
     }
@@ -325,6 +328,7 @@ export const pick = () => {
         : `${icon} ${line}`;
     });
 
+    const maxUiHeight = parseInt(terminalHeight / 2)
     // for viewport scrolling
     if (lines.length > maxUiHeight) {
       lines = lines.slice(index, index + maxUiHeight);
@@ -481,3 +485,4 @@ export const edit = (content = '') => {
   os.remove(filePath)
   return fileContent;
 };
+
