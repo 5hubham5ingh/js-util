@@ -100,7 +100,7 @@ js "ls.filter(f => f.endsWith('.md')).length.log()"
 # 5
 
 # List all subdirectories, styled with an icon
-js "ls.filter(f => f.isDir()).map(dir => \`📁 \${dir}\`.style('yellow')).join('\\n').log()"
+js "ls.filter(f => f.isDir.map(dir => \`📁 \${dir}\`.style('yellow')).join('\\n').log()"
 # 📁 directory1
 # 📁 another_dir
 
