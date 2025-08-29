@@ -6,6 +6,7 @@ import { printf } from "../qjs-ext-lib/src/std.js"
 import { isatty } from "../qjs-ext-lib/src/os.js"
 import * as enquire from "./enquire.js"
 import { getTerminalSize } from "../justjs/terminal.js"
+import * as render from "./render.js"
 
 globalThis.std = std
 globalThis.os = os
@@ -25,6 +26,7 @@ globalThis.eval = function(expression) {
   return std.evalScript(expression);
 }
 globalThis.enquire = enquire;
+globalThis.render = render;
 
 const resolvePath = (path) => {
   if (path.startsWith('/')) return path;
