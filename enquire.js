@@ -271,8 +271,8 @@ export const pick = () => {
     FILE_DETAILS: '📃'
   };
 
-  const MAX_DETAIL_HEIGHT = Math.floor(terminalHeight / 3);
-  const CONTENT_WIDTH = terminalWidth - 5;
+  const MAX_DETAIL_HEIGHT = parseInt(terminalHeight / 4);
+  const CONTENT_WIDTH = terminalWidth - 4;
 
   let options = ls;
   let index = 0;
@@ -292,9 +292,8 @@ export const pick = () => {
   };
 
   const getFileDetails = ({ size, createdAt, modifiedAt }) =>
-    [`Size:${size}`, `Created:${createdAt}`, `Modified:${modifiedAt}`]
-      .map(detail => detail.replace(/\s/g, '_'))
-      .join(' ');
+    [`SIZE: ${size}`, `CREATED: ${createdAt}`, `MODIFIED: ${modifiedAt}`]
+      .join(' │ ');
 
   const getDetails = () => {
     const currentOption = options[index];
@@ -306,7 +305,6 @@ export const pick = () => {
       .wrap(CONTENT_WIDTH)
       .split('\n')
       .slice(0, MAX_DETAIL_HEIGHT)
-      .join('\n');
   };
 
   const getDisplayIcon = (option, isSelected) => {
@@ -340,7 +338,7 @@ export const pick = () => {
       `${cwd !== '/' ? cwd + '/' : '/'}${options[index]}`.style('underline'),
       ...renderOptions(),
       '━'.repeat(terminalWidth - 4),
-      '  ' + getDetails(),
+      ...getDetails(),
       " ",
       " Select one (Enter to confirm, Arrow to navigate) ".style(['#000000', 'bold', 'bg-grey'])
     ];
