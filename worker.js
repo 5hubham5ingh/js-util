@@ -1,18 +1,26 @@
 import * as os from 'os';
-import { cursorUp } from "../justjs/cursor.js"
+import { cursorHide, cursorShow, cursorUp } from "../justjs/cursor.js"
+import { ttySetRaw } from '../qjs-ext-lib/src/os.js';
 
 const parent = os.Worker.parent;
 
 const startRendering = async (pulseFrames) => {
+  print(cursorHide, cursorUp())
+  ttySetRaw()
   const frames = pulseFrames;
 
   let frame = 0;
   while (true) {
     const currentFrame = frames[frame % frames.length]
     await os.sleepAsync(100)
-    print("\r", currentFrame, cursorUp(),)
+    print("\r", currentFrame, cursorUp())
+
     frame++;
   }
+}
+
+const stopRendering = () => {
+  print(cursorShow)
 }
 
 parent.onmessage = async (e) => {
@@ -22,6 +30,7 @@ parent.onmessage = async (e) => {
       await startRendering(ev.data);
       break;
     case "abort":
+      stopRendering()
       parent.onmessage = null;
   }
 };
