@@ -43,7 +43,7 @@ fi
 
 ## Build js then install it.
 echo -e "\e[1;4;33mBuilding js...\e[0m"
-qjsc -o js main.js
+qjsc -D worker.js -o js main.js
 echo -e "\e[1;4;33mInstalling js...\e[0m"
 sudo cp js /usr/bin/
 echo -e "\e[1;32mjs installation completed successfully.\e[0m"
