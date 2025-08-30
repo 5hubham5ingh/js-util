@@ -159,16 +159,16 @@ export const levels = (levels) => {
 
     allFrames.push(frames)
   }
-  print(cursorHide);
+  printf(cursorHide);
   ttySetRaw();
   const maxNoOfFrames = Math.max(...allFrames.map(frame => frame.length))
   let prevCursorPos;
   for (let i = 0; i < maxNoOfFrames; i++) {
     if (prevCursorPos) printf(prevCursorPos);
     const frames = allFrames.map(frames => frames[i]).join('\n\n')
-    print(frames.border('rounded'), '\n')
+    print(frames.border('rounded'))
     os.sleep(700 / maxNoOfFrames);
-    prevCursorPos = (cursorUp(allFrames.length * 2 + 2) + eraseDown)
+    prevCursorPos = (cursorUp(allFrames.length * 2 + 1) + eraseDown)
   }
   printf(cursorShow);
 };
