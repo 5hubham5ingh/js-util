@@ -1,4 +1,4 @@
-import { cursorDown, cursorHide, cursorShow, cursorUp, eraseDown } from "../justjs/cursor.js";
+import { cursorHide, cursorShow, cursorUp, eraseDown } from "../justjs/cursor.js";
 import { getTerminalSize, handleKeysPressSync, keySequences } from "../justjs/terminal.js";
 import { printf } from "std"
 import { ttySetRaw } from "../qjs-ext-lib/src/os.js";
@@ -82,7 +82,7 @@ export const pages = (content, pageHeight) => {
     }
 
     dots[activeIndex] = '●';
-    const indicator = '◖'.style('yellow') + dots.join('').style(['bold', '#000000', 'bg-yellow']) + '◗'.style('yellow');
+    const indicator = '◖'.style('grey') + dots.join('').style(['bold', '#000000', 'bg-grey']) + '◗'.style('grey');
 
     return shouldUseCompactIndicator
       ? indicator
@@ -95,10 +95,10 @@ export const pages = (content, pageHeight) => {
     }
 
     const page = pages[currentPage];
-    const pageIndicator = createPageIndicator();
-    const content = [...page, pageIndicator].join('\n').border('thick');
+    const content = [...page].join('\n').border('rounded');
 
-    print(content);
+    const pageIndicator = createPageIndicator();
+    print(content, pageIndicator);
     prevCursorPos = cursorUp(page.length + 3);
   };
 
