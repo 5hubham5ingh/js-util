@@ -1,4 +1,4 @@
-import { cursorHide, cursorShow, cursorUp, eraseDown } from "../justjs/cursor.js";
+import { cursorDown, cursorHide, cursorShow, cursorUp, eraseDown } from "../justjs/cursor.js";
 import { getTerminalSize, handleKeysPressSync, keySequences } from "../justjs/terminal.js";
 import { printf } from "std"
 import { ttySetRaw } from "../qjs-ext-lib/src/os.js";
@@ -140,8 +140,36 @@ export const pages = (content, pageHeight) => {
   printf(cursorShow);
 };
 
-export const progessBar = (progressPercentage) => {
-  if (progressPercentage > 100 || progressPercentage < 0) throw Error("Percentage must be within 0-100")
+export const levels = (levels) => {
+  const allFrames = []
+  for (const [currentLevel, maxLevel, title = '', desc = false] of levels) {
+    const frames = [];
+    const start = desc ? maxLevel : 0;
+    const end = desc ? currentLevel : currentLevel;
+    const step = desc ? -1 : 1;
 
-}
+    for (let i = start; desc ? i >= end : i <= end; i += step) {
+      const filled = i > 0 ? '█'.repeat(i) : '';
+      const emptySpaces = Math.max(0, maxLevel - i - 1);
+      const empty = '◗' + ' '.repeat(emptySpaces);
+
+      const bar = (filled + empty).style(['grey', emptySpaces >= 0 ? 'bg-white' : '']);
+      frames.push(title + '◖'.style('grey') + bar + '◗'.style('white'));
+    }
+
+    allFrames.push(frames)
+  }
+  print(cursorHide);
+  ttySetRaw();
+  const maxNoOfFrames = Math.max(...allFrames.map(frame => frame.length))
+  let prevCursorPos;
+  for (let i = 0; i < maxNoOfFrames; i++) {
+    if (prevCursorPos) printf(prevCursorPos);
+    const frames = allFrames.map(frames => frames[i]).join('\n\n')
+    print(frames.border('rounded'), '\n')
+    os.sleep(700 / maxNoOfFrames);
+    prevCursorPos = (cursorUp(allFrames.length * 2 + 2) + eraseDown)
+  }
+  printf(cursorShow);
+};
 
