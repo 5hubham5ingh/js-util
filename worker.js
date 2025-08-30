@@ -12,7 +12,7 @@ const startRendering = async (pulseFrames) => {
   let frame = 0;
   while (true) {
     const currentFrame = frames[frame % frames.length]
-    await os.sleepAsync(100)
+    await os.sleepAsync(1000 / frames.length)
     print("\r", currentFrame, cursorUp())
 
     frame++;
