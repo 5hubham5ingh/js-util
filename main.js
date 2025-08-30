@@ -569,7 +569,7 @@ String.prototype.wrap = function(maxLength = getTerminalSize()[0], byWords = tru
     for (const word of this.words()) {
       const next = (line ? line + ' ' + word : word)
 
-      if (next.length <= maxLength) {
+      if (next.stripStyle().length <= maxLength) {
         line = next
       } else {
         if (line) lines.push(line)
