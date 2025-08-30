@@ -34,6 +34,7 @@ export const loader = (message) => {
 
 export const pages = (content, pageHeight) => {
   const [terminalWidth, terminalHeight] = getTerminalSize();
+  if (pageHeight && pageHeight > terminalHeight - 3) pageHeight = terminalHeight - 3
   const contentWidth = terminalWidth - 4;
 
   const formattedLines = content.stripEmojis().split('\n')
@@ -138,4 +139,9 @@ export const pages = (content, pageHeight) => {
 
   printf(cursorShow);
 };
+
+export const progessBar = (progressPercentage) => {
+  if (progressPercentage > 100 || progressPercentage < 0) throw Error("Percentage must be within 0-100")
+
+}
 
