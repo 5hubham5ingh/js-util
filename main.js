@@ -450,8 +450,12 @@ String.prototype.style = function(styles) {
 
 String.prototype.stripStyle = function() {
   const ansiRegex = /[\u001b\u009b][[()#;?]*.{0,2}(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
-  return this.replace(ansiRegex, '');
+  return this.replace(ansiRegex, '')
 };
+
+String.prototype.stripEmojis = function() {
+  return this.replace(/\p{Emoji}/gu, '');
+}
 
 String.prototype.border = function(type = 'normal', style, padding = 1) {
   const str = this
