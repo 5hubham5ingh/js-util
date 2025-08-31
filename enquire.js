@@ -484,7 +484,7 @@ export const color = colorPicker;
 
 export const edit = (content = '') => {
   if (typeof content !== 'string') throw TypeError('Expected one argument of type "string"')
-  if (!EDITOR) return describe(content);
+  if (typeof EDITOR === 'undefined') return describe(content);
   const fileDir = '/tmp/js/'
   ensureDir(fileDir)
   const fileName = String(Math.random())
