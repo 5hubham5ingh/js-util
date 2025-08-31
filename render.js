@@ -4,7 +4,7 @@ import { printf } from "std"
 import { ttySetRaw } from "../qjs-ext-lib/src/os.js";
 
 export const loader = (message) => {
-  if (typeof message !== 'string') throw Error('The "message" argument be of type "string".')
+  if (typeof message !== 'string') throw TypeError('The "message" argument be of type "string".')
   if (message.length === 0) throw Error('The "message" can not be an empty string.')
 
   const worker = new os.Worker("./worker.js");
@@ -37,13 +37,13 @@ export const loader = (message) => {
 
 export const pages = (content, pageHeight) => {
   if (typeof content !== 'string') {
-    throw new Error('The "content" argument must be a string.');
+    throw new TypeError('The "content" argument must be a string.');
   }
   if (content.length === 0) {
     throw new Error('The "content" string cannot be empty.');
   }
   if (pageHeight !== undefined && typeof pageHeight !== 'number') {
-    throw new Error('The "pageHeight" argument must be a number if provided.');
+    throw new TypeError('The "pageHeight" argument must be a number if provided.');
   }
   if (pageHeight !== undefined && pageHeight < 1) {
     throw new Error('The "pageHeight" must be a positive number.');
@@ -158,7 +158,7 @@ export const pages = (content, pageHeight) => {
 
 export const levels = (levels, animate = true) => {
   if (!Array.isArray(levels) || levels.length === 0) {
-    throw new Error('The "levels" argument must be a non-empty array.');
+    throw new TypeError('The "levels" argument must be a non-empty array.');
   }
 
   for (let i = 0; i < levels.length; i++) {
@@ -170,7 +170,7 @@ export const levels = (levels, animate = true) => {
     const [currentLevel, maxLevel, title] = level;
 
     if (typeof currentLevel !== 'number' || typeof maxLevel !== 'number' || typeof title !== 'string') {
-      throw new Error(`Invalid data types for item at index ${i}. Expected [number, number, string].`);
+      throw new TypeError(`Invalid data types for item at index ${i}. Expected [number, number, string].`);
     }
 
     if (currentLevel < 0 || maxLevel <= 0 || currentLevel > maxLevel) {
@@ -179,7 +179,7 @@ export const levels = (levels, animate = true) => {
   }
 
   if (typeof animate !== 'boolean') {
-    throw new Error('The "animate" argument must be a boolean.');
+    throw new TypeError('The "animate" argument must be a boolean.');
   }
 
   const allFrames = []
@@ -203,7 +203,8 @@ export const levels = (levels, animate = true) => {
 
   if (!animate) {
     const finalFrames = allFrames.map(frames => frames[frames.length - 1]).join('\n\n');
-    return finalFrames
+    print(finalFrames)
+    return;
   }
 
   printf(cursorHide);
