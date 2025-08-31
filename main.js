@@ -8,6 +8,7 @@ import * as enquire from "./enquire.js"
 import { getTerminalSize } from "../justjs/terminal.js"
 import * as render from "./render.js"
 import * as draw from "./draw.js"
+import * as parser from "./parser.js"
 
 globalThis.std = std
 globalThis.os = os
@@ -200,75 +201,11 @@ Array.prototype.removeAll = function(...items) {
   return this
 };
 
-Array.prototype.toCsvString = function(delimiter = ',') {
-  if (this.length === 0) {
-    return "";
-  }
+Array.prototype.toCsvText = function(delimiter = ',') { return parser.csvArrayToCsvText(this, delimiter) }
 
-  let dataAsArrayOfArrays;
-  const firstElement = this[0];
+Array.prototype.toCsvArray = function() { return parser.csvJsonToCsvArray(this) }
 
-  if (typeof firstElement === 'object' && firstElement !== null && !Array.isArray(firstElement)) {
-    const headers = Object.keys(firstElement);
-    const dataRows = this.map(obj => headers.map(header => obj[header]));
-    dataAsArrayOfArrays = [headers, ...dataRows];
-  } else {
-    dataAsArrayOfArrays = this.map(item => Array.isArray(item) ? item : [item]);
-  }
-
-  return dataAsArrayOfArrays.map(row =>
-    row.map(cell => {
-      const str = (cell === null || cell === undefined) ? '' : String(cell);
-
-      const needsQuotes = str.includes(delimiter) || str.includes('"') || str.includes('\n') || str.includes('\r');
-
-      if (!needsQuotes) {
-        return str;
-      }
-
-      const escaped = str.replace(/"/g, '""');
-      return `"${escaped}"`;
-    }).join(delimiter)
-  ).join('\n');
-};
-
-Array.prototype.toCsvArray = function() {
-  if (this.length === 0) {
-    return [];
-  }
-
-  const firstElement = this[0];
-
-  if (typeof firstElement === 'object' && firstElement !== null && !Array.isArray(firstElement)) {
-    const headerSet = new Set();
-    this.forEach(obj => {
-      if (typeof obj === 'object' && obj !== null) {
-        Object.keys(obj).forEach(key => headerSet.add(key));
-      }
-    });
-
-    const headers = Array.from(headerSet).sort();
-
-    const dataRows = this.map(obj => {
-      if (typeof obj !== 'object' || obj === null) {
-        return new Array(headers.length).fill(undefined);
-      }
-      return headers.map(header => obj[header]);
-    });
-
-    return [headers, ...dataRows];
-  }
-
-  if (Array.isArray(firstElement)) {
-    return this;
-  }
-
-  return this.map(item => [item]);
-};
-
-Array.prototype.toCsvJson = function(delimiter = ',') {
-  return this.toCsvString(delimiter).toCsvJson(delimiter)
-}
+Array.prototype.toCsvJson = function(delimiter = ',') { return parser.csvArrayToCsvJson(this, delimiter) }
 
 Array.prototype.pipe = function(cb) {
   if (typeof cb === "function") return cb(this)
@@ -326,50 +263,9 @@ String.prototype.parseJson = function() {
   return JSON.parse(this)
 }
 
-String.prototype.toCsvArray = function(delimiter = ',') {
-  const rows = this.trim().split(/\r?\n/);
-  return rows.map(row => {
-    const cells = [];
-    let current = '';
-    let inQuotes = false;
+String.prototype.toCsvArray = function(delimiter = ',') { return parser.csvTextToCsvArray(this, delimiter) };
 
-    for (let i = 0; i < row.length; i++) {
-      const char = row[i];
-      const nextChar = row[i + 1];
-
-      if (char === '"') {
-        if (inQuotes && nextChar === '"') {
-          current += '"';
-          i++;
-        } else {
-          inQuotes = !inQuotes;
-        }
-      } else if (char === delimiter && !inQuotes) {
-        cells.push(current);
-        current = '';
-      } else {
-        current += char;
-      }
-    }
-
-    cells.push(current);
-    return cells;
-  });
-};
-
-String.prototype.toCsvJson = function(delimiter = ',') {
-  const rows = this.toCsvArray(delimiter);
-  if (rows.length < 2) return [];
-
-  const headers = rows[0];
-  return rows.slice(1).map(row => {
-    const obj = {};
-    headers.forEach((key, i) => {
-      obj[key] = row[i] ?? '';
-    });
-    return obj;
-  });
-};
+String.prototype.toCsvJson = function(delimiter = ',') { return parser.csvTextToCsvJson(this, delimiter) };
 
 String.prototype.exec = function() { return (exec(this)) }
 
