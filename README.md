@@ -380,8 +380,6 @@ Ensures that a directory exists, creating it and any necessary parent directorie
   print(stdin); // Prints "hello world\n"
   ```
 
----
-
 ## Object Prototype Extensions
 
 ### `Object.prototype`
@@ -862,121 +860,354 @@ Prints the number to standard output and then returns the number. Useful for cha
   123..log(); // Prints 123, returns 123
   ```
 
----
 
-## `colorPicker.js`
+## `enquire`
+An object providing interactive terminal input prompts.
 
-This module provides a terminal-based interactive color picker.
+- **`enquire.ask(message)`**
+  Prompts the user for a single line of text input.
+  - **`message`**: (`string`) The message to display as a prompt.
+  - **Returns**: (`string`) The user's input line.
+  - **Throws**: (`TypeError`) If `message` is not a string.
+  - **Example**:
+    ```javascript
+    const name = enquire.ask('What is your name?');
+    print(`Hello, ${name}!`);
+    ```
 
-### Functions
+- **`enquire.confirm(statement)`**
+  Prompts the user for a yes/no confirmation.
+  - **`statement`**: (`string`) The statement to confirm.
+  - **Returns**: (`boolean`) `true` if the user enters 'y', `false` if 'n'.
+  - **Throws**: (`TypeError`) If `statement` is not a string.
+  - **Example**:
+    ```javascript
+    const proceed = enquire.confirm('Do you want to proceed?');
+    if (proceed) print('Proceeding...');
+    ```
 
-#### `colorPicker()`
-Launches an interactive full-screen terminal UI for selecting colors. Users can navigate hues, saturations, and values, and choose between RGB, HSV, HSL, or HEX output formats.
-- **Returns**: (`object`) An object containing the selected color in various formats:
-  - `selectedType`: (`string`) The format selected by the user ('rgb', 'hsv', 'hex', 'hsl').
-  - `hsv`: (`object`) `{ h: number, s: number, v: number }`
-  - `rgb`: (`object`) `{ r: number, g: number, b: number }`
-  - `hex`: (`string`) Hexadecimal color string (e.g., '#RRGGBB').
-  - `hsl`: (`object`) `{ h: number, s: number, l: number }`
-- **Example**:
-  ```javascript
-  const color = colorPicker();
-  print(`You selected: ${color.selectedType} value: ${color[color.selectedType]}`);
-  ```
+- **`enquire.secret(message)`**
+  Prompts the user for sensitive input, hiding characters as they are typed (replaces with `*`).
+  - **`message`**: (`string`) The message to display as a prompt.
+  - **Returns**: (`string`) The user's secret input.
+  - **Throws**: (`TypeError`) If `message` is not a string.
+  - **Example**:
+    ```javascript
+    const password = enquire.secret('Enter your password:');
+    print('Password entered.'); // Avoid printing the actual password
+    ```
 
----
+- **`enquire.choose(options)`**
+  Allows the user to select a single option from a list using arrow keys.
+  - **`options`**: (`Array<string>`) An array of strings representing the choices.
+  - **Returns**: (`string`) The selected option.
+  - **Throws**: (`TypeError`) If `options` is not an array.
+  - **Example**:
+    ```javascript
+    const fruit = enquire.choose(['Apple', 'Banana', 'Orange']);
+    print(`You chose: ${fruit}`);
+    ```
 
-## `csvParser.js`
+- **`enquire.search(options)`**
+  Allows the user to search and select an option from a list, dynamically filtering based on input.
+  - **`options`**: (`Array<string>`) An array of strings representing the choices.
+  - **Returns**: (`string` or `undefined`) The selected option, or `undefined` if no option is selected/filtered.
+  - **Throws**: (`TypeError`) If `options` is not an array.
+  - **Example**:
+    ```javascript
+    const item = enquire.search(['Laptop', 'Keyboard', 'Mouse', 'Monitor']);
+    if (item) print(`Found: ${item}`);
+    ```
 
-This module provides utility functions for converting between different CSV data representations.
+- **`enquire.select(options)`**
+  Allows the user to select multiple options from a list using the spacebar to toggle selection.
+  - **`options`**: (`Array<string>`) An array of strings representing the choices.
+  - **Returns**: (`Array<string>`) An array of selected options.
+  - **Throws**: (`TypeError`) If `options` is not an array.
+  - **Example**:
+    ```javascript
+    const hobbies = enquire.select(['Reading', 'Hiking', 'Gaming', 'Cooking']);
+    print(`Your hobbies: ${hobbies.join(', ')}`);
+    ```
 
-### Functions
+- **`enquire.pick()`**
+  Launches an interactive file/directory picker, allowing navigation of the file system.
+  - **Returns**: (`string`) The absolute path of the selected file or directory.
+  - **Example**:
+    ```javascript
+    const selectedPath = enquire.pick();
+    print(`Selected: ${selectedPath}`);
+    ```
 
-#### `csvArrayToCsvJson(array, delimiter = ',')`
-Converts an array of arrays (CSV array format) to an array of objects (CSV JSON format). It infers headers from the first sub-array.
-- **`array`**: (`Array<Array<string>>`) The input CSV data as an array of arrays.
-- **`delimiter`**: (`string`, optional) The delimiter (not directly used in this method, but might be relevant in internal parsing steps). Defaults to `,`.
-- **Returns**: (`Array<object>`) The converted data in CSV JSON format.
-- **Example**:
-  ```javascript
-  const csvArray = [['name', 'age'], ['Alice', '30']];
-  csvArrayToCsvJson(csvArray); // [{ name: 'Alice', age: '30' }]
-  ```
+- **`enquire.describe(buffer = '')`**
+  Provides a multi-line text input area (a simple editor).
+  - **`buffer`**: (`string`, optional) Initial text content for the editor.
+  - **Returns**: (`string`) The edited text content.
+  - **Throws**: (`TypeError`) If `buffer` is not a string.
+  - **Example**:
+    ```javascript
+    const myNotes = enquire.describe('Start writing your notes here...');
+    print('Notes saved:');
+    print(myNotes);
+    ```
 
-#### `csvArrayToCsvText(array, delimiter = ',')`
-Converts an array of arrays (CSV array format) or an array of objects (CSV JSON format) into a raw CSV text string. Handles quoting and escaping for delimiters, quotes, and newlines.
-- **`array`**: (`Array<Array<string>>` or `Array<object>`) The input CSV data.
-- **`delimiter`**: (`string`, optional) The delimiter character. Defaults to `,`.
-- **Returns**: (`string`) The CSV formatted string.
-- **Example**:
-  ```javascript
-  const csvArray = [['Header1', 'Header2'], ['Value A', 'Value "B"']];
-  csvArrayToCsvText(csvArray); // "Header1,Header2\n"Value A","Value ""B"""
-  ```
+- **`enquire.color()`**
+  Launches an interactive full-screen terminal UI for selecting colors. This is a direct alias to the `colorPicker` function from `colorPicker.js`.
+  - **Returns**: (`object`) An object containing the selected color in various formats:
+    - `selectedType`: (`string`) The format selected by the user ('rgb', 'hsv', 'hex', 'hsl').
+    - `hsv`: (`object`) `{ h: number, s: number, v: number }`
+    - `rgb`: (`object`) `{ r: number, g: number, b: number }`
+    - `hex`: (`string`) Hexadecimal color string (e.g., '#RRGGBB').
+    - `hsl`: (`object`) `{ h: number, s: number, l: number }`
+  - **Example**:
+    ```javascript
+    const chosenColor = enquire.color();
+    print(`Selected color (hex): ${chosenColor.hex}`);
+    ```
 
-#### `csvTextToCsvArray(csvText, delimiter = ',')`
-Parses a CSV text string into an array of arrays. Handles quoted fields and escaped quotes.
-- **`csvText`**: (`string`) The input CSV data as a string.
-- **`delimiter`**: (`string`, optional) The delimiter character. Defaults to `,`.
-- **Returns**: (`Array<Array<string>>`) The parsed data as an array of arrays.
-- **Example**:
-  ```javascript
-  const csvString = '"Name","Age"\n"Alice","30"';
-  csvTextToCsvArray(csvString); // [['Name', 'Age'], ['Alice', '30']]
-  ```
+- **`enquire.edit(content = '')`**
+  Opens an external editor (specified by the `EDITOR` environment variable) with the given content. If `EDITOR` is not set, it falls back to `enquire.describe`.
+  - **`content`**: (`string`, optional) The initial content to load into the editor. Defaults to an empty string.
+  - **Returns**: (`string`) The content saved from the editor.
+  - **Throws**: (`TypeError`) If `content` is not a string. (`Error`) If a temporary file cannot be created/opened.
+  - **Example**:
+    ```javascript
+    const editedCode = enquire.edit('console.log("Hello World");');
+    print('Edited code:');
+    print(editedCode);
+    ```
 
-#### `csvTextToCsvJson(csvText, delimiter = ',')`
-Parses a CSV text string into an array of objects. It uses the first line as headers.
-- **`csvText`**: (`string`) The input CSV data as a string.
-- **`delimiter`**: (`string`, optional) The delimiter character. Defaults to `,`.
-- **Returns**: (`Array<object>`) The parsed data as an array of objects.
-- **Example**:
-  ```javascript
-  const csvString = 'name,age\nAlice,30\nBob,25';
-  csvTextToCsvJson(csvString); // [{ name: 'Alice', age: '30' }, { name: 'Bob', age: '25' }]
-  ```
+## `render`
+An object providing functions for rendering animated or paginated output in the terminal.
 
-#### `csvJsonToCsvText(csvJson)`
-Converts an array of objects (CSV JSON format) into a raw CSV text string.
-- **`csvJson`**: (`Array<object>`) The input CSV data as an array of objects.
-- **Returns**: (`string`) The CSV formatted string.
-- **Example**:
-  ```javascript
-  const csvJson = [{ name: 'Alice', age: 30 }, { name: 'Bob', age: 25 }];
-  csvJsonToCsvText(csvJson); // "name,age\nAlice,30\nBob,25"
-  ```
+- **`render.loader(message)`**
+  Displays an animated loader in the terminal.
+  - **`message`**: (`string`) The message to display alongside the loader. If empty, it uses a generic animation.
+  - **Returns**: (`function`) A function that, when called, stops the loader animation.
+  - **Throws**: (`TypeError`) If `message` is not a string. (`Error`) If `message` is an empty string.
+  - **Example**:
+    ```javascript
+    const stopLoader = render.loader('Loading data...');
+    // Simulate some work
+    os.sleep(3000);
+    stopLoader(); // Stop the loader
+    print('Data loaded!');
+    ```
 
-#### `csvJsonToCsvArray(csvJson)`
-Converts an array of objects (CSV JSON format) into an array of arrays (CSV array format). It infers headers from all unique keys in the objects and sorts them.
-- **`csvJson`**: (`Array<object>`) The input CSV data as an array of objects.
-- **Returns**: (`Array<Array<string>>`) The converted data as an array of arrays.
-- **Example**:
-  ```javascript
-  const csvJson = [{ name: 'Alice', age: 30 }, { age: 25, name: 'Bob' }];
-  csvJsonToCsvArray(csvJson); // [['age', 'name'], ['30', 'Alice'], ['25', 'Bob']]
-  ```
+- **`render.pages(content, pageHeight)`**
+  Displays multi-line content in a paginated view within the terminal. Users can navigate pages with arrow keys or 'h'/'l'.
+  - **`content`**: (`string`) The multi-line string content to display.
+  - **`pageHeight`**: (`number`, optional) The maximum number of content lines per page. If not provided, it defaults to half the terminal height. It will not exceed `terminalHeight - 3`.
+  - **Returns**: (`undefined`)
+  - **Throws**: (`TypeError`) If `content` is not a string or `pageHeight` is not a number. (`Error`) If `content` is empty or `pageHeight` is less than 1.
+  - **Example**:
+    ```javascript
+    const longText = 'Line 1\nLine 2\n...\nLine 100';
+    render.pages(longText, 10); // Display 10 lines per page
+    ```
 
----
+- **`render.levels(levels, animate = true)`**
+  Renders a set of animated or static progress bars (levels).
+  - **`levels`**: (`Array<Array<number | string>>`) An array of arrays, where each inner array represents a level: `[currentLevel: number, maxLevel: number, title: string, description: boolean (optional)]`. `description` (if true) makes the bar fill from max to current, otherwise from 0 to current.
+  - **`animate`**: (`boolean`, optional) If `true`, the levels will animate. Defaults to `true`.
+  - **Returns**: (`undefined`)
+  - **Throws**: (`TypeError`) If `levels` is not an array, or if inner array elements have incorrect types, or `animate` is not a boolean. (`Error`) If `levels` is empty, or `currentLevel`/`maxLevel` are invalid.
+  - **Example**:
+    ```javascript
+    render.levels([
+      [5, 10, 'Progress A'],
+      [80, 100, 'Progress B', true] // Fills from 100 down to 80
+    ]);
+    ```
 
-## `draw.js`
+## `draw`
+An object providing functions for drawing text-based UI elements in the terminal.
 
-This module provides functions for drawing various text-based UI elements in the terminal.
+- **`draw.table(data, columns)`**
+  Generates a formatted text table.
+  - **`data`**: (`Array<object>` or `object`) An array of objects where each object is a row, or a single object to display its key-value pairs.
+  - **`columns`**: (`Array<string>`, optional) An array of column headers to include. If not provided, it infers them from the data.
+  - **Returns**: (`string`) A string representing the formatted table.
+  - **Throws**: (`TypeError`) If `data` is not an array or object, or if `columns` is not an array.
+  - **Example**:
+    ```javascript
+    const userData = [{ name: 'Alice', age: 30 }, { name: 'Bob', city: 'NY' }];
+    print(draw.table(userData, ['name', 'age', 'city']));
+    // ╔═══════╤═════╤══════╗
+    // ║ name  │ age │ city ║
+    // ╟───────┼─────┼──────╢
+    // ║ Alice │ 30  │      ║
+    // ║ Bob   │     │ NY   ║
+    // ╚═══════╧═════╝
+    ```
 
-### Functions
+- **`draw.levels(levels)`**
+  Generates static progress bars (levels) as a string. (This is a static version of `render.levels` without animation).
+  - **`levels`**: (`Array<Array<number | string>>`) An array of arrays, where each inner array represents a level: `[currentLevel: number, maxLevel: number, title: string, description: boolean (optional)]`.
+  - **Returns**: (`string`) A string representing the formatted progress bars.
+  - **Throws**: (`TypeError`) If `levels` is not an array, or if inner array elements have incorrect types. (`Error`) If `levels` is empty, or `currentLevel`/`maxLevel` are invalid.
+  - **Example**:
+    ```javascript
+    print(draw.levels([
+      [5, 10, 'Task A'],
+      [7, 10, 'Task B']
+    ]));
+    // Task A  ◖█████◗     ◗
+    // Task B  ◖███████◗   ◗
+    ```
 
-#### `table(data, columns)`
-Generates a formatted text table.
-- **`data`**: (`Array<object>` or `object`) An array of objects where each object is a row, or a single object to display its key-value pairs.
-- **`columns`**: (`Array<string>`, optional) An array of column headers to include. If not provided, it infers them from the data.
-- **Returns**: (`string`) A string representing the formatted table.
-- **Throws**: (`TypeError`) If `data` is not an array or object, or if `columns` is not an array.
-- **Example**:
-  ```javascript
-  const userData = [{ name: 'Alice', age: 30 }, { name: 'Bob', city: 'NY' }];
-  print(draw.table(userData, ['name', 'age', 'city']));
-  // ╔═══════╤═════╤══════╗
-  // ║ name  │ age │ city ║
-  // ╟───────┼─────┼──────╢
-  // ║ Alice │ 30  │      ║
-  // ║ Bob   │     │ NY   ║
-  // ╚═══════
+- **`draw.border(str, type = 'normal', style, padding = 1)`**
+  Adds a text-based border around a string.
+  - **`str`**: (`string`) The input string to border.
+  - **`type`**: (`string`, optional) The border style ('normal', 'thick', 'double', 'rounded', 'hidden'). Defaults to 'normal'.
+  - **`style`**: (`string` or `Array<string>`, optional) ANSI styles to apply to the border characters.
+  - **`padding`**: (`number`, optional) The number of spaces to add between the border and the content. Defaults to `1`.
+  - **Returns**: (`string`) The string with a border.
+  - **Example**:
+    ```javascript
+    print(draw.border('Important Message', 'double', 'red', 2));
+    // ╔═════════════════════╗
+    // ║  Important Message  ║
+    // ╚═════════════════════╝
+    ```
+
+- **`draw.stack(firstString, secondString, align = 'left')`**
+  Stacks two multi-line strings vertically.
+  - **`firstString`**: (`string`) The top string.
+  - **`secondString`**: (`string`) The bottom string.
+  - **`align`**: (`'left'`, `'right'`, or `'center'`) Alignment of the stacked strings. Defaults to `'left'`.
+  - **Returns**: (`string`) The combined string.
+  - **Example**:
+    ```javascript
+    print(draw.stack('Header', 'Content Line 1\nContent Line 2', 'center'));
+    //    Header
+    // Content Line 1
+    // Content Line 2
+    ```
+
+- **`draw.join(firstString, secondString)`**
+  Joins two multi-line strings side-by-side. The shorter string will be padded to match the height of the taller one.
+  - **`firstString`**: (`string`) The left string.
+  - **`secondString`**: (`string`) The right string.
+  - **Returns**: (`string`) The combined string.
+  - **Example**:
+    ```javascript
+    print(draw.join('Left Column\nLine 2', 'Right Column'));
+    // Left ColumnRight Column
+    // Line 2
+    ```
+
+## `parser`
+An object containing functions for parsing and stringifying various data formats.
+
+- **`parser.csvArrayToCsvJson(array, delimiter = ',')`**
+  Converts an array of arrays (CSV array format) to an array of objects (CSV JSON format).
+  - **`array`**: (`Array<Array<string>>`) The input CSV data.
+  - **`delimiter`**: (`string`, optional) Delimiter for parsing. Defaults to `,`.
+  - **Returns**: (`Array<object>`) The converted data.
+  - **Example**:
+    ```javascript
+    parser.csvArrayToCsvJson([['name', 'age'], ['Alice', '30']]);
+    // [{ name: 'Alice', age: '30' }]
+    ```
+
+- **`parser.csvArrayToCsvText(array, delimiter = ',')`**
+  Converts an array of arrays (or an array of objects) to a CSV text string.
+  - **`array`**: (`Array<Array<string>>` or `Array<object>`) The input CSV data.
+  - **`delimiter`**: (`string`, optional) Delimiter for stringifying. Defaults to `,`.
+  - **Returns**: (`string`) The CSV string.
+  - **Example**:
+    ```javascript
+    parser.csvArrayToCsvText([['A', 'B'], ['1', '2']]); // "A,B\n1,2"
+    ```
+
+- **`parser.csvTextToCsvArray(csvText, delimiter = ',')`**
+  Parses a CSV text string into an array of arrays.
+  - **`csvText`**: (`string`) The input CSV string.
+  - **`delimiter`**: (`string`, optional) Delimiter for parsing. Defaults to `,`.
+  - **Returns**: (`Array<Array<string>>`) The parsed data.
+  - **Example**:
+    ```javascript
+    parser.csvTextToCsvArray("A,B\n1,2"); // [['A', 'B'], ['1', '2']]
+    ```
+
+- **`parser.csvTextToCsvJson(csvText, delimiter = ',')`**
+  Parses a CSV text string into an array of objects.
+  - **`csvText`**: (`string`) The input CSV string.
+  - **`delimiter`**: (`string`, optional) Delimiter for parsing. Defaults to `,`.
+  - **Returns**: (`Array<object>`) The parsed data.
+  - **Example**:
+    ```javascript
+    parser.csvTextToCsvJson("name,age\nAlice,30"); // [{ name: 'Alice', age: '30' }]
+    ```
+
+- **`parser.csvJsonToCsvText(csvJson)`**
+  Converts an array of objects (CSV JSON format) to a CSV text string.
+  - **`csvJson`**: (`Array<object>`) The input CSV data.
+  - **Returns**: (`string`) The CSV string.
+  - **Example**:
+    ```javascript
+    parser.csvJsonToCsvText([{ name: 'Alice', age: 30 }]); // "name,age\nAlice,30"
+    ```
+
+- **`parser.csvJsonToCsvArray(csvJson)`**
+  Converts an array of objects (CSV JSON format) to an array of arrays.
+  - **`csvJson`**: (`Array<object>`) The input CSV data.
+  - **Returns**: (`Array<Array<string>>`) The converted data.
+  - **Example**:
+    ```javascript
+    parser.csvJsonToCsvArray([{ name: 'Alice', age: 30 }]);
+    // [['name', 'age'], ['Alice', '30']]
+    ```
+
+- **`parser.parseIni(content, options = {})`**
+  Parses an INI file content into a JavaScript object.
+  - **`content`**: (`string`) The INI file content.
+  - **`options`**: (`object`, optional) Parsing options:
+    - `preserveCase`: (`boolean`) Whether to preserve key case (default: `false`).
+    - `allowDuplicates`: (`boolean`) Whether to allow duplicate keys (creates arrays, default: `false`).
+    - `parseValues`: (`boolean`) Whether to parse values as appropriate types (default: `true`).
+    - `includeComments`: (`boolean`) Whether to include comments in the result (default: `false`).
+    - `commentChars`: (`Array<string>`) Characters recognized as comments (default: `[;`, `#`]`).
+  - **Returns**: (`object`) The parsed INI data.
+  - **Example**:
+    ```javascript
+    parser.parseIni('[section]\nkey=value'); // { section: { key: 'value' } }
+    ```
+
+- **`parser.toIni(obj)`**
+  Stringifies a JavaScript object into an INI formatted string.
+  - **`obj`**: (`object`) The object to stringify.
+  - **Returns**: (`string`) The INI formatted string.
+  - **Example**:
+    ```javascript
+    parser.toIni({ rootKey: 'val', section: { item: 1 } });
+    // rootKey=val
+    //
+    // [section]
+    // item=1
+    ```
+
+- **`parser.parseToml(content)`**
+  Parses a TOML string into a JavaScript object. Supports basic data types, tables, and arrays of tables.
+  - **`content`**: (`string`) The TOML content as a string.
+  - **Returns**: (`object`) A JavaScript object representing the TOML data.
+  - **Example**:
+    ```javascript
+    parser.parseToml('title = "My Project"\n[owner]\nname = "Alice"');
+    // { title: 'My Project', owner: { name: 'Alice' } }
+    ```
+
+- **`parser.toToml(tomlObj)`**
+  Converts a JavaScript object into a TOML-formatted string.
+  - **`tomlObj`**: (`object`) The JavaScript object to convert.
+  - **Returns**: (`string`) The resulting TOML string.
+  - **Example**:
+    ```javascript
+    parser.toToml({ title: "Example", settings: { value: 10 } });
+    // title = "Example"
+    //
+    // [settings]
+    // value = 10
+    ```
+
