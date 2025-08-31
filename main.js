@@ -617,7 +617,7 @@ try {
   } else if (args.length === 0) {
     if (!isatty()) {
       const expression = std.in.readAsString();
-      std.evalScript(expression);
+      std.evalScript(expression, { backtrace_barrier: true });
     } else {
       globalThis.history = [];
       Object.defineProperty(globalThis, 'clear', {
@@ -629,12 +629,12 @@ try {
         const expression = std.in.getline();
         if (expression === null) break;
         history.push(expression);
-        std.evalScript(expression);
+        std.evalScript(expression, { backtrace_barrier: true });
       }
     }
   } else {
     const expression = args.join(' ');
-    std.evalScript(expression);
+    std.evalScript(expression, { backtrace_barrier: true });
   }
 } catch (error) {
   std.err.puts(
