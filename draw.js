@@ -137,7 +137,7 @@ const ALIGN = {
   CENTER: 'center'
 }
 
-export const join = (firstString, secondString, align = ALIGN.LEFT) => {
+export const stack = (firstString, secondString, align = ALIGN.LEFT) => {
   const linesFromFirstString = firstString.split('\n');
   const linesFromSecondString = secondString.split('\n')
   const combinedLines = [...linesFromFirstString, ...linesFromSecondString]
@@ -163,3 +163,26 @@ export const join = (firstString, secondString, align = ALIGN.LEFT) => {
   }
   return stackedLines.join('\n')
 }
+
+export const join = (firstString, secondString) => {
+  const linesFromFirstString = firstString.split('\n')
+  const linesFromSecondString = secondString.split('\n')
+  if (linesFromFirstString.length < linesFromSecondString.length) {
+    const maxLineWidth = Math.max(...linesFromFirstString.map(line => line.stripStyle().length))
+    const emptyLine = " ".repeat(maxLineWidth)
+    const emptyLines = new Array(linesFromSecondString.length - linesFromFirstString.length).fill(emptyLine)
+    linesFromFirstString.push(...emptyLines)
+  } else if (linesFromFirstString.length > linesFromSecondString.length) {
+    const maxLineWidth = Math.max(...linesFromSecondString.map(line => line.stripStyle().length))
+    const emptyLine = " ".repeat(maxLineWidth)
+    const emptyLines = new Array(linesFromFirstString.length - linesFromSecondString.length).fill(emptyLine)
+    linesFromSecondString.push(...emptyLines)
+  }
+  const maxLine = Math.max(linesFromSecondString.length, linesFromFirstString.length)
+  const combinedLines = []
+  for (let i = 0; i < maxLine; i++) {
+    combinedLines.push(`${linesFromFirstString[i] ?? ''}${linesFromSecondString[i] ?? ''}`)
+  }
+  return combinedLines.join('\n')
+}
+
