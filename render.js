@@ -33,6 +33,19 @@ export const loader = (message) => {
 }
 
 export const pages = (content, pageHeight) => {
+  if (typeof content !== 'string') {
+    throw new Error('The "content" argument must be a string.');
+  }
+  if (content.length === 0) {
+    throw new Error('The "content" string cannot be empty.');
+  }
+  if (pageHeight !== undefined && typeof pageHeight !== 'number') {
+    throw new Error('The "pageHeight" argument must be a number if provided.');
+  }
+  if (pageHeight !== undefined && pageHeight < 1) {
+    throw new Error('The "pageHeight" must be a positive number.');
+  }
+
   const [terminalWidth, terminalHeight] = getTerminalSize();
   if (pageHeight && pageHeight > terminalHeight - 3) pageHeight = terminalHeight - 3
   const contentWidth = terminalWidth - 4;
