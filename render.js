@@ -140,9 +140,11 @@ export const pages = (content, pageHeight) => {
   printf(cursorShow);
 };
 
-export const levels = (levels) => {
+export const levels = (levels, animate = true) => {
   const allFrames = []
-  for (const [currentLevel, maxLevel, title = '', desc = false] of levels) {
+  const maxTitleLength = Math.max(...levels.map(level => level[2].length))
+
+  for (const [currentLevel, maxLevel, title, desc = false] of levels) {
     const frames = [];
     const start = desc ? maxLevel : 0;
     const end = desc ? currentLevel : currentLevel;
@@ -152,17 +154,22 @@ export const levels = (levels) => {
       const filled = i > 0 ? '█'.repeat(i) : '';
       const emptySpaces = Math.max(0, maxLevel - i - 1);
       const empty = '◗' + ' '.repeat(emptySpaces);
-
       const bar = (filled + empty).style(['grey', emptySpaces >= 0 ? 'bg-white' : '']);
-      frames.push(title + '◖'.style('grey') + bar + '◗'.style('white'));
+      frames.push(title.padEnd(maxTitleLength + 1) + '◖'.style('grey') + bar + '◗'.style('white'));
     }
-
     allFrames.push(frames)
   }
+
+  if (!animate) {
+    const finalFrames = allFrames.map(frames => frames[frames.length - 1]).join('\n\n');
+    return finalFrames.border('rounded')
+  }
+
   printf(cursorHide);
   ttySetRaw();
   const maxNoOfFrames = Math.max(...allFrames.map(frame => frame.length))
   let prevCursorPos;
+
   for (let i = 0; i < maxNoOfFrames; i++) {
     if (prevCursorPos) printf(prevCursorPos);
     const frames = allFrames.map(frames => frames[i]).join('\n\n')
