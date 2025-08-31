@@ -159,37 +159,29 @@ export const levels = (levels, animate = true) => {
   if (!Array.isArray(levels) || levels.length === 0) {
     throw new TypeError('The "levels" argument must be a non-empty array.');
   }
-
   for (let i = 0; i < levels.length; i++) {
     const level = levels[i];
     if (!Array.isArray(level) || level.length < 3) {
       throw new Error(`Each item in the "levels" array must be an array of at least 3 elements. Invalid item at index ${i}.`);
     }
-
     const [currentLevel, maxLevel, title] = level;
-
     if (typeof currentLevel !== 'number' || typeof maxLevel !== 'number' || typeof title !== 'string') {
       throw new TypeError(`Invalid data types for item at index ${i}. Expected [number, number, string].`);
     }
-
     if (currentLevel < 0 || maxLevel <= 0 || currentLevel > maxLevel) {
       throw new Error(`Invalid level values at index ${i}. "currentLevel" and "maxLevel" must be positive numbers, and "currentLevel" cannot exceed "maxLevel".`);
     }
   }
-
   if (typeof animate !== 'boolean') {
     throw new TypeError('The "animate" argument must be a boolean.');
   }
-
   const allFrames = []
   const maxTitleLength = Math.max(...levels.map(level => level[2].length))
-
   for (const [currentLevel, maxLevel, title, desc = false] of levels) {
     const frames = [];
     const start = desc ? maxLevel : 0;
     const end = desc ? currentLevel : currentLevel;
     const step = desc ? -1 : 1;
-
     for (let i = start; desc ? i >= end : i <= end; i += step) {
       const filled = i > 0 ? '█'.repeat(i) : '';
       const emptySpaces = Math.max(0, maxLevel - i - 1);
@@ -199,25 +191,22 @@ export const levels = (levels, animate = true) => {
     }
     allFrames.push(frames)
   }
-
   if (!animate) {
     const finalFrames = allFrames.map(frames => frames[frames.length - 1]).join('\n\n');
-    print(finalFrames)
+    print(finalFrames.border())
     return;
   }
-
   printf(cursorHide);
   ttySetRaw();
   const maxNoOfFrames = Math.max(...allFrames.map(frame => frame.length))
   let prevCursorPos;
-
   for (let i = 0; i < maxNoOfFrames; i++) {
     if (prevCursorPos) printf(prevCursorPos);
-    const frames = allFrames.map(frames => frames[i]).join('\n\n')
+    // Fixed: Use the last frame when current frame index doesn't exist
+    const frames = allFrames.map(frames => frames[i] || frames[frames.length - 1]).join('\n\n')
     print(frames.border('rounded'))
     os.sleep(700 / maxNoOfFrames);
     prevCursorPos = (cursorUp(allFrames.length * 2 + 1) + eraseDown)
   }
   printf(cursorShow);
 };
-
