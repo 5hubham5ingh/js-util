@@ -178,6 +178,10 @@ js
     ║ b   │ 2     ║║ 2  ║     
     ║ c   │ 3     ║╚════╝     
     ╚═════╧═══════╝           
+
+# Create a markdown digest of a git repo
+js "'git ls-files'.exec().lines().filter(f => f.endsWith('js'))
+.reduce((digest,f)=> digest += '\n# FILE: ' + f + '\n' +  read(f),'').log()"
 ```
 
 ### Use as script interpreter
@@ -225,327 +229,754 @@ chmod +x fzfDict.js
 
 ### Use for handling user input
 
-## API Reference
+# API Reference
 
----
+## Global Objects and Functions
 
-### Global Functions and Objects 
+### `globalThis` Extensions
 
-#### `std`
+The `globalThis` object is extended with several utility functions and properties.
 
-* **Type:** `object`
-* **Description:** The QuickJS standard library, providing access to file I/O and other system-level functionalities.
+#### `parse(jsonString)`
+Parses a JSON string, constructing the JavaScript value or object described by the string.
+- **`jsonString`**: (`string`) The JSON string to parse.
+- **Returns**: (`any`) The JavaScript object or value parsed from the JSON string.
+- **Example**:
+  ```javascript
+  const obj = parse('{"name": "Alice", "age": 30}');
+  // obj is { name: "Alice", age: 30 }
+  ```
 
-#### `os`
+#### `stringify(value, replacer = null, space = 2)`
+Converts a JavaScript value to a JSON string.
+- **`value`**: (`any`) The value to convert to a JSON string.
+- **`replacer`**: (`function` or `array`, optional) A function that alters the behavior of the stringification process, or an array of `String` and `Number` objects that serve as a whitelist for selecting the properties of the `value` object to be included in the JSON string.
+- **`space`**: (`string` or `number`, optional) A `String` or `Number` object that's used to insert white space into the output JSON string for readability purposes.
+- **Returns**: (`string`) A JSON string representation of the `value`.
+- **Example**:
+  ```javascript
+  const jsonString = stringify({ name: "Bob", occupation: "Engineer" });
+  // jsonString is '{\n  "name": "Bob",\n  "occupation": "Engineer"\n}'
+  ```
 
-* **Type:** `object`
-* **Description:** The QuickJS operating system module, offering methods for interacting with the file system and processes.
+#### `exec(command)`
+Executes a shell command synchronously.
+- **`command`**: (`string` or `array`) The command string or an array of command arguments.
+- **Returns**: (`string`) The standard output of the command. Throws an error if the command fails.
+- **Example**:
+  ```javascript
+  const output = exec('ls -l');
+  print(output);
+  ```
 
-#### `parse(str: string)`
+#### `execAsync(command)`
+Executes a shell command asynchronously.
+- **`command`**: (`string` or `array`) The command string or an array of command arguments.
+- **Returns**: (`Promise<string>`) A promise that resolves with the standard output of the command, or rejects with an error if the command fails.
+- **Example**:
+  ```javascript
+  execAsync('sleep 1 && echo "Done"').then(print);
+  ```
 
-* **Returns:** `object`
-* **Description:** A shortcut for `JSON.parse()`. Parses a JSON string and returns the resulting JavaScript object.
+#### `read(filePath)`
+Reads the content of a file.
+- **`filePath`**: (`string`) The path to the file.
+- **Returns**: (`string`) The content of the file as a string. Throws an error if the file cannot be opened.
+- **Example**:
+  ```javascript
+  const content = read('./myfile.txt');
+  print(content);
+  ```
 
-#### `stringify(obj: object, replacer: function | array, space: number | string)`
+#### `use(scriptName)`
+Loads and executes a JavaScript script from a predefined configuration directory (`HOME/.config/js/`).
+- **`scriptName`**: (`string`) The name of the script file (without the `.js` extension).
+- **Returns**: (`undefined`)
+- **Example**:
+  ```javascript
+  use('myUtilityScript'); // Loads and runs ~/.config/js/myUtilityScript.js
+  ```
 
-* **Returns:** `string`
-* **Description:** A shortcut for `JSON.stringify()`. Converts a JavaScript object into a JSON string. The `replacer` and `space` arguments are optional for controlling the output.
+#### `cd(directoryPath = HOME)`
+Changes the current working directory.
+- **`directoryPath`**: (`string`, optional) The path to the directory to change to. Defaults to `HOME`.
+- **Returns**: (`boolean`) `true` if the directory was changed successfully, `false` otherwise.
+- **Example**:
+  ```javascript
+  cd('/tmp');
+  print(cwd); // Prints '/tmp'
+  ```
 
-#### `exec(cmd: string | array)`
-
-* **Returns:** `string`
-* **Description:** Executes a shell command **synchronously** and returns its standard output as a string. If the command fails, it throws an error.
-
-#### `execAsync(cmd: string | array)`
-
-* **Returns:** `Promise<string>`
-* **Description:** Executes a shell command **asynchronously** and returns a promise that resolves with the command's standard output.
-
-#### `read(path: string)`
-
-* **Returns:** `string`
-* **Description:** Reads the entire content of a file specified by `path` and returns it as a single string. This is an alias for `std.loadFile()`.
+#### `eval(expression)`
+Evaluates a JavaScript expression or script string.
+- **`expression`**: (`string`) The JavaScript expression or script to evaluate.
+- **Returns**: (`any`) The result of the evaluated expression.
+- **Example**:
+  ```javascript
+  const result = eval('1 + 2'); // result is 3
+  ```
 
 #### `enquire`
+An object containing functions for interactive terminal input. See [Enquire Module](#enquire-module) for details.
 
-* **Type:** `object`
-* **Description:** A utility for creating interactive command-line prompts, such as text input, confirmation dialogs, and select lists.
+#### `render`
+An object containing functions for rendering animated or formatted output in the terminal. See [Render Module](#render-module) for details.
+
+#### `draw`
+An object containing functions for drawing text-based UI elements in the terminal. See [Draw Module](#draw-module) for details.
+
+#### `parser`
+An object containing functions for parsing various data formats (CSV, INI, TOML). See [Parser Module](#parser-module) for details.
+
+#### `stat(path)`
+Retrieves file system statistics for a given path.
+- **`path`**: (`string`) The path to the file or directory.
+- **Returns**: (`object` or `undefined`) An object containing `isDir`, `isFile`, `isLink`, `size`, `createdAt`, `modifiedAt` properties, or `undefined` if the path does not exist or an error occurs.
+- **Example**:
+  ```javascript
+  const fileStats = stat('./myfile.txt');
+  if (fileStats) {
+    print(`Size: ${fileStats.size} bytes`);
+  }
+  ```
+
+#### `ensureDir(directoryPath)`
+Ensures that a directory exists, creating it and any necessary parent directories if they do not. Throws an error if a component of the path is an existing file.
+- **`directoryPath`**: (`string`) The path of the directory to ensure.
+- **Returns**: (`undefined`)
+- **Example**:
+  ```javascript
+  ensureDir('/tmp/my/new/directory');
+  ```
 
 #### `cwd`
-
-* **Type:** `string`
-* **Description:** A global string representing the current working directory.
+- **Type**: (`string`)
+- **Description**: A read-only global property that returns the current working directory.
+- **Example**:
+  ```javascript
+  print(cwd);
+  ```
 
 #### `ls`
-
-* **Type:** `Array<object>`
-* **Description:** Returns an array of objects, where each object represents a file or directory in the current working directory. Each object is a `String` with the filename as its primitive value, and also contains properties like **`isDir`**, **`isFile`**, **`isLink`**, **`size`**, **`createdAt`**, and **`modifiedAt`**.
+- **Type**: (`Array<String>`)
+- **Description**: A read-only global property that returns an array of custom `String` objects representing the contents of the current working directory. Each `String` object has additional properties: `isDir`, `isFile`, `isLink`, `size`, `createdAt`, `modifiedAt`.
+- **Example**:
+  ```javascript
+  for (const item of ls) {
+    if (item.isDir) {
+      print(`[DIR] ${item}`);
+    } else {
+      print(`[FILE] ${item} (${item.size} bytes)`);
+    }
+  }
+  ```
 
 #### `stdin`
-
-* **Type:** `string`
-* **Description:** A lazily evaluated string containing all data piped from standard input (`stdin`). This property is only read once.
-
-#### `use(scriptName: string)`
-
-* **Returns:** `void`
-* **Description:** Loads and executes a JavaScript file from the `~/.config/js/` directory. This is useful for importing custom utility scripts or libraries into your shell sessions.
-
-#### `cd(dir: string)`
-
-* **Returns:** `boolean`
-* **Description:** Changes the current working directory to the specified `dir`. If `dir` is not provided, it changes to the user's home directory (`$HOME`). Returns `true` on success and `false` on failure.
+- **Type**: (`string`)
+- **Description**: A read-only global property that returns the entire content of the standard input as a string. The content is cached after the first access.
+- **Example**:
+  ```javascript
+  // Assuming 'echo "hello world" | justjs -e "print(stdin)"' is run
+  print(stdin); // Prints "hello world\n"
+  ```
 
 ---
 
-### `Object.prototype` 
+## Object Prototype Extensions
 
-These methods are available on all JavaScript objects.
+### `Object.prototype`
 
-#### `.stringify(replacer?: function | array, space?: number | string)`
+#### `stringify(replacer = null, space = 2)`
+Converts the object to a JSON string.
+- **`replacer`**: (See `globalThis.stringify`)
+- **`space`**: (See `globalThis.stringify`)
+- **Returns**: (`string`)
+- **Example**:
+  ```javascript
+  ({ a: 1, b: 2 }).stringify(); // '{\n  "a": 1,\n  "b": 2\n}'
+  ```
 
-* **Returns:** `string`
-* **Description:** Converts the object into a JSON string. An alias for `JSON.stringify()`.
+#### `pipe(callback)`
+Passes the object as an argument to a callback function.
+- **`callback`**: (`function`) A function that takes one argument.
+- **Returns**: (`any`) The result of the callback function.
+- **Example**:
+  ```javascript
+  ({ value: 10 }).pipe(obj => obj.value * 2); // 20
+  ```
 
-#### `.pipe(callback: function | string | array)`
+#### `log()`
+Prints the object to standard output and then returns the object. Useful for chaining.
+- **Returns**: (`object`) The original object.
+- **Example**:
+  ```javascript
+  ({ a: 1 }).log(); // Prints { a: 1 }, returns { a: 1 }
+  ```
 
-* **Returns:** `any`
-* **Description:** Passes the object to a `callback` function or a shell command (`string` or `array`), and returns the result. This is a powerful method for chaining operations.
+#### `entries()`
+Returns an array of a given object's own enumerable string-keyed property `[key, value]` pairs.
+- **Returns**: (`Array<Array<any>>`)
+- **Example**:
+  ```javascript
+  ({ a: 1, b: 2 }).entries(); // [['a', 1], ['b', 2]]
+  ```
 
-#### `.log()`
+#### `keys()`
+Returns an array of a given object's own enumerable string-keyed property names.
+- **Returns**: (`Array<string>`)
+- **Example**:
+  ```javascript
+  ({ a: 1, b: 2 }).keys(); // ['a', 'b']
+  ```
 
-* **Returns:** `object`
-* **Description:** Prints the object to `stdout` and returns the object itself, allowing for method chaining.
+#### `values()`
+Returns an array of a given object's own enumerable string-keyed property values.
+- **Returns**: (`Array<any>`)
+- **Example**:
+  ```javascript
+  ({ a: 1, b: 2 }).values(); // [1, 2]
+  ```
 
-#### `.values()`
+#### `assign(sourceObject)`
+Copies all enumerable own properties from one or more source objects to a target object.
+- **`sourceObject`**: (`object`) The object to copy properties from.
+- **Returns**: (`object`) The modified target object.
+- **Example**:
+  ```javascript
+  const obj = { a: 1 };
+  obj.assign({ b: 2 }); // obj is now { a: 1, b: 2 }
+  ```
 
-* **Returns:** `array`
-* **Description:** An alias for `Object.values()`. Returns an array of the object's own enumerable property values.
+#### `table(columns)`
+Generates a formatted text table from the object's data. If the object is an array of objects, it treats each object as a row. If it's a plain object, it treats its entries as key-value rows.
+- **`columns`**: (`Array<string>`, optional) An array of column headers to display.
+- **Returns**: (`string`) A string representing the formatted table.
+- **Example**:
+  ```javascript
+  const data = [{ name: 'Alice', age: 30 }, { name: 'Bob', age: 24 }];
+  print(data.table());
+  // ╔═══════╤═════╗
+  // ║ name  │ age ║
+  // ╟───────┼─────╢
+  // ║ Alice │ 30  ║
+  // ║ Bob   │ 24  ║
+  // ╚═══════╧═════╝
+  ```
 
-#### `.keys()`
+#### `toIni()`
+Converts the object to an INI-formatted string.
+- **Returns**: (`string`)
+- **Example**:
+  ```javascript
+  const config = {
+    section1: {
+      key1: 'value1',
+      key2: 123
+    },
+    rootKey: 'rootValue'
+  };
+  print(config.toIni());
+  // rootKey=rootValue
+  //
+  // [section1]
+  // key1=value1
+  // key2=123
+  ```
 
-* **Returns:** `array`
-* **Description:** An alias for `Object.keys()`. Returns an array of the object's own enumerable property names.
-
-#### `.entries()`
-
-* **Returns:** `array`
-* **Description:** An alias for `Object.entries()`. Returns an array of `[key, value]` pairs for the object's own enumerable properties.
-
-#### `.assign(values: object)`
-
-* **Returns:** `object`
-* **Description:** An alias for `Object.assign()`. Copies all enumerable properties from one or more source objects to a target object.
-
-#### `.table(columns?: Array<string>)`
-
-* **Returns:** `string`
-* **Description:** Formats the object or an array of objects into a readable, formatted table string. Optionally, you can specify an array of `columns` to include.
-
----
+#### `toToml()`
+Converts the object to a TOML-formatted string.
+- **Returns**: (`string`)
+- **Example**:
+  ```javascript
+  const config = {
+    title: "TOML Example",
+    owner: {
+      name: "Alice",
+      dob: "1979-05-27T07:32:00-08:00"
+    }
+  };
+  print(config.toToml());
+  // title = "TOML Example"
+  //
+  // [owner]
+  // name = "Alice"
+  // dob = "1979-05-27T07:32:00-08:00"
+  ```
 
 ### `Array.prototype`
 
-These methods are available on all JavaScript arrays.
+#### `stringify(replacer = null, space = 2)`
+Converts the array to a JSON string.
+- **`replacer`**: (See `globalThis.stringify`)
+- **`space`**: (See `globalThis.stringify`)
+- **Returns**: (`string`)
+- **Example**:
+  ```javascript
+  [1, 2, 3].stringify(); // '[\n  1,\n  2,\n  3\n]'
+  ```
 
-#### `.stringify(replacer?: function | array, space?: number | string)`
+#### `for(callback)`
+Iterates over each element in the array, calling a callback function for each element. Returns the original array.
+- **`callback`**: (`function`) A function that takes the current element as an argument.
+- **Returns**: (`Array`) The original array.
+- **Example**:
+  ```javascript
+  [1, 2, 3].for(e => print(e * 2)); // Prints 2, 4, 6
+  ```
 
-* **Returns:** `string`
-* **Description:** Converts the array into a JSON string.
+#### `remove(...items)`
+Removes the first occurrence of specified items from the array.
+- **`...items`**: (`any`) One or more items to remove.
+- **Returns**: (`Array`) The modified array.
+- **Example**:
+  ```javascript
+  const arr = [1, 2, 3, 2];
+  arr.remove(2); // arr is now [1, 3, 2]
+  ```
 
-#### `.for(callback: function)`
+#### `removeAll(...items)`
+Removes all occurrences of specified items from the array.
+- **`...items`**: (`any`) One or more items to remove.
+- **Returns**: (`Array`) The modified array.
+- **Example**:
+  ```javascript
+  const arr = [1, 2, 3, 2];
+  arr.removeAll(2); // arr is now [1, 3]
+  ```
 
-* **Returns:** `void`
-* **Description:** A simple iterator that runs the `callback` function for each element in the array. Unlike `.forEach`, it does not return the array.
+#### `toCsvText(delimiter = ',')`
+Converts an array of arrays (or an array of objects) to a CSV formatted string.
+- **`delimiter`**: (`string`, optional) The delimiter to use. Defaults to `,`.
+- **Returns**: (`string`) The CSV string.
+- **Example**:
+  ```javascript
+  [['Header1', 'Header2'], ['ValueA', 'ValueB']].toCsvText();
+  // "Header1,Header2\nValueA,ValueB"
+  ```
 
-#### `.remove(...items: any)`
+#### `toCsvArray()`
+Converts an array of objects (JSON format) to an array of arrays (CSV array format), including headers.
+- **Returns**: (`Array<Array<string>>`) The CSV array.
+- **Example**:
+  ```javascript
+  [{ A: 1, B: 2 }, { A: 3, B: 4 }].toCsvArray();
+  // [['A', 'B'], ['1', '2'], ['3', '4']]
+  ```
 
-* **Returns:** `array`
-* **Description:** Removes the **first** occurrence of the specified `items` from the array.
+#### `toCsvJson(delimiter = ',')`
+Converts an array of arrays (CSV array format) to an array of objects (CSV JSON format).
+- **`delimiter`**: (`string`, optional) The delimiter (not directly used in this method, but might be relevant in internal parsing steps).
+- **Returns**: (`Array<object>`) The CSV JSON array.
+- **Example**:
+  ```javascript
+  [['name', 'age'], ['Alice', '30']].toCsvJson();
+  // [{ name: 'Alice', age: '30' }]
+  ```
 
-#### `.removeAll(...items: any)`
+#### `pipe(callbackOrCommand)`
+Passes the array as an argument to a callback function or pipes its string representation to an external command.
+- **`callbackOrCommand`**: (`function`, `string`, or `Array<string>`) A function, a command string, or an array of command arguments.
+- **Returns**: (`any` or `string`) The result of the callback function or the stdout of the command. Throws an error if the command fails.
+- **Example**:
+  ```javascript
+  [1, 2, 3].pipe(arr => arr.map(n => n * 2)); // [2, 4, 6]
+  ['echo', 'Hello from pipe'].exec(); // "Hello from pipe\n"
+  ```
 
-* **Returns:** `array`
-* **Description:** Removes **all** occurrences of the specified `items` from the array.
+#### `exec()`
+Executes the array as a shell command synchronously. (Equivalent to `globalThis.exec(this)`).
+- **Returns**: (`string`) The standard output of the command.
+- **Example**:
+  ```javascript
+  ['ls', '-a'].exec(); // Returns a string with directory listing
+  ```
 
-#### `.toCsvString(delimiter?: string)`
-
-* **Returns:** `string`
-* **Description:** Converts an array of objects or an array of arrays into a CSV-formatted string. Defaults to a comma (`,`) delimiter.
-
-#### `.toCsvArray(delimiter?: string)`
-
-* **Returns:** `array`
-* **Description:** Converts a CSV-formatted string into an array of arrays. Defaults to a comma (`,`) delimiter.
-
-#### `.toCsvJson(delimiter?: string)`
-
-* **Returns:** `Array<object>`
-* **Description:** Converts a CSV-formatted string into an array of JSON objects. The first row of the CSV is used as the keys for the objects. Defaults to a comma (`,`) delimiter.
-
-#### `.pipe(callback: function | string | array)`
-
-* **Returns:** `any`
-* **Description:** Passes the array elements to a `callback` function or a shell command.
-
-#### `.exec()`
-
-* **Returns:** `string`
-* **Description:** Treats the array as a command and its arguments, and executes it synchronously. For example, `['git', 'status'].exec()` is equivalent to running `git status`.
-
-#### `.execAsync()`
-
-* **Returns:** `Promise<string>`
-* **Description:** Treats the array as a command and its arguments, and executes it asynchronously.
-
----
+#### `execAsync()`
+Executes the array as a shell command asynchronously. (Equivalent to `globalThis.execAsync(this)`).
+- **Returns**: (`Promise<string>`) A promise resolving with the standard output.
+- **Example**:
+  ```javascript
+  ['sleep', '1'].execAsync().then(() => print("Slept for 1 second"));
+  ```
 
 ### `String.prototype`
 
-These methods are available on all JavaScript strings.
+#### `pipe(callbackOrCommand)`
+Passes the string as an argument to a callback function or pipes its content to an external command.
+- **`callbackOrCommand`**: (`function`, `string`, or `Array<string>`) A function, a command string, or an array of command arguments.
+- **Returns**: (`any` or `string`) The result of the callback function or the stdout of the command. Throws an error if the command fails.
+- **Example**:
+  ```javascript
+  "hello".pipe(s => s.toUpperCase()); // "HELLO"
+  "hello\nworld".pipe('grep world'); // "world\n"
+  ```
 
-#### `.pipe(callback: function | string | array)`
+#### `body(start, end, lineNumber, wordNumber)`
+Extracts a portion of a multi-line string.
+- **`start`**: (`number`, optional) The starting line index (0-based, inclusive).
+- **`end`**: (`number`, optional) The ending line index (0-based, exclusive).
+- **`lineNumber`**: (`number`, optional) If provided, extracts a specific line.
+- **`wordNumber`**: (`number`, optional) If `lineNumber` is provided, extracts a specific word from that line.
+- **Returns**: (`string`) The extracted content.
+- **Example**:
+  ```javascript
+  const text = "Line 1\nLine 2\nLine 3";
+  text.body(0, 2); // "Line 1\nLine 2"
+  text.body(null, null, 1); // "Line 2"
+  text.body(null, null, 1, 1); // "2"
+  ```
 
-* **Returns:** `any`
-* **Description:** Passes the string to a `callback` function or a shell command.
+#### `write(path, mode = "w+")`
+Writes the string content to a file.
+- **`path`**: (`string`) The path to the file.
+- **`mode`**: (`string`, optional) The file open mode. Defaults to `"w+"`.
+- **Returns**: (`string`) The original string. Throws an error if the file cannot be opened.
+- **Example**:
+  ```javascript
+  "Hello file!".write('./output.txt');
+  ```
 
-#### `.body(start?: number, end?: number, line?: boolean, word?: boolean)`
+#### `parseJson()`
+Parses the string content as JSON.
+- **Returns**: (`any`) The parsed JavaScript object or value.
+- **Example**:
+  ```javascript
+  '{"name": "justjs"}'.parseJson(); // { name: "justjs" }
+  ```
 
-* **Returns:** `string`
-* **Description:** Extracts a section of a multi-line string. You can specify a starting (`start`) and ending (`end`) position, and whether to treat the string by `line` or `word`.
+#### `toCsvArray(delimiter = ',')`
+Converts a CSV string to an array of arrays (CSV array format).
+- **`delimiter`**: (`string`, optional) The delimiter to use. Defaults to `,`.
+- **Returns**: (`Array<Array<string>>`) The CSV array.
+- **Example**:
+  ```javascript
+  "A,B\n1,2".toCsvArray(); // [['A', 'B'], ['1', '2']]
+  ```
 
-#### `.write(path: string, mode?: string)`
+#### `toCsvJson(delimiter = ',')`
+Converts a CSV string to an array of objects (CSV JSON format).
+- **`delimiter`**: (`string`, optional) The delimiter to use. Defaults to `,`.
+- **Returns**: (`Array<object>`) The CSV JSON array.
+- **Example**:
+  ```javascript
+  "name,age\nAlice,30".toCsvJson(); // [{ name: 'Alice', age: '30' }]
+  ```
 
-* **Returns:** `string`
-* **Description:** Writes the string content to a file at the specified `path`. The optional `mode` defaults to `"w+"` (write and create).
+#### `parseIni(options)`
+Parses an INI formatted string into a JavaScript object.
+- **`options`**: (`object`, optional) Parsing options (e.g., `preserveCase`, `allowDuplicates`, `parseValues`, `includeComments`, `commentChars`).
+- **Returns**: (`object`) The parsed INI data.
+- **Example**:
+  ```javascript
+  '[section]\nkey=value'.parseIni(); // { section: { key: 'value' } }
+  ```
 
-#### `.parseJson()`
+#### `parseToml()`
+Parses a TOML formatted string into a JavaScript object.
+- **Returns**: (`object`) The parsed TOML data.
+- **Example**:
+  ```javascript
+  'title = "My Project"'.parseToml(); // { title: 'My Project' }
+  ```
 
-* **Returns:** `object`
-* **Description:** Parses a string that contains valid JSON and returns the resulting JavaScript object.
+#### `exec()`
+Executes the string content as a shell command synchronously. (Equivalent to `globalThis.exec(this)`).
+- **Returns**: (`string`) The standard output of the command.
+- **Example**:
+  ```javascript
+  'ls -l'.exec(); // Returns a string with directory listing
+  ```
 
-#### `.toCsvArray(delimiter?: string)`
+#### `execAsync()`
+Executes the string content as a shell command asynchronously. (Equivalent to `globalThis.execAsync(this)`).
+- **Returns**: (`Promise<string>`) A promise resolving with the standard output.
+- **Example**:
+  ```javascript
+  'sleep 1'.execAsync().then(() => print("Slept for 1 second"));
+  ```
 
-* **Returns:** `array`
-* **Description:** Converts a CSV-formatted string into a two-dimensional array.
+#### `log()`
+Prints the string to standard output and then returns the string. Useful for chaining.
+- **Returns**: (`string`) The original string.
+- **Example**:
+  ```javascript
+  "Hello".log(); // Prints "Hello", returns "Hello"
+  ```
 
-#### `.toCsvJson(delimiter?: string)`
+#### `lines()`
+Splits the string into an array of lines.
+- **Returns**: (`Array<string>`)
+- **Example**:
+  ```javascript
+  "Line1\nLine2".lines(); // ['Line1', 'Line2']
+  ```
 
-* **Returns:** `Array<object>`
-* **Description:** Converts a CSV-formatted string into an array of objects, using the first line as object keys.
+#### `words()`
+Splits the string into an array of words, filtering out empty strings.
+- **Returns**: (`Array<string>`)
+- **Example**:
+  ```javascript
+  "Hello    world".words(); // ['Hello', 'world']
+  ```
 
-#### `.exec()`
+#### `isDir()`
+Checks if the string represents a path to an existing directory.
+- **Returns**: (`boolean`)
+- **Example**:
+  ```javascript
+  '/tmp'.isDir(); // true (if /tmp exists and is a directory)
+  ```
 
-* **Returns:** `string`
-* **Description:** Executes the string as a shell command **synchronously**.
+#### `isFile()`
+Checks if the string represents a path to an existing file.
+- **Returns**: (`boolean`)
+- **Example**:
+  ```javascript
+  './myfile.txt'.isFile(); // true (if myfile.txt exists and is a file)
+  ```
 
-#### `.execAsync()`
+#### `isSymLink()`
+Checks if the string represents a path to an existing symbolic link.
+- **Returns**: (`boolean`)
+- **Example**:
+  ```javascript
+  '/var/log'.isSymLink(); // true (if /var/log is a symlink)
+  ```
 
-* **Returns:** `Promise<string>`
-* **Description:** Executes the string as a shell command **asynchronously**.
+#### `style(styles)`
+Applies ANSI escape code styling to the string.
+- **`styles`**: (`string` or `Array<string>`) A style name (e.g., 'bold', 'red') or an array of style names or hex/RGB color strings.
+- **Returns**: (`string`) The styled string.
+- **Example**:
+  ```javascript
+  'Error!'.style('red');
+  'Success'.style(['bold', '#00ff00']);
+  ```
 
-#### `.log()`
+#### `stripStyle()`
+Removes ANSI escape codes from the string.
+- **Returns**: (`string`) The string without ANSI styles.
+- **Example**:
+  ```javascript
+  '\x1b[31mRed Text\x1b[0m'.stripStyle(); // 'Red Text'
+  ```
 
-* **Returns:** `string`
-* **Description:** Prints the string to `stdout` and returns the string itself.
+#### `stripEmojis()`
+Removes Unicode emoji characters from the string.
+- **Returns**: (`string`) The string without emojis.
+- **Example**:
+  ```javascript
+  'Hello 👋'.stripEmojis(); // 'Hello '
+  ```
 
-#### `.lines()`
+#### `border(type = 'normal', style, padding = 1)`
+Adds a text-based border around the string.
+- **`type`**: (`string`, optional) The border style ('normal', 'thick', 'double', 'rounded', 'hidden'). Defaults to 'normal'.
+- **`style`**: (`string` or `Array<string>`, optional) ANSI styles to apply to the border characters.
+- **`padding`**: (`number`, optional) The number of spaces to add between the border and the content. Defaults to `1`.
+- **Returns**: (`string`) The string with a border.
+- **Example**:
+  ```javascript
+  print('Hello'.border('double', 'blue'));
+  // ╔═══════╗
+  // ║ Hello ║
+  // ╚═══════╝
+  ```
 
-* **Returns:** `array`
-* **Description:** Splits the string into an array of lines based on newline characters.
+#### `stripBorder()`
+Removes common text-based border characters from the string.
+- **Returns**: (`string`) The string without border characters.
+- **Example**:
+  ```javascript
+  '╔═══╗\n║ A ║\n╚═══╝'.stripBorder(); // '\nA\n'
+  ```
 
-#### `.words()`
+#### `eval()`
+Evaluates the string as a JavaScript expression. (Equivalent to `globalThis.eval(this)`).
+- **Returns**: (`any`) The result of the evaluation.
+- **Example**:
+  ```javascript
+  '1 + 1'.eval(); // 2
+  ```
 
-* **Returns:** `array`
-* **Description:** Splits the string into an array of words based on whitespace.
+#### `join(secondString)`
+Joins two multi-line strings side-by-side. The shorter string will be padded to match the height of the taller one.
+- **`secondString`**: (`string`) The string to join on the right.
+- **Returns**: (`string`) The combined string.
+- **Example**:
+  ```javascript
+  print('Line1\nLine2'.join('ColA\nColB'));
+  // Line1ColA
+  // Line2ColB
+  ```
 
-#### `.isDir()`
+#### `stack(secondString, align = 'left')`
+Stacks two multi-line strings vertically.
+- **`secondString`**: (`string`) The string to stack below.
+- **`align`**: (`'left'`, `'right'`, or `'center'`) Alignment of the stacked strings. Defaults to `'left'`.
+- **Returns**: (`string`) The combined string.
+- **Example**:
+  ```javascript
+  print('Top'.stack('Bottom', 'center'));
+  //  Top
+  // Bottom
+  ```
 
-* **Returns:** `boolean`
-* **Description:** Returns `true` if the string is a valid path to a directory.
+#### `chunks(size)`
+Splits the string into an array of chunks of a specified size.
+- **`size`**: (`number`) The maximum length of each chunk.
+- **Returns**: (`Array<string>`) An array of string chunks.
+- **Example**:
+  ```javascript
+  'abcdefg'.chunks(3); // ['abc', 'def', 'g']
+  ```
 
-#### `.isFile()`
+#### `wrap(maxLength = getTerminalSize()[0], byWords = true)`
+Wraps the string to fit within a specified maximum length, either by words or by characters.
+- **`maxLength`**: (`number`, optional) The maximum length of each line. Defaults to terminal width.
+- **`byWords`**: (`boolean`, optional) If `true`, wraps by whole words; otherwise, wraps by characters. Defaults to `true`.
+- **Returns**: (`string`) The wrapped string.
+- **Example**:
+  ```javascript
+  'This is a long sentence.'.wrap(10);
+  // 'This is a\nlong\nsentence.'
+  ```
 
-* **Returns:** `boolean`
-* **Description:** Returns `true` if the string is a valid path to a file.
+### `Number.prototype`
 
-#### `.isSymLink()`
+#### `pipe(callbackOrCommand)`
+Passes the number as an argument to a callback function or pipes its string representation to an external command.
+- **`callbackOrCommand`**: (`function`, `string`, or `Array<string>`) A function, a command string, or an array of command arguments.
+- **Returns**: (`any` or `string`) The result of the callback function or the stdout of the command. Throws an error if the command fails.
+- **Example**:
+  ```javascript
+  5..pipe(n => n * 2); // 10
+  10..pipe('xargs echo'); // "10\n"
+  ```
 
-* **Returns:** `boolean`
-* **Description:** Returns `true` if the string is a valid path to a symbolic link.
-
-#### `.style(styles: string | Array<string>)`
-
-* **Returns:** `string`
-* **Description:** Applies ANSI styles to the string for colored and formatted output in the terminal.
-    * **Formatting:** `bold`, `italic`, `underline`.
-    * **Colors:** `red`, `green`, `yellow`, `blue`, `magenta`, `cyan`, `white`, `grey`, and `bright` versions (e.g., `brightRed`).
-    * **Hex/RGB:** Accepts hex codes like `#4287f5` or RGB values like `rgb(66, 135, 245)`.
-    * **Backgrounds:** `bg-red`, `bg-blue`, etc.
-
-#### `.stripStyle()`
-
-* **Returns:** `string`
-* **Description:** Removes all ANSI style codes from the string.
-
-#### `.border(type?: string, style?: string | Array<string>, padding?: number)`
-
-* **Returns:** `string`
-* **Description:** Encloses the string in a styled border.
-    * **Type:** `normal`, `thick`, `double`, `rounded`.
-    * **Style:** An array of ANSI styles for the border characters.
-    * **Padding:** An optional number for space around the text.
-
-#### `.stripBorder()`
-
-* **Returns:** `string`
-* **Description:** Removes any border characters from a string.
-
-#### `.join(secondString: string)`
-
-* **Returns:** `string`
-* **Description:** Joins two multi-line strings side-by-side.
-
-#### `.stack(secondString: string, align?: string)`
-
-* **Returns:** `string`
-* **Description:** Stacks two multi-line strings vertically. Alignment can be `left`, `right`, or `center`.
-
-#### `.chunks(size: number)`
-
-* **Returns:** `array`
-* **Description:** Splits the string into an array of smaller strings, each with a maximum length of `size`.
-
-#### `.wrap(maxLength: number, byWords?: boolean)`
-
-* **Returns:** `string`
-* **Description:** Wraps the string to a specified `maxLength`. If `byWords` is `true`, it wraps at word boundaries.
-
-#### `.eval()`
-
-* **Returns:** `any`
-* **Description:** Evaluates the string as JavaScript code and returns the result.
+#### `log()`
+Prints the number to standard output and then returns the number. Useful for chaining.
+- **Returns**: (`number`) The original number.
+- **Example**:
+  ```javascript
+  123..log(); // Prints 123, returns 123
+  ```
 
 ---
 
-### `Number.prototype` 🔢
+## `colorPicker.js`
 
-These methods are available on all JavaScript numbers.
+This module provides a terminal-based interactive color picker.
 
-#### `.pipe(callback: function | string | array)`
+### Functions
 
-* **Returns:** `any`
-* **Description:** Passes the number as an argument to a `callback` function or a shell command.
+#### `colorPicker()`
+Launches an interactive full-screen terminal UI for selecting colors. Users can navigate hues, saturations, and values, and choose between RGB, HSV, HSL, or HEX output formats.
+- **Returns**: (`object`) An object containing the selected color in various formats:
+  - `selectedType`: (`string`) The format selected by the user ('rgb', 'hsv', 'hex', 'hsl').
+  - `hsv`: (`object`) `{ h: number, s: number, v: number }`
+  - `rgb`: (`object`) `{ r: number, g: number, b: number }`
+  - `hex`: (`string`) Hexadecimal color string (e.g., '#RRGGBB').
+  - `hsl`: (`object`) `{ h: number, s: number, l: number }`
+- **Example**:
+  ```javascript
+  const color = colorPicker();
+  print(`You selected: ${color.selectedType} value: ${color[color.selectedType]}`);
+  ```
 
-#### `.log()`
+---
 
-* **Returns:** `number`
-* **Description:** Prints the number to `stdout` and returns the number itself.
+## `csvParser.js`
 
-## Contributing
+This module provides utility functions for converting between different CSV data representations.
 
-Contributions are welcome! Feel free to open an issue or submit a pull request.
+### Functions
 
-## License
+#### `csvArrayToCsvJson(array, delimiter = ',')`
+Converts an array of arrays (CSV array format) to an array of objects (CSV JSON format). It infers headers from the first sub-array.
+- **`array`**: (`Array<Array<string>>`) The input CSV data as an array of arrays.
+- **`delimiter`**: (`string`, optional) The delimiter (not directly used in this method, but might be relevant in internal parsing steps). Defaults to `,`.
+- **Returns**: (`Array<object>`) The converted data in CSV JSON format.
+- **Example**:
+  ```javascript
+  const csvArray = [['name', 'age'], ['Alice', '30']];
+  csvArrayToCsvJson(csvArray); // [{ name: 'Alice', age: '30' }]
+  ```
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+#### `csvArrayToCsvText(array, delimiter = ',')`
+Converts an array of arrays (CSV array format) or an array of objects (CSV JSON format) into a raw CSV text string. Handles quoting and escaping for delimiters, quotes, and newlines.
+- **`array`**: (`Array<Array<string>>` or `Array<object>`) The input CSV data.
+- **`delimiter`**: (`string`, optional) The delimiter character. Defaults to `,`.
+- **Returns**: (`string`) The CSV formatted string.
+- **Example**:
+  ```javascript
+  const csvArray = [['Header1', 'Header2'], ['Value A', 'Value "B"']];
+  csvArrayToCsvText(csvArray); // "Header1,Header2\n"Value A","Value ""B"""
+  ```
+
+#### `csvTextToCsvArray(csvText, delimiter = ',')`
+Parses a CSV text string into an array of arrays. Handles quoted fields and escaped quotes.
+- **`csvText`**: (`string`) The input CSV data as a string.
+- **`delimiter`**: (`string`, optional) The delimiter character. Defaults to `,`.
+- **Returns**: (`Array<Array<string>>`) The parsed data as an array of arrays.
+- **Example**:
+  ```javascript
+  const csvString = '"Name","Age"\n"Alice","30"';
+  csvTextToCsvArray(csvString); // [['Name', 'Age'], ['Alice', '30']]
+  ```
+
+#### `csvTextToCsvJson(csvText, delimiter = ',')`
+Parses a CSV text string into an array of objects. It uses the first line as headers.
+- **`csvText`**: (`string`) The input CSV data as a string.
+- **`delimiter`**: (`string`, optional) The delimiter character. Defaults to `,`.
+- **Returns**: (`Array<object>`) The parsed data as an array of objects.
+- **Example**:
+  ```javascript
+  const csvString = 'name,age\nAlice,30\nBob,25';
+  csvTextToCsvJson(csvString); // [{ name: 'Alice', age: '30' }, { name: 'Bob', age: '25' }]
+  ```
+
+#### `csvJsonToCsvText(csvJson)`
+Converts an array of objects (CSV JSON format) into a raw CSV text string.
+- **`csvJson`**: (`Array<object>`) The input CSV data as an array of objects.
+- **Returns**: (`string`) The CSV formatted string.
+- **Example**:
+  ```javascript
+  const csvJson = [{ name: 'Alice', age: 30 }, { name: 'Bob', age: 25 }];
+  csvJsonToCsvText(csvJson); // "name,age\nAlice,30\nBob,25"
+  ```
+
+#### `csvJsonToCsvArray(csvJson)`
+Converts an array of objects (CSV JSON format) into an array of arrays (CSV array format). It infers headers from all unique keys in the objects and sorts them.
+- **`csvJson`**: (`Array<object>`) The input CSV data as an array of objects.
+- **Returns**: (`Array<Array<string>>`) The converted data as an array of arrays.
+- **Example**:
+  ```javascript
+  const csvJson = [{ name: 'Alice', age: 30 }, { age: 25, name: 'Bob' }];
+  csvJsonToCsvArray(csvJson); // [['age', 'name'], ['30', 'Alice'], ['25', 'Bob']]
+  ```
+
+---
+
+## `draw.js`
+
+This module provides functions for drawing various text-based UI elements in the terminal.
+
+### Functions
+
+#### `table(data, columns)`
+Generates a formatted text table.
+- **`data`**: (`Array<object>` or `object`) An array of objects where each object is a row, or a single object to display its key-value pairs.
+- **`columns`**: (`Array<string>`, optional) An array of column headers to include. If not provided, it infers them from the data.
+- **Returns**: (`string`) A string representing the formatted table.
+- **Throws**: (`TypeError`) If `data` is not an array or object, or if `columns` is not an array.
+- **Example**:
+  ```javascript
+  const userData = [{ name: 'Alice', age: 30 }, { name: 'Bob', city: 'NY' }];
+  print(draw.table(userData, ['name', 'age', 'city']));
+  // ╔═══════╤═════╤══════╗
+  // ║ name  │ age │ city ║
+  // ╟───────┼─────┼──────╢
+  // ║ Alice │ 30  │      ║
+  // ║ Bob   │     │ NY   ║
+  // ╚═══════
