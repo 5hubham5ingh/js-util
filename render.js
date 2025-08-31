@@ -110,11 +110,12 @@ export const pages = (content, pageHeight) => {
     }
 
     const page = pages[currentPage];
-    const content = [...page].join('\n').border('rounded');
+    const helperText = " Continue:Enter | Navigation:Arrows ".style(['#000000', 'bold', 'bg-grey'])
+    const content = [...page, helperText.padStart(helperText.stripStyle().length + terminalWidth - 13)].join('\n').border('rounded');
 
     const pageIndicator = createPageIndicator();
     print(content, pageIndicator);
-    prevCursorPos = cursorUp(page.length + 3);
+    prevCursorPos = cursorUp(page.length + 4);
   };
 
   const nextPage = () => {
