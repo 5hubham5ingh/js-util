@@ -130,3 +130,36 @@ export const border = (str, type = 'normal', style, padding = 1) => {
   return `${topBorder}\n${middleContent}\n${bottomBorder}`;
 }
 
+
+const ALIGN = {
+  LEFT: 'left',
+  RIGHT: 'right',
+  CENTER: 'center'
+}
+
+export const join = (firstString, secondString, align = ALIGN.LEFT) => {
+  const linesFromFirstString = firstString.split('\n');
+  const linesFromSecondString = secondString.split('\n')
+  const combinedLines = [...linesFromFirstString, ...linesFromSecondString]
+  const maxLineWidth = Math.max(...combinedLines.map(line => line.stripStyle().length))
+
+  const stackedLines = []
+  switch (align) {
+    case ALIGN.LEFT:
+      stackedLines.push(...combinedLines.map(line => line.padEnd(maxLineWidth)))
+      break;
+    case ALIGN.RIGHT:
+      stackedLines.push(...combinedLines.map(line => line.padStart(maxLineWidth)))
+      break;
+    case ALIGN.CENTER:
+      stackedLines.push(...combinedLines.map(line => {
+        const lineVisibleLength = line.stripStyle().length
+        const gap = maxLineWidth - lineVisibleLength
+        const leftPaddingCount = parseInt(gap / 2)
+        const rightPaddingCount = gap - leftPaddingCount
+        return " ".repeat(leftPaddingCount) + line + " ".repeat(rightPaddingCount)
+      }))
+      break;
+  }
+  return stackedLines.join('\n')
+}
