@@ -4,8 +4,7 @@ import { printf } from "std"
 import { ttySetRaw } from "../qjs-ext-lib/src/os.js";
 
 export const loader = (message) => {
-  if (typeof message !== 'string') throw TypeError('The "message" argument be of type "string".')
-  if (message.length === 0) throw Error('The "message" can not be an empty string.')
+  if (message && typeof message !== 'string') throw TypeError('The "message" argument be of type "string".')
 
   const worker = new os.Worker("./worker.js");
 
