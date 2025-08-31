@@ -440,38 +440,7 @@ String.prototype.join = function(secondString) {
   return combinedLines.join('\n')
 }
 
-const ALIGN = {
-  LEFT: 'left',
-  RIGHT: 'right',
-  CENTER: 'center'
-}
-
-String.prototype.stack = function(secondString, align = ALIGN.LEFT) {
-  const linesFromFirstString = this.split('\n');
-  const linesFromSecondString = secondString.split('\n')
-  const combinedLines = [...linesFromFirstString, ...linesFromSecondString]
-  const maxLineWidth = Math.max(...combinedLines.map(line => line.stripStyle().length))
-
-  const stackedLines = []
-  switch (align) {
-    case ALIGN.LEFT:
-      stackedLines.push(...combinedLines.map(line => line.padEnd(maxLineWidth)))
-      break;
-    case ALIGN.RIGHT:
-      stackedLines.push(...combinedLines.map(line => line.padStart(maxLineWidth)))
-      break;
-    case ALIGN.CENTER:
-      stackedLines.push(...combinedLines.map(line => {
-        const lineVisibleLength = line.stripStyle().length
-        const gap = maxLineWidth - lineVisibleLength
-        const leftPaddingCount = parseInt(gap / 2)
-        const rightPaddingCount = gap - leftPaddingCount
-        return " ".repeat(leftPaddingCount) + line + " ".repeat(rightPaddingCount)
-      }))
-      break;
-  }
-  return stackedLines.join('\n')
-}
+String.prototype.stack = function(...all) { return draw.join(this, ...all) }
 
 String.prototype.chunks = function(size) {
   if (this.length === 0) return this;
@@ -541,7 +510,8 @@ try {
         const expression = std.in.getline();
         if (expression === null) break;
         history.push(expression);
-        std.evalScript(expression, { backtrace_barrier: true });
+        try { std.evalScript(expression, { backtrace_barrier: true }) }
+        catch (error) { print(error) }
       }
     }
   } else {
