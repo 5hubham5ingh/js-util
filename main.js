@@ -10,6 +10,7 @@ import * as render from "./render.js"
 import * as draw from "./draw.js"
 import * as csvParser from "./csvParser.js"
 import * as iniParser from "./iniParser.js"
+import * as tomlParser from "./tomlParser.js"
 
 globalThis.std = std
 globalThis.os = os
@@ -31,7 +32,7 @@ globalThis.eval = function(expression) {
 globalThis.enquire = enquire;
 globalThis.render = render;
 globalThis.draw = draw;
-globalThis.parser = { ...csvParser, ...iniParser }
+globalThis.parser = { ...csvParser, ...iniParser, ...tomlParser }
 
 const resolvePath = (path) => {
   if (path.startsWith('/')) return path;
@@ -179,6 +180,8 @@ Object.prototype.table = function(columns) { return draw.table(this, columns) }
 
 Object.prototype.toIni = function() { return iniParser.toIni(this) }
 
+Object.prototype.toToml = function() { return tomlParser.toToml(this) }
+
 Array.prototype.stringify = function(replacer = null, space = 2) {
   return JSON.stringify(this, replacer, space)
 }
@@ -272,6 +275,8 @@ String.prototype.toCsvArray = function(delimiter = ',') { return csvParser.csvTe
 String.prototype.toCsvJson = function(delimiter = ',') { return csvParser.csvTextToCsvJson(this, delimiter) };
 
 String.prototype.parseIni = function(options) { return iniParser.parseIni(this, options) }
+
+String.prototype.parseToml = function() { return tomlParser.parseToml(this) }
 
 String.prototype.exec = function() { return (exec(this)) }
 
