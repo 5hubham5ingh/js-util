@@ -8,7 +8,7 @@ import * as enquire from "./enquire.js"
 import { getTerminalSize } from "../justjs/terminal.js"
 import * as render from "./render.js"
 import * as draw from "./draw.js"
-import * as parser from "./parser.js"
+import * as parser from "./csvParser.js"
 
 globalThis.std = std
 globalThis.os = os
