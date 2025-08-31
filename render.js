@@ -141,6 +141,31 @@ export const pages = (content, pageHeight) => {
 };
 
 export const levels = (levels, animate = true) => {
+  if (!Array.isArray(levels) || levels.length === 0) {
+    throw new Error('The "levels" argument must be a non-empty array.');
+  }
+
+  for (let i = 0; i < levels.length; i++) {
+    const level = levels[i];
+    if (!Array.isArray(level) || level.length < 3) {
+      throw new Error(`Each item in the "levels" array must be an array of at least 3 elements. Invalid item at index ${i}.`);
+    }
+
+    const [currentLevel, maxLevel, title] = level;
+
+    if (typeof currentLevel !== 'number' || typeof maxLevel !== 'number' || typeof title !== 'string') {
+      throw new Error(`Invalid data types for item at index ${i}. Expected [number, number, string].`);
+    }
+
+    if (currentLevel < 0 || maxLevel <= 0 || currentLevel > maxLevel) {
+      throw new Error(`Invalid level values at index ${i}. "currentLevel" and "maxLevel" must be positive numbers, and "currentLevel" cannot exceed "maxLevel".`);
+    }
+  }
+
+  if (typeof animate !== 'boolean') {
+    throw new Error('The "animate" argument must be a boolean.');
+  }
+
   const allFrames = []
   const maxTitleLength = Math.max(...levels.map(level => level[2].length))
 
@@ -162,7 +187,7 @@ export const levels = (levels, animate = true) => {
 
   if (!animate) {
     const finalFrames = allFrames.map(frames => frames[frames.length - 1]).join('\n\n');
-    return finalFrames.border('rounded')
+    return finalFrames
   }
 
   printf(cursorHide);
