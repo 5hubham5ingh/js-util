@@ -7,7 +7,7 @@ import { colorPicker } from "./colorPicker.js"
 
 const formatLine = (line, lineNumber, totalLines) => {
   const visible = line.stripStyle()
-  const [terminalWidth, terminalHeight] = getTerminalSize()
+  const [terminalWidth] = getTerminalSize()
   const horizontalGap = terminalWidth - 2 - visible.length
 
   if (horizontalGap > 0) {
@@ -57,11 +57,13 @@ const createNavigationHandlers = (getLength, getIndex, setIndex, renderFn) => ({
 })
 
 export const ask = (message) => {
+  if (typeof message !== 'string') throw TypeError('The "message" must be of type string.')
   printf(' ◉ %s ', message)
   return std.in.getline()
 }
 
 export const confirm = (statement) => {
+  if (typeof statement !== 'string') throw TypeError('The "statement" must be of type string.')
   let choice
   while (true) {
     printf(' ◉ %s (y/n): ', statement)
@@ -73,6 +75,7 @@ export const confirm = (statement) => {
 }
 
 export const secret = (message) => {
+  if (typeof message !== 'string') throw TypeError('The "message" must be of type string.')
   ttySetRaw()
   let secret = ''
   printf(' ◉ %s: ', message)
@@ -92,11 +95,12 @@ export const secret = (message) => {
 }
 
 export const choose = (options) => {
-  if (!options) return;
+  if (!options || !Array.isArray(options)) throw TypeError("Expected an argument of type String[]");
+
   printf("%s", cursorHide)
   ttySetRaw()
 
-  const [terminalWidth, terminalHeight] = getTerminalSize()
+  const [_terminalWidth, terminalHeight] = getTerminalSize()
   let index = 0
   let prevCursorPos
 
@@ -130,6 +134,7 @@ export const choose = (options) => {
 }
 
 export const search = (options) => {
+  if (!options || !Array.isArray(options)) throw TypeError("Expected an argument of type String[]");
   printf("%s", cursorHide)
   ttySetRaw()
 
@@ -226,6 +231,7 @@ export const search = (options) => {
 }
 
 export const select = (options) => {
+  if (!options || !Array.isArray(options)) throw TypeError("Expected an argument of type String[]");
   if (!options) return;
   printf("%s", cursorHide)
   ttySetRaw()
@@ -395,6 +401,7 @@ export const pick = () => {
 };
 
 export const describe = (buffer = '') => {
+  if (typeof buffer !== 'string') throw TypeError('Expected one argument of type "string"')
 
   const [terminalWidth, terminalHeight] = getTerminalSize()
   const CURSOR_CHAR = '█';
@@ -476,6 +483,7 @@ export const describe = (buffer = '') => {
 export const color = colorPicker;
 
 export const edit = (content = '') => {
+  if (typeof content !== 'string') throw TypeError('Expected one argument of type "string"')
   if (!EDITOR) return describe(content);
   const fileDir = '/tmp/js/'
   ensureDir(fileDir)
