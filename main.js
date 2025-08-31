@@ -7,6 +7,7 @@ import { isatty } from "../qjs-ext-lib/src/os.js"
 import * as enquire from "./enquire.js"
 import { getTerminalSize } from "../justjs/terminal.js"
 import * as render from "./render.js"
+import * as draw from "./draw.js"
 
 globalThis.std = std
 globalThis.os = os
@@ -27,6 +28,7 @@ globalThis.eval = function(expression) {
 }
 globalThis.enquire = enquire;
 globalThis.render = render;
+globalThis.draw = draw;
 
 const resolvePath = (path) => {
   if (path.startsWith('/')) return path;
@@ -170,54 +172,7 @@ Object.prototype.values = function() { return Object.values(this) };
 
 Object.prototype.assign = function(entries) { return Object.assign(this, entries) }
 
-Object.prototype.table = function(columns) {
-  const data = this
-  let table = ''
-  const isArray = Array.isArray(data);
-  const rows = isArray ? data : Object.entries(data).map(([key, value]) => ({ key, value }));
-
-  if (!rows.length) {
-    table += '╔════╗\n║ [] ║\n╚════╝\n'
-    return;
-  }
-
-  const keys = columns && columns.length
-    ? columns
-    : [...new Set(rows.flatMap(row => Object.keys(row)))];
-
-  const header = [...keys];
-
-  const getString = (v) => v === null ? 'null' : v === undefined ? 'undefined' : String(v);
-
-  const allRows = [header, ...rows.map(row => {
-    return keys.map(k => getString(row[k]));
-  })];
-
-  const colWidths = header.map((_, colIndex) =>
-    Math.max(...allRows.map(row => getString(row[colIndex]).length))
-  );
-
-  const pad = (s, i) => getString(s).padEnd(colWidths[i], ' ');
-
-  const formatRow = (row) =>
-    '║ ' + row.map(pad).map((v) => v).join(' │ ') + ' ║';
-
-  const makeLine = (left, mid, right, fill) =>
-    left +
-    colWidths.map(w => fill.repeat(w + 2)).join(mid) +
-    right;
-
-  const top = makeLine('╔', '╤', '╗', '═');
-  const separator = makeLine('╟', '┼', '╢', '─');
-  const bottom = makeLine('╚', '╧', '╝', '═');
-
-  const lines = [top, formatRow(header), separator];
-  allRows.slice(1).forEach(row => lines.push(formatRow(row)));
-  lines.push(bottom);
-
-  table += lines.join('\n')
-  return table;
-}
+Object.prototype.table = function(columns) { return draw.table(this, columns) }
 
 Array.prototype.stringify = function(replacer = null, space = 2) {
   return JSON.stringify(this, replacer, space)
@@ -457,50 +412,7 @@ String.prototype.stripEmojis = function() {
   return this.replace(/\p{Emoji}/gu, '');
 }
 
-String.prototype.border = function(type = 'normal', style, padding = 1) {
-  const str = this
-
-  const borderChars = {
-    normal: { x: "─".style(style), y: "│".style(style), tl: "┌".style(style), tr: "┐".style(style), bl: "└".style(style), br: "┘".style(style) },
-    thick: { x: "━".style(style), y: "┃".style(style), tl: "┏".style(style), tr: "┓".style(style), bl: "┗".style(style), br: "┛".style(style) },
-    double: { x: "═".style(style), y: "║".style(style), tl: "╔".style(style), tr: "╗".style(style), bl: "╚".style(style), br: "╝".style(style) },
-    rounded: { x: "─".style(style), y: "│".style(style), tl: "╭".style(style), tr: "╮".style(style), bl: "╰".style(style), br: "╯".style(style) },
-    hidden: { x: " ".style(style), y: " ".style(style), tl: " ".style(style), tr: " ".style(style), bl: " ".style(style), br: " ".style(style) },
-  };
-
-  const chars = borderChars[type];
-  if (!chars) {
-    return str;
-  }
-
-  const lines = str.split('\n');
-  const horizontalPadding = ' '.repeat(padding);
-
-  const contentWidth = Math.max(
-    0,
-    ...lines.map(line => line.stripStyle().length)
-  );
-
-  if (contentWidth === 0 && lines.length === 1 && lines[0] === '') {
-    return `${chars.tl}${chars.tr}\n${chars.bl}${chars.br}`;
-  }
-
-  const totalInnerWidth = contentWidth + padding * 2;
-
-  const topBorder = chars.tl + chars.x.repeat(totalInnerWidth) + chars.tr;
-  const bottomBorder = chars.bl + chars.x.repeat(totalInnerWidth) + chars.br;
-
-  const middleContent = lines.map(line => {
-    const strippedLength = line.stripStyle().length;
-
-    const rightPaddingCount = totalInnerWidth - strippedLength - padding;
-    const rightPadding = ' '.repeat(rightPaddingCount > 0 ? rightPaddingCount : 0);
-
-    return `${chars.y}${horizontalPadding}${line}${rightPadding}${chars.y}`;
-  }).join('\n');
-
-  return `${topBorder}\n${middleContent}\n${bottomBorder}`;
-}
+String.prototype.border = function(...all) { return draw.border(this, ...all) }
 
 String.prototype.stripBorder = function() { return this.replace(new RegExp('─|│|┌|┐|└|┘|━|┃|┏|┓|┗|┛|═|║|╔|╗|╚|╝|╭|╮|╰|╯| ', 'g'), ''); }
 
