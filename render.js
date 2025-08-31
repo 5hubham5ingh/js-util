@@ -4,6 +4,9 @@ import { printf } from "std"
 import { ttySetRaw } from "../qjs-ext-lib/src/os.js";
 
 export const loader = (message) => {
+  if (typeof message !== 'string') throw Error('The "message" argument be of type "string".')
+  if (message.length === 0) throw Error('The "message" can not be an empty string.')
+
   const worker = new os.Worker("./worker.js");
 
   const [terminalWidth, _] = getTerminalSize()
