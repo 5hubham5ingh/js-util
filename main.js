@@ -8,7 +8,8 @@ import * as enquire from "./enquire.js"
 import { getTerminalSize } from "../justjs/terminal.js"
 import * as render from "./render.js"
 import * as draw from "./draw.js"
-import * as parser from "./csvParser.js"
+import * as csvParser from "./csvParser.js"
+import * as iniParser from "./iniParser.js"
 
 globalThis.std = std
 globalThis.os = os
@@ -30,6 +31,7 @@ globalThis.eval = function(expression) {
 globalThis.enquire = enquire;
 globalThis.render = render;
 globalThis.draw = draw;
+globalThis.parser = { ...csvParser, ...iniParser }
 
 const resolvePath = (path) => {
   if (path.startsWith('/')) return path;
@@ -175,6 +177,8 @@ Object.prototype.assign = function(entries) { return Object.assign(this, entries
 
 Object.prototype.table = function(columns) { return draw.table(this, columns) }
 
+Object.prototype.toIni = function() { return iniParser.toIni(this) }
+
 Array.prototype.stringify = function(replacer = null, space = 2) {
   return JSON.stringify(this, replacer, space)
 }
@@ -201,11 +205,11 @@ Array.prototype.removeAll = function(...items) {
   return this
 };
 
-Array.prototype.toCsvText = function(delimiter = ',') { return parser.csvArrayToCsvText(this, delimiter) }
+Array.prototype.toCsvText = function(delimiter = ',') { return csvParser.csvArrayToCsvText(this, delimiter) }
 
-Array.prototype.toCsvArray = function() { return parser.csvJsonToCsvArray(this) }
+Array.prototype.toCsvArray = function() { return csvParser.csvJsonToCsvArray(this) }
 
-Array.prototype.toCsvJson = function(delimiter = ',') { return parser.csvArrayToCsvJson(this, delimiter) }
+Array.prototype.toCsvJson = function(delimiter = ',') { return csvParser.csvArrayToCsvJson(this, delimiter) }
 
 Array.prototype.pipe = function(cb) {
   if (typeof cb === "function") return cb(this)
@@ -263,9 +267,11 @@ String.prototype.parseJson = function() {
   return JSON.parse(this)
 }
 
-String.prototype.toCsvArray = function(delimiter = ',') { return parser.csvTextToCsvArray(this, delimiter) };
+String.prototype.toCsvArray = function(delimiter = ',') { return csvParser.csvTextToCsvArray(this, delimiter) };
 
-String.prototype.toCsvJson = function(delimiter = ',') { return parser.csvTextToCsvJson(this, delimiter) };
+String.prototype.toCsvJson = function(delimiter = ',') { return csvParser.csvTextToCsvJson(this, delimiter) };
+
+String.prototype.parseIni = function(options) { return iniParser.parseIni(this, options) }
 
 String.prototype.exec = function() { return (exec(this)) }
 
