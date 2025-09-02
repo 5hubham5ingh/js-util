@@ -19,18 +19,21 @@ try {
       const expression = std.in.readAsString();
       std.evalScript(expression, { backtrace_barrier: true });
     } else {
-      globalThis.history = [];
+      const __history = [];
       Object.defineProperty(globalThis, 'clear', {
         get() { printf("\x1b[2J\x1b[H"); },
       });
+      Object.defineProperty(globalThis, 'redo', {
+        get() { return enquire.search(__history).eval() }
+      })
 
       while (true) {
         printf("❯ ");
         const expression = std.in.getline();
         if (expression === null) break;
-        history.push(expression);
         try { std.evalScript(expression, { backtrace_barrier: true }) }
         catch (error) { print(error) }
+        __history.unshift(expression);
       }
     }
   } else {
@@ -41,4 +44,4 @@ try {
   std.err.puts(
     `${error.constructor.name}: ${error.message}\n${error.stack}`,
   );
-}
+} 
