@@ -42,7 +42,7 @@ const resolvePath = (path) => {
 
 globalThis.stat = function(path) {
   const resolvedPath = resolvePath(path)
-  const [stats, statErr] = os.lstat(resolvedPath);
+  const [stats, statErr] = os.stat(resolvedPath);
   if (statErr) throw Error(`Failed to read stat for "${resolvedPath}".\nError code: ${statErr}`);
 
   const bytes = stats.size;
@@ -79,12 +79,14 @@ globalThis.ensureDir = (dir) => {
     if (!part) continue;
 
     currentPath += (i === 0 ? '' : '/') + part;
-    const statObj = stat(currentPath);
+    try {
+      const statObj = stat(currentPath);
+      if (statObj && statObj.isFile) throw Error(`ensureDir :: "${currentPath}" is a file.`);
+      if (statObj && statObj.isDir) continue;
+    } catch (e) {
+      os.mkdir(currentPath)
+    }
 
-    if (statObj && statObj.isFile) throw Error(`ensureDir :: "${currentPath}" is a file.`);
-    if (statObj && statObj.isDir) continue;
-
-    os.mkdir(currentPath)
   }
 };
 
