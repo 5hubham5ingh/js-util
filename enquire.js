@@ -134,7 +134,7 @@ export const choose = (options) => {
 }
 
 export const search = (options) => {
-  if (!options || !Array.isArray(options)) throw TypeError("Expected an argument of type String[]");
+  if (!options || !Array.isArray(options) || options.length === 0) throw TypeError(`Expected an argument of type String[], but got\n${stringify(options)}`);
   printf("%s", cursorHide)
   ttySetRaw()
 
