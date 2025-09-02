@@ -24,14 +24,14 @@ try {
         get() { printf("\x1b[2J\x1b[H"); },
       });
       Object.defineProperty(globalThis, 'redo', {
-        get() { return enquire.search(__history).eval() }
+        get() { return enquire.describe(enquire.search(__history)).eval() }
       })
 
       while (true) {
         printf("❯ ");
         const expression = std.in.getline();
         if (expression === null) break;
-        try { std.evalScript(expression, { backtrace_barrier: true }) }
+        try { print(std.evalScript(expression, { backtrace_barrier: true })) }
         catch (error) { print(error) }
         __history.unshift(expression);
       }
