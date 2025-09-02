@@ -180,6 +180,7 @@ export function colorPicker() {
   })
 
   print(ansi.style.reset, cursorShow)
+  os.exec(['stty', 'sane'])
   const { h, s, v } = state.selectedColor
   const { r, g, b } = hsvToRgb(parseInt(h), parseInt(s), parseInt(v))
   const hex = rgbToHex(parseInt(r), parseInt(g), parseInt(b))

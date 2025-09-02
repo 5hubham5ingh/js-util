@@ -129,7 +129,7 @@ export const choose = (options) => {
 
   handleKeysPressSync(handlers)
   printf(cursorShow)
-
+  os.exec(['stty', 'sane'])
   return options[index]
 }
 
@@ -226,7 +226,7 @@ export const search = (options) => {
 
   handleKeysPressSync(handlers)
   printf(cursorShow)
-
+  os.exec(['stty', 'sane'])
   return filtered.length ? filtered[index] : undefined
 }
 
@@ -272,7 +272,7 @@ export const select = (options) => {
 
   handleKeysPressSync(handlers)
   printf(cursorShow)
-
+  os.exec(['stty', 'sane'])
   return [...selected].map(i => options[i])
 }
 
@@ -395,6 +395,7 @@ export const pick = () => {
 
   renderUi();
   handleKeysPressSync(handlers);
+  os.exec(['stty', 'sane'])
   printf(cursorShow);
 
   return `${cwd !== '/' ? cwd + '/' : '/'}${options[index]}`
@@ -475,6 +476,7 @@ export const describe = (buffer = '') => {
     const result = handleInput(char);
 
     if (result.shouldExit) {
+      os.exec(['stty', 'sane'])
       return result.result;
     }
   }
@@ -498,6 +500,7 @@ export const edit = (content = '') => {
   const fileContent = editedFile.readAsString()
   editedFile.close();
   os.remove(filePath)
+  os.exec(['stty', 'sane'])
   return fileContent;
 };
 
