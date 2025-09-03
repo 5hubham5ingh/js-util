@@ -129,7 +129,7 @@ Object.prototype.stringify = function(replacer = null, space = 2) {
 
 Object.prototype.pipe = function(cb) { return cb(this) }
 
-Object.prototype.log = function() { print(this); return this }
+Object.prototype.log = function() { print(stringify(this, null, 1)); return this }
 
 Object.prototype.entries = function() { return Object.entries(this) };
 
