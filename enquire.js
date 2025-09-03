@@ -288,7 +288,7 @@ export const pick = () => {
   const MAX_DETAIL_HEIGHT = parseInt(terminalHeight / 4);
   const CONTENT_WIDTH = terminalWidth - 4;
 
-  let options = ls;
+  let options = lsStat
   let index = 0;
   let prevCursorPos;
   const navigationHistory = [];
@@ -298,7 +298,7 @@ export const pick = () => {
 
   const getDirectoryContents = (dir) => {
     cd(dir);
-    const contents = ls.map(content =>
+    const contents = lsStat.map(content =>
       `${content.isDir ? ICONS.FOLDER_CLOSED : ICONS.FILE}${content}`
     ).join(' ');
     cd('..');

@@ -118,6 +118,28 @@ Object.defineProperty(globalThis, 'ls', {
   }
 });
 
+Object.defineProperty(globalThis, 'lsStat', {
+  get: () => ls.map(item => {
+    const content = new String(item);
+
+    const [stats, statErr] = os.lstat(cwd + '/' + item);
+    if (statErr) {
+      throw Error(`Error getting stats for "${item}"\nError code: ${statErr}`);
+    }
+
+    Object.defineProperties(content, {
+      isDir: { value: (stats ? (stats.mode & os.S_IFMT) === os.S_IFDIR : false) },
+      isFile: { value: (stats ? (stats.mode & os.S_IFMT) === os.S_IFREG : false) },
+      isLink: { value: (stats ? (stats.mode & os.S_IFMT) === os.S_IFLNK : false) },
+      size: { value: stats?.size },
+      createdAt: { value: new Date(stats?.ctime) },
+      modifiedAt: { value: new Date(stats?.mtime) },
+    });
+
+    return content;
+  })
+})
+
 let stdinCached;
 Object.defineProperty(globalThis, 'stdin', {
   get: () => stdinCached ?? (stdinCached = std.in.readAsString())
