@@ -127,7 +127,22 @@ Object.prototype.stringify = function(replacer = null, space = 2) {
   return JSON.stringify(this, replacer, space);
 };
 
-Object.prototype.pipe = function(cb) { return cb(this) }
+Object.prototype.pipe = function(cb) {
+  if (typeof cb === "function") return cb(this)
+  else if (typeof cb === "string" || Array.isArray(cb)) {
+    const input = typeof this === 'string' ? this : (
+      this.toString() !== "[object Object]" ? this.toString()
+        : stringify(this)
+    )
+    const ps = new ProcessSync(cb, {
+      input,
+    })
+    ps.run()
+    if (ps.success) return ps.stdout;
+    throw Error(ps.stderr)
+  }
+  throw new TypeError("Invalid callback type. Expected function or string/array.");
+}
 
 Object.prototype.log = function() { print(stringify(this, null, 1)); return this }
 
@@ -178,35 +193,10 @@ Array.prototype.toCsvArray = function() { return csvParser.csvJsonToCsvArray(thi
 
 Array.prototype.toCsvJson = function(delimiter = ',') { return csvParser.csvArrayToCsvJson(this, delimiter) }
 
-Array.prototype.pipe = function(cb) {
-  if (typeof cb === "function") return cb(this)
-  else if (typeof cb === "string" || Array.isArray(cb)) {
-    const input = this.map(e => e.toString()).join(' ')
-    const ps = new ProcessSync(cb, {
-      input,
-    })
-    ps.run()
-    if (ps.success) return ps.stdout;
-    throw Error(ps.stderr)
-  }
-}
-
 Array.prototype.exec = function() { return exec(this) }
 
 Array.prototype.execAsync = function() { return execAsync(this) }
 
-
-String.prototype.pipe = function(cb) {
-  if (typeof cb === "function") return cb(this)
-  else if (typeof cb === "string" || Array.isArray(cb)) {
-    const ps = new ProcessSync(cb, {
-      input: this,
-    })
-    ps.run()
-    if (ps.success) return ps.stdout;
-    throw Error(ps.stderr)
-  }
-}
 
 String.prototype.body = function(start, end, line, word) {
   let file = this
@@ -298,18 +288,6 @@ String.prototype.wrap = function(maxLength = getTerminalSize()[0], byWords = tru
     return lines.join('\n')
   }
   return this.chunks(maxLength).join('\n')
-}
-
-Number.prototype.pipe = function(cb) {
-  if (typeof cb === "function") return cb(this)
-  if (typeof cb === "string" || Array.isArray(cb)) {
-    const ps = new ProcessSync(cb, {
-      input: this.toString(),
-    })
-    ps.run()
-    if (ps.success) return ps.stdout;
-    throw Error(ps.stderr)
-  }
 }
 
 Number.prototype.log = function() { print(this); return this }
