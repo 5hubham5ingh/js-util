@@ -83,6 +83,7 @@ export const secret = (message) => {
   while (true) {
     const char = std.in.readAsString(1)
     if (char === keySequences.Enter) {
+      printf('\n')
       return secret
     } else if (char === keySequences.Backspace) {
       secret = secret.slice(0, -1)
@@ -306,7 +307,7 @@ export const pick = () => {
   };
 
   const getFileDetails = ({ size, createdAt, modifiedAt }) =>
-    [`SIZE: ${size}`, `CREATED: ${createdAt}`, `MODIFIED: ${modifiedAt}`]
+    [`SIZE: ${size}`, `CHANGED: ${createdAt}`, `MODIFIED: ${modifiedAt}`]
       .join(' │ ');
 
   const getDetails = () => {
@@ -439,12 +440,13 @@ export const describe = (buffer = '') => {
     const displayBuffer = processBufferForDisplay();
     const ui = [
       ...displayBuffer,
-      ' ',
-      ' ',
-      HELP_PADDED
-    ].join('\n').border('double').log();
+      ' '
+    ];
 
-    prevCursorPos = cursorUp(ui.split('\n').length);
+    if (buffer.split('\n').length === 1) ui.push(" ")
+    ui.push(HELP_PADDED)
+
+    prevCursorPos = cursorUp(ui.join('\n').border('double').log().split('\n').length);
   };
 
   const handleInput = (char) => {
