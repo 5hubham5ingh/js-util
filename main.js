@@ -6,7 +6,7 @@ const scriptPath = args[0];
 
 const [st, err] = scriptPath ? os.stat(scriptPath) : [null, -1];
 
-globalThis.__version = 1.16
+globalThis.__version = "1.16.0"
 
 try {
   if (!err && (st.mode & os.S_IFMT) === os.S_IFREG) {
