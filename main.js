@@ -1,6 +1,5 @@
 import { printf } from "../qjs-ext-lib/src/std.js"
 import { isatty } from "../qjs-ext-lib/src/os.js"
-import { version } from "../../qjs-ext-lib/src/version.js"
 import "extension.js"
 const args = scriptArgs.slice(1);
 const scriptPath = args[0];
