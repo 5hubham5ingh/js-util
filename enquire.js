@@ -306,8 +306,8 @@ export const pick = () => {
     return contents;
   };
 
-  const getFileDetails = ({ size, createdAt, modifiedAt }) =>
-    [`SIZE: ${size}`, `CHANGED: ${createdAt}`, `MODIFIED: ${modifiedAt}`]
+  const getFileDetails = ({ size, changedAt, modifiedAt }) =>
+    [`SIZE: ${size}`, `CHANGED: ${changedAt}`, `MODIFIED: ${modifiedAt}`]
       .join(' │ ');
 
   const getDetails = () => {
@@ -366,7 +366,7 @@ export const pick = () => {
     const selectedOption = options[index];
     if (selectedOption.isDir) {
       if (!cd(selectedOption)) return;
-      const contents = ls
+      const contents = lsStat
       if (contents.length === 0) return;
       options = contents;
       navigationHistory.push(index);
@@ -377,7 +377,7 @@ export const pick = () => {
 
   const navigateBack = () => {
     if (!cd('..')) return;
-    options = ls;
+    options = lsStat;
     index = navigationHistory.pop() ?? 0;
     renderUi();
   };
