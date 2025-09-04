@@ -1,10 +1,13 @@
 import { printf } from "../qjs-ext-lib/src/std.js"
 import { isatty } from "../qjs-ext-lib/src/os.js"
+import { version } from "../../qjs-ext-lib/src/version.js"
 import "extension.js"
 const args = scriptArgs.slice(1);
 const scriptPath = args[0];
 
 const [st, err] = scriptPath ? os.stat(scriptPath) : [null, -1];
+
+globalThis.__version = 1.16
 
 try {
   if (!err && (st.mode & os.S_IFMT) === os.S_IFREG) {
