@@ -132,6 +132,7 @@ Object.defineProperty(globalThis, 'lsStat', {
       isFile: { value: (stats ? (stats.mode & os.S_IFMT) === os.S_IFREG : false) },
       isLink: { value: (stats ? (stats.mode & os.S_IFMT) === os.S_IFLNK : false) },
       size: { value: stats?.size },
+      accessedAt: { value: new Date(stats?.atime) },
       changedAt: { value: new Date(stats?.ctime) },
       modifiedAt: { value: new Date(stats?.mtime) },
     });
