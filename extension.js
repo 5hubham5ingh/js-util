@@ -60,7 +60,7 @@ globalThis.stat = function(path) {
       mb: parseFloat(mb.toFixed(2)),
       gb: parseFloat(gb.toFixed(2))
     },
-    createdAt: new Date(stats.ctime),
+    changedAt: new Date(stats.ctime),
     modifiedAt: new Date(stats.mtime),
   };
 }
@@ -132,7 +132,7 @@ Object.defineProperty(globalThis, 'lsStat', {
       isFile: { value: (stats ? (stats.mode & os.S_IFMT) === os.S_IFREG : false) },
       isLink: { value: (stats ? (stats.mode & os.S_IFMT) === os.S_IFLNK : false) },
       size: { value: stats?.size },
-      createdAt: { value: new Date(stats?.ctime) },
+      changedAt: { value: new Date(stats?.ctime) },
       modifiedAt: { value: new Date(stats?.mtime) },
     });
 
