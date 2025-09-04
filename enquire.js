@@ -306,8 +306,8 @@ export const pick = () => {
     return contents;
   };
 
-  const getFileDetails = ({ size, changedAt, modifiedAt }) =>
-    [`SIZE: ${size}`, `CHANGED: ${changedAt}`, `MODIFIED: ${modifiedAt}`]
+  const getFileDetails = ({ size, accessedAt, changedAt, modifiedAt }) =>
+    [`SIZE: ${size}`, `ACCESSED: ${accessedAt}`, `CHANGED: ${changedAt}`, `MODIFIED: ${modifiedAt}`]
       .join(' │ ');
 
   const getDetails = () => {
