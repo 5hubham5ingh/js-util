@@ -28,10 +28,15 @@ export const loader = (message) => {
 
   worker.postMessage({ type: "start", data: frames });
 
-  return () => {
+  return () => new Promise((resolve) => {
     worker.postMessage({ type: "abort" });
-    worker.onmessage = null;
-  };
+    worker.onmessage = e => {
+      if (e.data === 'stopped') {
+        worker.onmessage = null
+        resolve()
+      }
+    };
+  });
 }
 
 export const pages = (content, pageHeight) => {
