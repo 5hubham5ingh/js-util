@@ -13,7 +13,7 @@ const scriptPath = args[0];
 const [st, err] = scriptPath ? os.stat(scriptPath) : [null, -1];
 
 Object.defineProperty(globalThis, '__version', {
-  get() { print("1.17.0") }
+  get() { print("1.18.0") }
 });
 
 
@@ -81,40 +81,42 @@ async function update() {
   try {
     currentVersion = exec("js '__version'")
   } catch (e) {
-    ["'js' not found.", "It seems 'js' is not installed or not in your system's PATH. Please install it first or ensure it's accessible."].join('\n').style('red').log();
+    log.fatal(["'js' not found.", "It seems 'js' is not installed or not in your system's PATH. Please install it first or ensure it's accessible."].join('\n'))
   }
   if (!version.isSemver(currentVersion)) {
-    `Error: Failed to parse the currently installed 'js' version: ${currentVersion}`.style('red').log()
+    log.fatal(`Failed to parse the currently installed 'js' version: ${currentVersion}`)
   }
   if (!version.isSemver(latestVersion)) {
-    `Failed to parse latest version of 'js': ${latestVersion}`.style('red').log()
+    log.fatal(`Failed to parse latest version of 'js': ${latestVersion}`)
   }
-  ("Currently installed 'js' version: " + currentVersion).style('yellow').log()
+  log.info("Currently installed 'js' version: " + currentVersion)
 
   if (version.gt(currentVersion, latestVersion)) {
-    "An update is available!".style('green').log()
+    log.info("An update is available!")
     " Release note ".style(["#000000", "bg-grey"]).log()
     render.pages(latest.body)
     if (!enquire.confirm("Initiate upgrade to '" + latestVersion + "' ?")) return;
     const installationDir = (exec("whereis js"))?.split(" ")[1]?.trim();
-    ("Identified current 'js' installation path: " + installationDir).style("yellow").log()
+    log.info("Identified current 'js' installation path: " + installationDir)
     const newReleasePackageName = newVersionDownloadUrl.split('/').at(-1);
     const packageDestinationDir = os.getcwd()[0] + "/" + "js";
-    `Downloading new release package: '${newReleasePackageName}' to temporary location: '${packageDestinationDir}' (saved as 'js').\nThis might take a moment...`.style("yellow").log()
+    log.info(`Downloading new release package: '${newReleasePackageName}' to temporary location: '${packageDestinationDir}' (saved as 'js').\nThis might take a moment...`)
     const stopLoader = render.loader()
     if (os.exec(["curl", "-so", packageDestinationDir, "-L", newVersionDownloadUrl])) {
       await stopLoader()
-      ["Download failed.", "Failed to download the new 'js' release.", " Please ensure 'curl' is installed on your system and you have an active internet connection."].join('\n').style('red').log()
+      log.fatal(["Download failed.", "Failed to download the new 'js' release.", " Please ensure 'curl' is installed on your system and you have an active internet connection."].join('\n'))
     }
     await stopLoader()
       `Download complete. Package saved successfully.\nMoving the new 'js' binary to "${installationDir}"`.style("yellow").log()
-    if (os.rename("WallRizz", installationDir)) {
-      [`Installation failed.`, `Failed to move the new 'js' executable to '${installationDir}'.`, ` This usually happens due to insufficient permissions. Please try running 'sudo mv js ${installationDir}' manually for a system-wide installation, or ensure your user has write access to the directory.`].join('\n').style('red').log()
-      return
+    if (os.exec(['chmod', '+x', 'js'])) {
+      log.fatal("Failed to make 'js' executable\nTry running 'chmod +x js'")
     }
-    "'js' update completed successfully!".style('yellow').log()
+    if (os.rename("js", installationDir)) {
+      log.fatal([`Installation failed.`, `Failed to move the new 'js' executable to '${installationDir}'.`, ` This usually happens due to insufficient permissions. Please try running 'sudo mv js ${installationDir}' manually for a system-wide installation, or ensure your user has write access to the directory.`].join('\n'))
+    }
+    log.info("'js' update completed successfully!")
   } else {
-    "'js' is already at the latest version. No update needed at this time.".style("yellow").log()
+    log.info("'js' is already at the latest version. No update needed at this time.")
   }
 }
 

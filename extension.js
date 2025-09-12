@@ -9,6 +9,7 @@ import * as draw from "./draw.js"
 import * as csvParser from "./csvParser.js"
 import * as iniParser from "./iniParser.js"
 import * as tomlParser from "./tomlParser.js"
+import * as log from "./log.js"
 
 globalThis.std = std
 globalThis.os = os
@@ -31,6 +32,7 @@ globalThis.enquire = enquire;
 globalThis.render = render;
 globalThis.draw = draw;
 globalThis.parser = { ...csvParser, ...iniParser, ...tomlParser }
+globalThis.log = log
 
 const resolvePath = (path) => {
   if (path.startsWith('/')) return path;
