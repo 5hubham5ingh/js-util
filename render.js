@@ -33,6 +33,7 @@ export const loader = (message) => {
     worker.onmessage = e => {
       if (e.data === 'stopped') {
         worker.onmessage = null
+        os.exec(['stty', 'sane'])
         resolve()
       }
     };
@@ -57,7 +58,7 @@ export const pages = (content, pageHeight) => {
   if (pageHeight && pageHeight > terminalHeight - 3) pageHeight = terminalHeight - 3
   const contentWidth = terminalWidth - 4;
 
-  const formattedLines = content.stripEmojis().split('\n')
+  const formattedLines = content.stripEmojis().replace(/\r/g, '').split('\n')
     .flatMap(line => {
       const strippedLength = line.stripStyle().length;
       if (strippedLength > contentWidth) {
@@ -157,7 +158,7 @@ export const pages = (content, pageHeight) => {
     [keySequences.Enter]: nextOrQuit,
     'q': (_, quit) => quit()
   });
-
+  os.exec(['stty', 'sane'])
   printf(cursorShow);
 };
 
@@ -214,5 +215,6 @@ export const levels = (levels, animate = true) => {
     os.sleep(700 / maxNoOfFrames);
     prevCursorPos = (cursorUp(allFrames.length * 2 + 1) + eraseDown)
   }
+  os.exec(['stty', 'sane'])
   printf(cursorShow);
 };
