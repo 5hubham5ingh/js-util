@@ -2,6 +2,7 @@ import { printf } from "../qjs-ext-lib/src/std.js"
 import { isatty } from "../qjs-ext-lib/src/os.js"
 import { version } from "../qjs-ext-lib/src/version.js"
 import "extension.js"
+import { cursorShow } from "../justjs/cursor.js"
 
 try { std.loadScript(HOME.concat("/", ".js")) }
 catch { }
@@ -58,6 +59,8 @@ try {
     if (runUpdate) await update()
   }
 } catch (error) {
+  os.exec(['stty', 'sane'])
+  print(cursorShow)
   std.err.puts(
     `${error.constructor.name}: ${error.message}\n${error.stack}`,
   );
