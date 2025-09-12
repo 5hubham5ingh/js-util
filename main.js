@@ -62,7 +62,7 @@ try {
   os.exec(['stty', 'sane'])
   print(cursorShow)
   std.err.puts(
-    `${error.constructor.name}: ${error.message}\n${error.stack}`,
+    `${error.constructor.name.style("#c91d1a")}: ${error.message.style("#FFA07A")}\n${error.stack.style("#C6EFCE")}`,
   );
 }
 
