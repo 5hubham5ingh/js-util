@@ -3,6 +3,9 @@ import { isatty } from "../qjs-ext-lib/src/os.js"
 import { version } from "../qjs-ext-lib/src/version.js"
 import "extension.js"
 
+try { std.loadScript(HOME.concat("/", ".js")) }
+catch { }
+
 const args = scriptArgs.slice(1);
 const scriptPath = args[0];
 
