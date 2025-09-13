@@ -3,6 +3,7 @@ import { cursorBackward, cursorHide, cursorMove, cursorShow, cursorUp, eraseDown
 import { ttySetRaw } from 'os'
 import { getTerminalSize, handleKeysPressSync, keySequences } from "../justjs/terminal.js"
 import { colorPicker } from "./colorPicker.js"
+import { ansi } from "../justjs/ansiStyle.js"
 
 
 const formatLine = (line, lineNumber, totalLines) => {
@@ -58,19 +59,26 @@ const createNavigationHandlers = (getLength, getIndex, setIndex, renderFn) => ({
 
 export const ask = (message) => {
   if (typeof message !== 'string') throw TypeError('The "message" must be of type string.')
-  printf(' ◉ %s ', message)
-  return std.in.getline()
+  render.startSection()
+  printf(' %s '.style(["bg-grey", "#000000", "bold"]).concat("".style('grey'), " ")
+    , message)
+  const ans = std.in.getline()
+  printf(ansi.style.reset)
+  render.endSection()
+  return ans;
 }
 
 export const confirm = (statement) => {
   if (typeof statement !== 'string') throw TypeError('The "statement" must be of type string.')
   let choice
+  render.startSection()
   while (true) {
-    printf(' ◉ %s (y/n): ', statement)
+    printf(' %s (y/n)'.style(["bg-grey", "#000000", "bold"]).concat("".style('grey'), " "), statement)
     choice = std.in.getline()?.trim().toLowerCase()
     if (choice === 'y' || choice === 'n') break
-    print('Invalid input! '.style(['bold', '#bc0300']) + choice)
+    log.error('Invalid input! ' + choice)
   }
+  render.endSection()
   return choice === 'y'
 }
 
@@ -78,12 +86,14 @@ export const secret = (message) => {
   if (typeof message !== 'string') throw TypeError('The "message" must be of type string.')
   ttySetRaw()
   let secret = ''
-  printf(' ◉ %s: ', message)
+  render.startSection()
+  printf(' %s: '.style(["bg-grey", "#000000", "bold"]).concat("".style('grey'), " "), message)
 
   while (true) {
     const char = std.in.readAsString(1)
     if (char === keySequences.Enter) {
-      printf('\n')
+      print(ansi.style.reset)
+      render.endSection()
       return secret
     } else if (char === keySequences.Backspace) {
       secret = secret.slice(0, -1)
