@@ -3,7 +3,7 @@ import { cursorShow } from "../justjs/cursor.js"
 function makeLogger(label, color, postPrint = () => { }) {
   return (...args) => {
     const symbol = ` ${label}`.style(['bold', '#000000', `bg-${color}`]) + '◗'.style(color)
-    print(symbol, ...args.map(arg => arg.style(color)))
+    print([symbol, ...args.map(arg => arg.style(color))].join(' ').border("rounded", color))
     postPrint()
   }
 }
