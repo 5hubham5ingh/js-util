@@ -218,3 +218,19 @@ export const levels = (levels, animate = true) => {
   os.exec(['stty', 'sane'])
   printf(cursorShow);
 };
+
+export const line = (style = "grey") => {
+  const [terminalWidth] = getTerminalSize()
+  "─".repeat(terminalWidth).style(style).log()
+}
+
+export const startSection = (style = "grey") => {
+  const [terminalWidth] = getTerminalSize()
+  print(("╭" + "─".repeat(terminalWidth - 2) + "╮").style(style))
+}
+
+export const endSection = (style = "grey") => {
+  const [terminalWidth] = getTerminalSize()
+  print(("╰" + "─".repeat(terminalWidth - 2) + "╯").style(style))
+}
+
