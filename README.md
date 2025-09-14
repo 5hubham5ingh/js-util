@@ -1,15 +1,20 @@
-# js - JavaScript for your Shell
+# `js`: A javascript based QuickJS-powered Shell Scripting Enhancer
 
-`js` is an interpreter, "shell", and a command-line tool that brings JavaScript to your shell. 
-Built on the lightweight and fast [QuickJS](https://bellard.org/quickjs/) engine, `js` provides a rich set of helper methods and global shortcuts to make your command-line scripting more productive, readable, and enjoyable.
+`js` is a versatile command-line utility that supercharges your shell scripting with the power of QuickJS. It provides a rich set of built-in functions and powerful prototype extensions for JavaScript primitives, enabling:
+
+*   **Interactive Prompts:** Build engaging CLI experiences with `ask`, `confirm`, `choose`, `select`, `search`, `pick` (file/dir picker), `describe` (multi-line input), and a `color` picker.
+*   **Dynamic UI Elements:** Create animated loaders, paginated text displays, and progress bars with `render.loader`, `render.pages`, and `render.levels`.
+*   **Text-Based Graphics:** Generate formatted tables, borders, and stack/join strings with `draw.table`, `String.prototype.border`, `String.prototype.stack`, and `String.prototype.join`.
+*   **System Integration:** Seamlessly interact with your OS for file system operations (`cwd`, `ls`, `cd`, `stat`, `ensureDir`), execute shell commands (`exec`, `execAsync`), and integrate with your `$EDITOR`.
+*   **Data Manipulation:** Effortlessly parse and stringify JSON, INI, TOML, and CSV formats.
+*   **Powerful Prototypes:** Extend JavaScript `String`, `Array`, `Object`, and `Number` prototypes with numerous utility methods for styling, stripping, wrapping, parsing, and more – making your scripts incredibly concise and expressive.
+
+`js` transforms complex shell tasks into elegant, readable JavaScript, making your CLI tools more interactive, visually appealing, and robust.
 
 ## Why
-- Traditional shells are great for running commands, but they're slow for complex scripting because they have to start a new process for almost everything. 
+- Traditional shell scripting is great for running commands, but they're slow for complex scripting because they have to start a new process for almost everything. 
 - By performing complex logic, data manipulation, and arithmetic directly in the optimized JavaScript engine, `js` avoids the significant overhead of creating new processes for every operation.
-- Also, it brings the simplicity and readability of a modern scripting language over cryptic and numerous syntax for different tools like awk, sed, jq, etc to your commands.
-
-It is not a drop-in replacement for traditional shells like Bash, Zsh, and Fish. Rather, it's a powerful companion for when you need to write a script that requires modern programming language features, fast data processing, or complex logic.
-Think of it as a tool that lets you combine the best of both worlds: the power of external UNIX utilities with the elegance and performance of a modern scripting language.
+- Also, it brings the simplicity and readability of a modern scripting language over cryptic and numerous syntax for different tools like awk, sed, jq, etc to your commands and give you the power to write declarative scripts using built-in TUIs.
 
 ## Features
 
@@ -21,6 +26,7 @@ Think of it as a tool that lets you combine the best of both worlds: the power o
 *   **Built-in Data Conversion:** Convert between CSV and JSON formats effortlessly.
 *   **Advanced String & Array Manipulation:** A rich set of prototype methods for common data manipulation tasks.
 *   **Styled Output:** Add colors, styles, and borders to your output for better readability.
+*   **TUIs:** Built-in terminal based interactive interface for various user input and output.
 
 ## Installation
 
@@ -231,33 +237,15 @@ chmod +x fzfDict.js
 
 # API Reference
 
+## Extensions and config file
+- Extra helper scripts can be loaded globally from `~/config/js/` with `use(scriptName)`.
+- A default script, if exist, will be loaded from `~/.js` always.
+
 ## Global Objects and Functions
 
 ### `globalThis` Extensions
 
 The `globalThis` object is extended with several utility functions and properties.
-
-#### `parse(jsonString)`
-Parses a JSON string, constructing the JavaScript value or object described by the string.
-- **`jsonString`**: (`string`) The JSON string to parse.
-- **Returns**: (`any`) The JavaScript object or value parsed from the JSON string.
-- **Example**:
-  ```javascript
-  const obj = parse('{"name": "Alice", "age": 30}');
-  // obj is { name: "Alice", age: 30 }
-  ```
-
-#### `stringify(value, replacer = null, space = 2)`
-Converts a JavaScript value to a JSON string.
-- **`value`**: (`any`) The value to convert to a JSON string.
-- **`replacer`**: (`function` or `array`, optional) A function that alters the behavior of the stringification process, or an array of `String` and `Number` objects that serve as a whitelist for selecting the properties of the `value` object to be included in the JSON string.
-- **`space`**: (`string` or `number`, optional) A `String` or `Number` object that's used to insert white space into the output JSON string for readability purposes.
-- **Returns**: (`string`) A JSON string representation of the `value`.
-- **Example**:
-  ```javascript
-  const jsonString = stringify({ name: "Bob", occupation: "Engineer" });
-  // jsonString is '{\n  "name": "Bob",\n  "occupation": "Engineer"\n}'
-  ```
 
 #### `exec(command)`
 Executes a shell command synchronously.
@@ -317,16 +305,19 @@ Evaluates a JavaScript expression or script string.
   ```
 
 #### `enquire`
-An object containing functions for interactive terminal input. See [Enquire Module](#enquire-module) for details.
+An object containing functions for interactive terminal input. See [Enquire Module](https://github.com/5hubham5ingh/js-util?tab=readme-ov-file#enquire-1) for details.
 
 #### `render`
-An object containing functions for rendering animated or formatted output in the terminal. See [Render Module](#render-module) for details.
+An object containing functions for rendering animated or formatted output in the terminal. See [Render Module](https://github.com/5hubham5ingh/js-util?tab=readme-ov-file#render-1) for details.
 
 #### `draw`
-An object containing functions for drawing text-based UI elements in the terminal. See [Draw Module](#draw-module) for details.
+An object containing functions for drawing text-based UI elements in the terminal. See [Draw Module](https://github.com/5hubham5ingh/js-util?tab=readme-ov-file#draw-1) for details.
 
 #### `parser`
-An object containing functions for parsing various data formats (CSV, INI, TOML). See [Parser Module](#parser-module) for details.
+An object containing functions for parsing various data formats (CSV, INI, TOML). See [Parser Module](https://github.com/5hubham5ingh/js-util?tab=readme-ov-file#parser-1) for details.
+
+#### `log`
+An object containing functions for logging message of different kinds. See [Log Module](https://github.com/5hubham5ingh/js-util?tab=readme-ov-file#log-1) for details.
 
 #### `stat(path)`
 Retrieves file system statistics for a given path.
@@ -1097,70 +1088,83 @@ An object providing functions for drawing text-based UI elements in the terminal
     // Line 2
     ```
 
-## `parser`
+- `draw.message(label, message, details, color)`
+  Create a formatted message TUI and return it as string.
+  - `label`: (`string`) The label for message.
+  - `message`: (`string`) The message.
+  - `details`: (`string`) The details about the message. (Optional)
+  - `color`: (`string`) The color of label, message and outer border.
+  - **Return**: (`string`) The generated message TUI.
+  - **Example**:
+    ```javascript
+    const msg = draw("Update","The is an update message.","This is update desctiption.","green")
+    print(msg)
+    ```
+  
+## `parse`
 An object containing functions for parsing and stringifying various data formats.
 
-- **`parser.csvArrayToCsvJson(array, delimiter = ',')`**
+- **`parse.csvArrayToCsvJson(array, delimiter = ',')`**
   Converts an array of arrays (CSV array format) to an array of objects (CSV JSON format).
   - **`array`**: (`Array<Array<string>>`) The input CSV data.
   - **`delimiter`**: (`string`, optional) Delimiter for parsing. Defaults to `,`.
   - **Returns**: (`Array<object>`) The converted data.
   - **Example**:
     ```javascript
-    parser.csvArrayToCsvJson([['name', 'age'], ['Alice', '30']]);
+    parse.csvArrayToCsvJson([['name', 'age'], ['Alice', '30']]);
     // [{ name: 'Alice', age: '30' }]
     ```
 
-- **`parser.csvArrayToCsvText(array, delimiter = ',')`**
+- **`parse.csvArrayToCsvText(array, delimiter = ',')`**
   Converts an array of arrays (or an array of objects) to a CSV text string.
   - **`array`**: (`Array<Array<string>>` or `Array<object>`) The input CSV data.
   - **`delimiter`**: (`string`, optional) Delimiter for stringifying. Defaults to `,`.
   - **Returns**: (`string`) The CSV string.
   - **Example**:
     ```javascript
-    parser.csvArrayToCsvText([['A', 'B'], ['1', '2']]); // "A,B\n1,2"
+    parse.csvArrayToCsvText([['A', 'B'], ['1', '2']]); // "A,B\n1,2"
     ```
 
-- **`parser.csvTextToCsvArray(csvText, delimiter = ',')`**
+- **`parse.csvTextToCsvArray(csvText, delimiter = ',')`**
   Parses a CSV text string into an array of arrays.
   - **`csvText`**: (`string`) The input CSV string.
   - **`delimiter`**: (`string`, optional) Delimiter for parsing. Defaults to `,`.
   - **Returns**: (`Array<Array<string>>`) The parsed data.
   - **Example**:
     ```javascript
-    parser.csvTextToCsvArray("A,B\n1,2"); // [['A', 'B'], ['1', '2']]
+    parse.csvTextToCsvArray("A,B\n1,2"); // [['A', 'B'], ['1', '2']]
     ```
 
-- **`parser.csvTextToCsvJson(csvText, delimiter = ',')`**
+- **`parse.csvTextToCsvJson(csvText, delimiter = ',')`**
   Parses a CSV text string into an array of objects.
   - **`csvText`**: (`string`) The input CSV string.
   - **`delimiter`**: (`string`, optional) Delimiter for parsing. Defaults to `,`.
   - **Returns**: (`Array<object>`) The parsed data.
   - **Example**:
     ```javascript
-    parser.csvTextToCsvJson("name,age\nAlice,30"); // [{ name: 'Alice', age: '30' }]
+    parse.csvTextToCsvJson("name,age\nAlice,30"); // [{ name: 'Alice', age: '30' }]
     ```
 
-- **`parser.csvJsonToCsvText(csvJson)`**
+- **`parse.csvJsonToCsvText(csvJson)`**
   Converts an array of objects (CSV JSON format) to a CSV text string.
   - **`csvJson`**: (`Array<object>`) The input CSV data.
   - **Returns**: (`string`) The CSV string.
   - **Example**:
     ```javascript
-    parser.csvJsonToCsvText([{ name: 'Alice', age: 30 }]); // "name,age\nAlice,30"
+    parse.csvJsonToCsvText([{ name: 'Alice', age: 30 }]); // "name,age\nAlice,30"
     ```
 
-- **`parser.csvJsonToCsvArray(csvJson)`**
+- **`parse.csvJsonToCsvArray(csvJson)`**
   Converts an array of objects (CSV JSON format) to an array of arrays.
   - **`csvJson`**: (`Array<object>`) The input CSV data.
   - **Returns**: (`Array<Array<string>>`) The converted data.
   - **Example**:
     ```javascript
-    parser.csvJsonToCsvArray([{ name: 'Alice', age: 30 }]);
+    parse.csvJsonToCsvArray([{ name: 'Alice', age: 30 }]);
     // [['name', 'age'], ['Alice', '30']]
     ```
 
-- **`parser.parseIni(content, options = {})`**
+- **`parse.ini(content, options = {})`**
   Parses an INI file content into a JavaScript object.
   - **`content`**: (`string`) The INI file content.
   - **`options`**: (`object`, optional) Parsing options:
@@ -1172,42 +1176,59 @@ An object containing functions for parsing and stringifying various data formats
   - **Returns**: (`object`) The parsed INI data.
   - **Example**:
     ```javascript
-    parser.parseIni('[section]\nkey=value'); // { section: { key: 'value' } }
+    parser.ini('[section]\nkey=value'); // { section: { key: 'value' } }
     ```
 
-- **`parser.toIni(obj)`**
+- **`parse.toIni(obj)`**
   Stringifies a JavaScript object into an INI formatted string.
   - **`obj`**: (`object`) The object to stringify.
   - **Returns**: (`string`) The INI formatted string.
   - **Example**:
     ```javascript
-    parser.toIni({ rootKey: 'val', section: { item: 1 } });
+    parse.toIni({ rootKey: 'val', section: { item: 1 } });
     // rootKey=val
     //
     // [section]
     // item=1
     ```
 
-- **`parser.parseToml(content)`**
+- **`parse.parseToml(content)`**
   Parses a TOML string into a JavaScript object. Supports basic data types, tables, and arrays of tables.
   - **`content`**: (`string`) The TOML content as a string.
   - **Returns**: (`object`) A JavaScript object representing the TOML data.
   - **Example**:
     ```javascript
-    parser.parseToml('title = "My Project"\n[owner]\nname = "Alice"');
+    parse.toml('title = "My Project"\n[owner]\nname = "Alice"');
     // { title: 'My Project', owner: { name: 'Alice' } }
     ```
 
-- **`parser.toToml(tomlObj)`**
+- **`parse.toToml(tomlObj)`**
   Converts a JavaScript object into a TOML-formatted string.
   - **`tomlObj`**: (`object`) The JavaScript object to convert.
   - **Returns**: (`string`) The resulting TOML string.
   - **Example**:
     ```javascript
-    parser.toToml({ title: "Example", settings: { value: 10 } });
+    parse.toToml({ title: "Example", settings: { value: 10 } });
     // title = "Example"
     //
     // [settings]
     // value = 10
     ```
 
+- `parse.json(stringfiedObj)`
+  Alias for JSON.parse.
+
+- `parse.toString(obj)`
+  Alias for JSON.stringify.
+
+## `log`
+An object containing functions for logging messages.
+
+- `log.error(message,description)`, `log.info(message,description)`, `log.warn(message, description)`, `log.fatal(message, description)`
+  Prints the message as error.
+  - `message`: (string) The message text.
+  - `description`: (string) Option description of the error.
+  - **Example**:
+  ```javascript
+  log.error("This is an error.","This is the error's description")
+  ```
