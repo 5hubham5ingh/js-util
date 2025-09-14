@@ -1,3 +1,5 @@
+import { getTerminalSize } from "../justjs/terminal.js";
+
 export const table = (data, columns) => {
   if (typeof data !== 'object' || data === null) {
     throw TypeError('The "data" argument must be an array or a non-null object.');
@@ -186,3 +188,34 @@ export const join = (firstString, secondString) => {
   return combinedLines.join('\n')
 }
 
+export const message = (label, message, details, color) => {
+  if (typeof label !== 'string' || !label.trim())
+    throw new TypeError("message(): 'label' must be a non-empty string.")
+  if (typeof message !== 'string' || !message.trim())
+    throw new TypeError("message(): 'message' must be a non-empty string.")
+  if (details != null && typeof details !== 'string')
+    throw new TypeError("message(): 'details' must be a string if provided.")
+
+  const [terminalWidth] = getTerminalSize()
+  const formatedLabel = ` ${label}`.style(['bold', '#000000', `bg-${color}`]) + '◗'.style(color)
+
+  let maxMessageLineLength = 0
+  const formatedMessage = message
+    .wrap(terminalWidth - 5 - message.stripStyle().length)
+    .lines()
+    .map(l => {
+      maxMessageLineLength = Math.max(maxMessageLineLength, l.stripStyle().length)
+      return l.style(color)
+    }).join('\n')
+
+  const formatedDetail = details?.lines()
+    .map(l => l.wrap(terminalWidth - 6).padEnd(maxMessageLineLength + label.stripStyle().length))
+    .join('\n')
+    ?.border("rounded")
+
+  const finalMessage = []
+  finalMessage.push(formatedLabel + ' ' + formatedMessage)
+  if (details) finalMessage.push(formatedDetail)
+
+  return finalMessage.join("\n").border("rounded", color, 0)
+}

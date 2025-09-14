@@ -1,18 +1,24 @@
+
 import { cursorShow } from "../justjs/cursor.js"
 
-function makeLogger(label, color, postPrint = () => { }) {
-  return (...args) => {
-    const symbol = ` ${label}`.style(['bold', '#000000', `bg-${color}`]) + '◗'.style(color)
-    print([symbol, ...args.map(arg => arg.style(color))].join(' ').border("rounded", color))
-    postPrint()
-  }
+export const warn = (msg, det) => {
+  const label = "WARN", color = "#fce74b"
+  print(draw.message(label, msg, det, color))
 }
 
-export const warn = makeLogger("WARN", "#fce74b")
-export const info = makeLogger("INFO", "#C6EFCE")
-export const error = makeLogger("ERROR", "#FFA07A")
-export const fatal = makeLogger("FATAL", "#c91d1a", () => {
-  print(cursorShow)
-  os.exec(['stty', 'sane'])
-})
+export const info = (msg, det) => {
+  const label = "INFO", color = "#C6EFCE"
+  print(draw.message(label, msg, det, color))
+}
 
+export const error = (msg, det) => {
+  const label = "ERROR", color = "#FFA07A"
+  std.err.puts(draw.message(label, msg, det, color), '\n')
+}
+
+export const fatal = (msg, det) => {
+  const label = "FATAL", color = "#c91d1a"
+  std.err.puts(draw.message(label, msg, det, color), '\n', cursorShow)
+  os.exec(['stty', 'sane'])
+  std.exit()
+}

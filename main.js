@@ -2,7 +2,6 @@ import { printf } from "../qjs-ext-lib/src/std.js"
 import { isatty } from "../qjs-ext-lib/src/os.js"
 import { version } from "../qjs-ext-lib/src/version.js"
 import "extension.js"
-import { cursorShow } from "../justjs/cursor.js"
 
 try { std.loadScript(HOME.concat("/", ".js")) }
 catch { }
@@ -13,7 +12,7 @@ const scriptPath = args[0];
 const [st, err] = scriptPath ? os.stat(scriptPath) : [null, -1];
 
 Object.defineProperty(globalThis, '__version', {
-  get() { print("1.18.0") }
+  get() { print("1.18.1") }
 });
 
 
@@ -59,11 +58,7 @@ try {
     if (runUpdate) await update()
   }
 } catch (error) {
-  os.exec(['stty', 'sane'])
-  print(cursorShow)
-  std.err.puts(
-    `${error.constructor.name.style("#c91d1a")}: ${error.message.style("#FFA07A")}\n${error.stack.style("#C6EFCE")}`,
-  );
+  log.fatal(`${error.constructor.name} : ${error.message}`, error.stack)
 }
 
 async function update() {
