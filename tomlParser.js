@@ -6,7 +6,7 @@
  * @param {string} content The TOML content as a string.
  * @returns {object} A JavaScript object representing the TOML data.
  */
-export function parseToml(content) {
+export function toml(content) {
   const lines = content.split(/\r?\n/);
   const result = {};
   let currentTable = result;

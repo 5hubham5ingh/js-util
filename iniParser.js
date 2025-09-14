@@ -4,7 +4,7 @@
  * @param {Object} options - Parsing options
  * @returns {Object} Parsed INI data
  */
-export function parseIni(content, options = {}) {
+export function ini(content, options = {}) {
   const opts = {
     // Whether to preserve key case (default: false, converts to lowercase)
     preserveCase: false,

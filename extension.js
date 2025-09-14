@@ -13,8 +13,6 @@ import * as log from "./log.js"
 
 globalThis.std = std
 globalThis.os = os
-globalThis.parse = JSON.parse
-globalThis.stringify = JSON.stringify
 globalThis.exec = exec
 globalThis.execAsync = execAsync
 globalThis.read = std.loadFile
@@ -31,7 +29,7 @@ globalThis.eval = function(expression) {
 globalThis.enquire = enquire;
 globalThis.render = render;
 globalThis.draw = draw;
-globalThis.parser = { ...csvParser, ...iniParser, ...tomlParser }
+globalThis.parse = { ...csvParser, ...iniParser, ...tomlParser, json: JSON.parse, toString: JSON.stringify }
 globalThis.log = log
 
 const resolvePath = (path) => {
