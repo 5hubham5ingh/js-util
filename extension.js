@@ -167,7 +167,7 @@ Object.prototype.pipe = function(cb) {
   throw new TypeError("Invalid callback type. Expected function or string/array.");
 }
 
-Object.prototype.log = function() { print(stringify(this, null, 1)); return this }
+Object.prototype.log = function() { print(JSON.stringify(this, null, 1)); return this }
 
 Object.prototype.entries = function() { return Object.entries(this) };
 
@@ -220,6 +220,7 @@ Array.prototype.exec = function() { return exec(this) }
 
 Array.prototype.execAsync = function() { return execAsync(this) }
 
+Array.prototype.log = function() { print(JSON.stringify(this, null, 1)); return this }
 
 String.prototype.body = function(start, end, line, word) {
   let file = this
