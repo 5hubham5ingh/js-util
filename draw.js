@@ -283,8 +283,7 @@ export const message = (label, message, details, color) => {
 
   const maxMessageLineLength = terminalWidth - label.stripStyle().length - 6;
   const formatedMessage = message
-    .wrap(terminalWidth - 5 - label.stripStyle().length)
-    .lines()
+    .wrap(terminalWidth - 5 - label.stripStyle().length).lines()
     .map((l) => l.style(color)).join("\n");
 
   const formatedDetail = details?.lines()

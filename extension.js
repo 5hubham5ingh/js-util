@@ -252,9 +252,9 @@ String.prototype.toCsvArray = function(delimiter = ',') { return csvParser.csvTe
 
 String.prototype.toCsvJson = function(delimiter = ',') { return csvParser.csvTextToCsvJson(this, delimiter) };
 
-String.prototype.parseIni = function(options) { return iniParser.parseIni(this, options) }
+String.prototype.parseIni = function(options) { return iniParser.ini(this, options) }
 
-String.prototype.parseToml = function() { return tomlParser.parseToml(this) }
+String.prototype.parseToml = function() { return tomlParser.toml(this) }
 
 String.prototype.exec = function() { return exec(this) }
 

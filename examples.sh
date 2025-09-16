@@ -35,11 +35,11 @@ $JS "ensureDir('/tmp/test_dir'); print('Created /tmp/test_dir')"
 $JS "stat('/tmp/test_dir').log()" # Get file/directory stats
 $JS "'echo Hello from exec'.exec().log()"
 $JS "'echo Hello from execAsync'.execAsync().then(r => print(r.stdout)).catch(e => print(e))"
-$JS "parse('{\"key\":\"value\"}').log()"
-$JS "stringify({ key: 'value' }).log()"
 $JS "read('examples.sh').lines().slice(0, 5).join('\\n').log()" # Read file, manipulate lines
 
 # Prototype extensions
+$JS "'{\"key\":\"value\"}'.parseJson().log()"
+$JS "({key:'value'}).stringify().log()"
 $JS "'This is a test string'.style(['bold', 'red', 'bg-yellow']).log()"
 $JS "'This has some \x1b[34mcolor\x1b[0m'.stripStyle().log()"
 $JS "'Hello 👋 World 🌍'.stripEmojis().log()"
