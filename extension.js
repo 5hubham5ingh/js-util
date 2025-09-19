@@ -316,4 +316,27 @@ String.prototype.wrap = function(maxLength = getTerminalSize()[0], byWords = tru
 
 Number.prototype.log = function() { print(this); return this }
 
+Object.defineProperty(Number.prototype, 'seconds', {
+  get: function() { return this * 1000; },
+  configurable: true
+});
 
+Object.defineProperty(Number.prototype, 'minutes', {
+  get: function() { return this * 60 * 1000; },
+  configurable: true
+});
+
+Object.defineProperty(Number.prototype, 'hours', {
+  get: function() { return this * 60 * 60 * 1000; },
+  configurable: true
+});
+
+Object.defineProperty(Number.prototype, 'days', {
+  get: function() { return this * 24 * 60 * 60 * 1000; },
+  configurable: true
+});
+
+Object.defineProperty(Number.prototype, 'weeks', {
+  get: function() { return this * 7 * 24 * 60 * 60 * 1000; },
+  configurable: true
+});
