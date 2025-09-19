@@ -227,12 +227,12 @@ export const line = (style = "grey") => {
 
 export const startSection = (style = "grey") => {
   const [terminalWidth] = getTerminalSize()
-  print(("╭" + "─".repeat(terminalWidth - 2) + "╮").style(style))
+  print(("╔" + "═".repeat(terminalWidth - 2) + "╗").style(style))
 }
 
 export const endSection = (style = "grey") => {
   const [terminalWidth] = getTerminalSize()
-  print(("╰" + "─".repeat(terminalWidth - 2) + "╯").style(style))
+  print(("╚" + "═".repeat(terminalWidth - 2) + "╝").style(style))
 }
 
 export const timer = (till) => {
