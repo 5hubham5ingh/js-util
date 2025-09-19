@@ -1,7 +1,8 @@
-import { cursorHide, cursorShow, cursorUp, eraseDown } from "../justjs/cursor.js";
+import { clearScreen, cursorHide, cursorShow, cursorUp, eraseDown } from "../justjs/cursor.js";
 import { getTerminalSize, handleKeysPressSync, keySequences } from "../justjs/terminal.js";
 import { printf } from "std"
 import { ttySetRaw } from "../qjs-ext-lib/src/os.js";
+import { setInterval, clearInterval } from "../qjs-ext-lib/src/timers.js";
 
 export const loader = (message) => {
   if (message && typeof message !== 'string') throw TypeError('The "message" argument be of type "string".')
@@ -234,3 +235,27 @@ export const endSection = (style = "grey") => {
   print(("╰" + "─".repeat(terminalWidth - 2) + "╯").style(style))
 }
 
+export const timer = (till) => {
+  const intervalId = setInterval(() => {
+    const now = Date.now();
+    const diff = Math.abs(till - now);
+
+    if (diff < 10) {
+      clearInterval(intervalId);
+    }
+
+    const totalSeconds = Math.floor(diff / 1000);
+    const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+    const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+    const seconds = String(Math.floor(totalSeconds % 60)).padStart(2, '0');
+
+    const milliseconds = String(Math.floor(diff % 1000 / 10)).padStart(2, '0');
+
+    const timeString = `${hours}:${minutes}:${seconds}:${milliseconds}`;
+
+    const blockNumber = draw.blockNumber(timeString);
+    const padStart = Math.abs((getTerminalSize()[0] - blockNumber.lines()[0].length) / 2);
+
+    print(clearScreen + blockNumber.border("double").lines().map(l => l.padStart(padStart + l.length)).join('\n'));
+  }, 10);
+}

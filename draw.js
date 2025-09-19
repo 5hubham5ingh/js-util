@@ -301,3 +301,136 @@ export const message = (label, message, details, color) => {
 
   return finalMessage.join("\n").border("rounded", color, 0);
 };
+
+export const blockNumber = (str, scale = 1) => {
+  const chars = {
+    '0': [
+      "██████",
+      "██  ██",
+      "██  ██",
+      "██  ██",
+      "██████"
+    ],
+    '1': [
+      "  ██  ",
+      "  ██  ",
+      "  ██  ",
+      "  ██  ",
+      "  ██  "
+    ],
+    '2': [
+      "██████",
+      "    ██",
+      "██████",
+      "██    ",
+      "██████"
+    ],
+    '3': [
+      "██████",
+      "    ██",
+      "██████",
+      "    ██",
+      "██████"
+    ],
+    '4': [
+      "██  ██",
+      "██  ██",
+      "██████",
+      "    ██",
+      "    ██"
+    ],
+    '5': [
+      "██████",
+      "██    ",
+      "██████",
+      "    ██",
+      "██████"
+    ],
+    '6': [
+      "██████",
+      "██    ",
+      "██████",
+      "██  ██",
+      "██████"
+    ],
+    '7': [
+      "██████",
+      "    ██",
+      "    ██",
+      "    ██",
+      "    ██",
+    ],
+    '8': [
+      "██████",
+      "██  ██",
+      "██████",
+      "██  ██",
+      "██████"
+    ],
+    '9': [
+      "██████",
+      "██  ██",
+      "██████",
+      "    ██",
+      "██████"
+    ],
+    '.': [
+      "  ",
+      "  ",
+      "  ",
+      "  ",
+      "██"
+    ],
+    '-': [
+      "    ",
+      "    ",
+      "████",
+      "    ",
+      "    ",
+    ],
+    ':': [
+      "  ",
+      "██",
+      "  ",
+      "██",
+      "  ",
+    ]
+  };
+
+  // Ensure scale is a positive integer
+  const finalScale = Math.max(1, Math.floor(scale));
+
+  const outputLines = [];
+
+  // Loop through each line of the block characters (5 lines total)
+  for (let j = 0; j < 5; j++) {
+    let line = '';
+
+    // Build the string for the current line by looping through the input string
+    for (let i = 0; i < str.length; i++) {
+      const char = str[i];
+      const blockChar = chars[char];
+
+      if (blockChar) {
+        // Horizontally scale the block character line
+        let scaledLinePart = '';
+        for (let k = 0; k < blockChar[j].length; k++) {
+          scaledLinePart += blockChar[j][k].repeat(finalScale);
+        }
+        line += scaledLinePart;
+
+        // Add a space between characters
+        if (i < str.length - 1) {
+          line += ' '.repeat(finalScale);
+        }
+      }
+    }
+
+    // Vertically scale the line and add to output
+    for (let l = 0; l < finalScale; l++) {
+      outputLines.push(line);
+    }
+  }
+
+  return outputLines.join('\n');
+};
