@@ -1,4 +1,4 @@
-import { clearScreen, cursorHide, cursorShow, cursorUp, eraseDown } from "../justjs/cursor.js";
+import { clearScreen, cursorDown, cursorHide, cursorShow, cursorUp, eraseDown } from "../justjs/cursor.js";
 import { getTerminalSize, handleKeysPressSync, keySequences } from "../justjs/terminal.js";
 import { printf } from "std"
 import { ttySetRaw } from "../qjs-ext-lib/src/os.js";
@@ -236,13 +236,15 @@ export const endSection = (style = "grey") => {
 }
 
 export const timer = (till) => {
+  print(cursorHide)
+  const stop = () => {
+    clearInterval(intervalId);
+    print(cursorShow, cursorDown(7))
+  }
   const intervalId = setInterval(() => {
     const now = Date.now();
     const diff = Math.abs(till - now);
 
-    if (diff < 10) {
-      clearInterval(intervalId);
-    }
 
     const totalSeconds = Math.floor(diff / 1000);
     const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
@@ -253,9 +255,12 @@ export const timer = (till) => {
 
     const timeString = `${hours}:${minutes}:${seconds}:${milliseconds}`;
 
-    const blockNumber = draw.blockNumber(timeString);
+    const blockNumber = draw.blockDigits(timeString);
     const padStart = Math.abs((getTerminalSize()[0] - blockNumber.lines()[0].length) / 2);
 
-    print(clearScreen + blockNumber.border("double").lines().map(l => l.padStart(padStart + l.length)).join('\n'));
+    print(blockNumber.border("double").lines().map(l => l.padStart(padStart + l.length)).join('\n'), cursorUp(7));
+
+    if (diff < 10) stop()
   }, 10);
+  return stop
 }

@@ -302,7 +302,7 @@ export const message = (label, message, details, color) => {
   return finalMessage.join("\n").border("rounded", color, 0);
 };
 
-export const blockNumber = (str, scale = 1) => {
+export const blockDigits = (str, scale = 1) => {
   const chars = {
     '0': [
       "██████",
