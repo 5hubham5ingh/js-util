@@ -319,16 +319,34 @@ String.prototype.align = function(alignment, width = getTerminalSize()[0]) {
 
     case "center": return this.lines().map(l => {
       const padStart = Math.abs((width - l.stripStyle().length) / 2)
-      return l.padStart(l.stripStyle().length + padStart)
+      return l.padStart(l.length + padStart)
     }).join('\n')
 
     case "right": return this.lines().map(l => {
       const padLeft = Math.abs(width - l.stripStyle().length)
-      return l.padStart(l.stripStyle().length + padLeft)
+      return l.padStart(l.length + padLeft)
     }).join('\n')
 
     default: return this
   }
+}
+
+String.prototype.padEnd2 = function(maxLength, fillString = " ") {
+  return this.wrap(maxLength)
+    .lines()
+    .map((l) => l
+      .padEnd(
+        (maxLength - l.stripStyle().length) + l.length), fillString
+    ).join("\n");
+}
+
+String.prototype.padStart2 = function(maxLength, fillString = " ") {
+  return this.wrap(maxLength)
+    .lines()
+    .map((l) => l
+      .padStart(
+        (maxLength - l.stripStyle().length) + l.length), fillString
+    ).join("\n");
 }
 
 Number.prototype.log = function() { print(this); return this }
