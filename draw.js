@@ -281,20 +281,12 @@ export const message = (label, message, details, color) => {
   const formatedLabel = ` ${label}`.style(["bold", "#000000", `bg-${color}`]) +
     "◗".style(color);
 
-  const maxMessageLineLength = terminalWidth - label.stripStyle().length - 6;
-  const formatedMessage = message
-    .wrap(terminalWidth - 5 - label.stripStyle().length)
-    .lines()
-    .map((l) => l.padEnd(
-      terminalWidth - 5 - label.stripStyle().length,
-    ).style(color)).join("\n");
+  const formatedMessage = message.padEnd2(terminalWidth - 3 - formatedLabel.stripStyle().length).style(color)
 
   const formatedDetail = details?.lines()
     .map((l) =>
-      l.wrap(terminalWidth - 6).padEnd(
-        maxMessageLineLength + label.stripStyle().length,
-      )
-    )
+      l.wrap(terminalWidth - 6)
+        .padEnd2(terminalWidth - 6))
     .join("\n")
     ?.border("rounded");
 
