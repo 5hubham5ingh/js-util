@@ -314,6 +314,23 @@ String.prototype.wrap = function(maxLength = getTerminalSize()[0], byWords = tru
   return this.chunks(maxLength).join('\n')
 }
 
+String.prototype.align = function(alignment, width = getTerminalSize()[0]) {
+  switch (alignment) {
+
+    case "center": return this.lines().map(l => {
+      const padStart = Math.abs((width - l.stripStyle().length) / 2)
+      return l.padStart(l.stripStyle().length + padStart)
+    }).join('\n')
+
+    case "right": return this.lines().map(l => {
+      const padLeft = Math.abs(width - l.stripStyle().length)
+      return l.padStart(l.stripStyle().length + padLeft)
+    }).join('\n')
+
+    default: return this
+  }
+}
+
 Number.prototype.log = function() { print(this); return this }
 
 Object.defineProperty(Number.prototype, 'seconds', {
