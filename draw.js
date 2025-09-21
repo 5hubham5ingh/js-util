@@ -111,7 +111,7 @@ export const levels = (levels) => {
   return finalFrames.join("\n\n");
 };
 
-export const border = (str, type = "normal", style, padding = 1) => {
+export const border = (str, type = "normal", style, padX = 1, padY = 0) => {
   const borderChars = {
     normal: {
       x: "─".style(style),
@@ -161,7 +161,6 @@ export const border = (str, type = "normal", style, padding = 1) => {
   }
 
   const lines = str.split("\n");
-  const horizontalPadding = " ".repeat(padding);
 
   const contentWidth = Math.max(
     0,
@@ -172,23 +171,19 @@ export const border = (str, type = "normal", style, padding = 1) => {
     return `${chars.tl}${chars.tr}\n${chars.bl}${chars.br}`;
   }
 
-  const totalInnerWidth = contentWidth + padding * 2;
+  const totalInnerWidth = contentWidth + padX * 2;
 
   const topBorder = chars.tl + chars.x.repeat(totalInnerWidth) + chars.tr;
   const bottomBorder = chars.bl + chars.x.repeat(totalInnerWidth) + chars.br;
 
-  const middleContent = lines.map((line) => {
-    const strippedLength = line.stripStyle().length;
+  const verticalPadding = (chars.y + " ".repeat(totalInnerWidth) + chars.y + "\n").repeat(padY)
+  const horizontalPadding = " ".repeat(padX)
 
-    const rightPaddingCount = totalInnerWidth - strippedLength - padding;
-    const rightPadding = " ".repeat(
-      rightPaddingCount > 0 ? rightPaddingCount : 0,
-    );
+  const middleContent = lines.map(
+    (line) => `${chars.y}${horizontalPadding}${line}${horizontalPadding}${chars.y}`
+  ).join("\n");
 
-    return `${chars.y}${horizontalPadding}${line}${rightPadding}${chars.y}`;
-  }).join("\n");
-
-  return `${topBorder}\n${middleContent}\n${bottomBorder}`;
+  return `${topBorder}\n${verticalPadding}${middleContent}\n${verticalPadding}${bottomBorder}`;
 };
 
 const ALIGN = {
