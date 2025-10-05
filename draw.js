@@ -167,6 +167,7 @@ export const border = (str, type = "normal", style, padX = 1, padY = 0) => {
     ...lines.map((line) => line.stripStyle().length),
   );
 
+  // return empty box
   if (contentWidth === 0 && lines.length === 1 && lines[0] === "") {
     return `${chars.tl}${chars.tr}\n${chars.bl}${chars.br}`;
   }
@@ -179,8 +180,8 @@ export const border = (str, type = "normal", style, padX = 1, padY = 0) => {
   const verticalPadding = (chars.y + " ".repeat(totalInnerWidth) + chars.y + "\n").repeat(padY)
   const horizontalPadding = " ".repeat(padX)
 
-  const middleContent = lines.map(
-    (line) => `${chars.y}${horizontalPadding}${line}${horizontalPadding}${chars.y}`
+  const middleContent = lines.map(line =>
+    `${chars.y}${horizontalPadding}${line.padEnd(contentWidth + line.length - line.stripStyle().length)}${horizontalPadding}${chars.y}`
   ).join("\n");
 
   return `${topBorder}\n${verticalPadding}${middleContent}\n${verticalPadding}${bottomBorder}`;
@@ -204,12 +205,12 @@ export const stack = (firstString, secondString, align = ALIGN.LEFT) => {
   switch (align) {
     case ALIGN.LEFT:
       stackedLines.push(
-        ...combinedLines.map((line) => line.padEnd(maxLineWidth)),
+        ...combinedLines.map((line) => line.padEnd2(maxLineWidth)),
       );
       break;
     case ALIGN.RIGHT:
       stackedLines.push(
-        ...combinedLines.map((line) => line.padStart(maxLineWidth)),
+        ...combinedLines.map((line) => line.padStart2(maxLineWidth)),
       );
       break;
     case ALIGN.CENTER:
@@ -229,6 +230,7 @@ export const stack = (firstString, secondString, align = ALIGN.LEFT) => {
 export const join = (firstString, secondString) => {
   const linesFromFirstString = firstString.split("\n");
   const linesFromSecondString = secondString.split("\n");
+
   if (linesFromFirstString.length < linesFromSecondString.length) {
     const maxLineWidth = Math.max(
       ...linesFromFirstString.map((line) => line.stripStyle().length),
@@ -238,7 +240,8 @@ export const join = (firstString, secondString) => {
       linesFromSecondString.length - linesFromFirstString.length,
     ).fill(emptyLine);
     linesFromFirstString.push(...emptyLines);
-  } else if (linesFromFirstString.length > linesFromSecondString.length) {
+  }
+  else if (linesFromFirstString.length > linesFromSecondString.length) {
     const maxLineWidth = Math.max(
       ...linesFromSecondString.map((line) => line.stripStyle().length),
     );
@@ -248,6 +251,7 @@ export const join = (firstString, secondString) => {
     ).fill(emptyLine);
     linesFromSecondString.push(...emptyLines);
   }
+
   const maxLine = Math.max(
     linesFromSecondString.length,
     linesFromFirstString.length,

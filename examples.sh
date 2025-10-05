@@ -2,6 +2,9 @@ set -x
 
 JS=("${1:-js}")
 
+$JS "' Welcome to js demo and examples '.style(['bg-grey','#ffffff']).border('double').stack('Starting in...'.border(),'center').align('center').log()"
+$JS "render.timer(Date.now() + 5..seconds)"
+
 # Enquire functions for interactive prompts
 $JS "enquire.ask('What is your name?').log()"
 $JS "enquire.confirm('Do you like js?').log()"

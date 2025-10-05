@@ -336,7 +336,7 @@ String.prototype.padEnd2 = function(maxLength, fillString = " ") {
     .lines()
     .map((l) => l
       .padEnd(
-        (maxLength - l.stripStyle().length) + l.length), fillString
+        maxLength + l.length - l.stripStyle().length), fillString
     ).join("\n");
 }
 
@@ -345,7 +345,7 @@ String.prototype.padStart2 = function(maxLength, fillString = " ") {
     .lines()
     .map((l) => l
       .padStart(
-        (maxLength - l.stripStyle().length) + l.length), fillString
+        maxLength + l.length - l.stripStyle().length), fillString
     ).join("\n");
 }
 
