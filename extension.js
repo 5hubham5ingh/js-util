@@ -1,5 +1,6 @@
 import * as std from "std"
 import { exec as execAsync, execSync as exec, ProcessSync } from "../qjs-ext-lib/src/process.js"
+import { setInterval, clearInterval, wait } from "../qjs-ext-lib/src/timers.js"
 import * as os from "os"
 import { ansi } from "../justjs/ansiStyle.js"
 import * as enquire from "./enquire.js"
@@ -31,6 +32,9 @@ globalThis.render = render;
 globalThis.draw = draw;
 globalThis.parse = { ...csvParser, ...iniParser, ...tomlParser, json: JSON.parse, toString: JSON.stringify }
 globalThis.log = log
+globalThis.setInterval = setInterval
+globalThis.clearInterval = clearInterval
+globalThis.wait = wait
 
 const resolvePath = (path) => {
   if (path.startsWith('/')) return path;
