@@ -1,4 +1,4 @@
-import { clearScreen, cursorDown, cursorHide, cursorShow, cursorUp, eraseDown } from "../justjs/cursor.js";
+import { clearScreen as clear, cursorDown, cursorHide, cursorShow, cursorUp, eraseDown } from "../justjs/cursor.js";
 import { getTerminalSize, handleKeysPressSync, keySequences } from "../justjs/terminal.js";
 import { printf } from "std"
 import { ttySetRaw } from "../qjs-ext-lib/src/os.js";
@@ -264,3 +264,5 @@ export const timer = (till) => {
   }, 10);
   return stop
 }
+
+export const clearScreen = () => printf(clear);
