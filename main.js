@@ -12,7 +12,7 @@ const scriptPath = args[0];
 const [st, err] = scriptPath ? os.stat(scriptPath) : [null, -1];
 
 Object.defineProperty(globalThis, '__version', {
-  get() { print("1.19.0") }
+  get() { print("1.20.0") }
 });
 
 
