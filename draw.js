@@ -38,10 +38,13 @@ export const table = (data, columns) => {
   ];
 
   const colWidths = header.map((_, colIndex) =>
-    Math.max(...allRows.map((row) => getString(row[colIndex]).length))
+    Math.max(
+      ...allRows.map((row) => getString(row[colIndex])?.stripStyle()?.length),
+    )
   );
 
-  const pad = (s, i) => getString(s).padEnd(colWidths[i], " ");
+  const pad = (s, i) =>
+    getString(s).padEnd(colWidths[i] + s.length - s.stripStyle().length, " ");
 
   const formatRow = (row) =>
     "║ " + row.map(pad).map((v) => v).join(" │ ") + " ║";
@@ -177,11 +180,14 @@ export const border = (str, type = "normal", style, padX = 1, padY = 0) => {
   const topBorder = chars.tl + chars.x.repeat(totalInnerWidth) + chars.tr;
   const bottomBorder = chars.bl + chars.x.repeat(totalInnerWidth) + chars.br;
 
-  const verticalPadding = (chars.y + " ".repeat(totalInnerWidth) + chars.y + "\n").repeat(padY)
-  const horizontalPadding = " ".repeat(padX)
+  const verticalPadding =
+    (chars.y + " ".repeat(totalInnerWidth) + chars.y + "\n").repeat(padY);
+  const horizontalPadding = " ".repeat(padX);
 
-  const middleContent = lines.map(line =>
-    `${chars.y}${horizontalPadding}${line.padEnd(contentWidth + line.length - line.stripStyle().length)}${horizontalPadding}${chars.y}`
+  const middleContent = lines.map((line) =>
+    `${chars.y}${horizontalPadding}${
+      line.padEnd(contentWidth + line.length - line.stripStyle().length)
+    }${horizontalPadding}${chars.y}`
   ).join("\n");
 
   return `${topBorder}\n${verticalPadding}${middleContent}\n${verticalPadding}${bottomBorder}`;
@@ -240,8 +246,7 @@ export const join = (firstString, secondString) => {
       linesFromSecondString.length - linesFromFirstString.length,
     ).fill(emptyLine);
     linesFromFirstString.push(...emptyLines);
-  }
-  else if (linesFromFirstString.length > linesFromSecondString.length) {
+  } else if (linesFromFirstString.length > linesFromSecondString.length) {
     const maxLineWidth = Math.max(
       ...linesFromSecondString.map((line) => line.stripStyle().length),
     );
@@ -280,12 +285,15 @@ export const message = (label, message, details, color) => {
   const formatedLabel = ` ${label}`.style(["bold", "#000000", `bg-${color}`]) +
     "◗".style(color);
 
-  const formatedMessage = message.padEnd2(terminalWidth - 3 - formatedLabel.stripStyle().length).style(color)
+  const formatedMessage = message.padEnd2(
+    terminalWidth - 3 - formatedLabel.stripStyle().length,
+  ).style(color);
 
   const formatedDetail = details?.lines()
     .map((l) =>
       l.wrap(terminalWidth - 6)
-        .padEnd2(terminalWidth - 6))
+        .padEnd2(terminalWidth - 6)
+    )
     .join("\n")
     ?.border("rounded");
 
@@ -298,97 +306,97 @@ export const message = (label, message, details, color) => {
 
 export const blockDigits = (str, scale = 1) => {
   const chars = {
-    '0': [
+    "0": [
       "██████",
       "██  ██",
       "██  ██",
       "██  ██",
-      "██████"
+      "██████",
     ],
-    '1': [
+    "1": [
       "  ██  ",
       "  ██  ",
       "  ██  ",
       "  ██  ",
-      "  ██  "
+      "  ██  ",
     ],
-    '2': [
+    "2": [
       "██████",
       "    ██",
       "██████",
       "██    ",
-      "██████"
+      "██████",
     ],
-    '3': [
+    "3": [
       "██████",
       "    ██",
       "██████",
       "    ██",
-      "██████"
+      "██████",
     ],
-    '4': [
+    "4": [
       "██  ██",
       "██  ██",
       "██████",
       "    ██",
-      "    ██"
+      "    ██",
     ],
-    '5': [
+    "5": [
       "██████",
       "██    ",
       "██████",
       "    ██",
-      "██████"
+      "██████",
     ],
-    '6': [
+    "6": [
       "██████",
       "██    ",
       "██████",
       "██  ██",
-      "██████"
+      "██████",
     ],
-    '7': [
+    "7": [
       "██████",
       "    ██",
       "    ██",
       "    ██",
       "    ██",
     ],
-    '8': [
-      "██████",
-      "██  ██",
-      "██████",
-      "██  ██",
-      "██████"
-    ],
-    '9': [
+    "8": [
       "██████",
       "██  ██",
       "██████",
+      "██  ██",
+      "██████",
+    ],
+    "9": [
+      "██████",
+      "██  ██",
+      "██████",
       "    ██",
-      "██████"
+      "██████",
     ],
-    '.': [
+    ".": [
       "  ",
       "  ",
       "  ",
       "  ",
-      "██"
+      "██",
     ],
-    '-': [
+    "-": [
       "    ",
       "    ",
       "████",
       "    ",
       "    ",
     ],
-    ':': [
+    ":": [
       "  ",
       "██",
       "  ",
       "██",
       "  ",
-    ]
+    ],
   };
 
   // Ensure scale is a positive integer
@@ -398,7 +406,7 @@ export const blockDigits = (str, scale = 1) => {
 
   // Loop through each line of the block characters (5 lines total)
   for (let j = 0; j < 5; j++) {
-    let line = '';
+    let line = "";
 
     // Build the string for the current line by looping through the input string
     for (let i = 0; i < str.length; i++) {
@@ -407,7 +415,7 @@ export const blockDigits = (str, scale = 1) => {
 
       if (blockChar) {
         // Horizontally scale the block character line
-        let scaledLinePart = '';
+        let scaledLinePart = "";
         for (let k = 0; k < blockChar[j].length; k++) {
           scaledLinePart += blockChar[j][k].repeat(finalScale);
         }
@@ -415,7 +423,7 @@ export const blockDigits = (str, scale = 1) => {
 
         // Add a space between characters
         if (i < str.length - 1) {
-          line += ' '.repeat(finalScale);
+          line += " ".repeat(finalScale);
         }
       }
     }
@@ -426,5 +434,5 @@ export const blockDigits = (str, scale = 1) => {
     }
   }
 
-  return outputLines.join('\n');
+  return outputLines.join("\n");
 };
