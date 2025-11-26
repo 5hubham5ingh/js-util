@@ -270,7 +270,7 @@ export const join = (firstString, secondString) => {
   return combinedLines.join("\n");
 };
 
-export const message = (label, message, details, color) => {
+export const message = (label, message, details, color = "white") => {
   if (typeof label !== "string" || !label.trim()) {
     throw new TypeError("message(): 'label' must be a non-empty string.");
   }
