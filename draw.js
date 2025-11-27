@@ -436,3 +436,102 @@ export const blockDigits = (str, scale = 1) => {
 
   return outputLines.join("\n");
 };
+
+export function heatMap(data) {
+  if (!data || data.length === 0 || data[0].length === 0) {
+    return "";
+  }
+
+  // Automatically determine width and height from the data
+  const height = data.length;
+  const width = Math.max(...data.map((row) => row.length));
+
+  // Resize/interpolate data to fit the original data dimensions (no scaling needed, but keep logic for consistency)
+  const resized = resizeData(data, width, height);
+
+  // Find min and max values for normalization
+  let min = Infinity;
+  let max = -Infinity;
+  for (let row of resized) {
+    for (let val of row) {
+      if (val < min) min = val;
+      if (val > max) max = val;
+    }
+  }
+
+  // If all values are the same, return uniform light map
+  if (max === min || isNaN(max)) {
+    return "⬜".repeat(width) + "\n" +
+      ("⬜".repeat(width) + "\n").repeat(height - 1) +
+      "⬜".repeat(width);
+  }
+
+  const range = max - min;
+  const SQUARE = "⬛\uFE0E ";
+  // 8 levels of intensity using block characters (light to dark) - green theme
+  const levels = [
+    "⬜\uFE0E ".style("#2ffc28"), // Empty box for 0
+    SQUARE.style("#56fc50"),
+    SQUARE.style("#65fc5f"),
+    SQUARE.style("#0af702"),
+    SQUARE.style("#06a001"),
+    SQUARE.style("#057501"),
+    SQUARE.style("#034700"),
+    SQUARE.style("#012300"),
+  ];
+
+  const result = [];
+  for (let y = 0; y < height; y++) {
+    const row = [];
+    for (let x = 0; x < width; x++) {
+      const value = resized[y][x];
+      const normalized = (value - min) / range; // 0 to 1
+      const index = Math.min(
+        Math.floor(normalized * levels.length),
+        levels.length - 1,
+      );
+      row.push(levels[index]);
+    }
+    result.push(row.join(""));
+  }
+  return result.join("\n");
+
+  // Helper: Resize 2D data to target dimensions using bilinear interpolation
+  function resizeData(data, targetWidth, targetHeight) {
+    const srcHeight = data.length;
+    if (srcHeight === 0) return [];
+    const srcWidth = data[0].length;
+
+    const result = [];
+    for (let y = 0; y < targetHeight; y++) {
+      const row = [];
+      const srcY = (y / targetHeight) * srcHeight;
+      const srcY0 = Math.floor(srcY);
+      const srcY1 = Math.min(srcY0 + 1, srcHeight - 1);
+
+      for (let x = 0; x < targetWidth; x++) {
+        const srcX = (x / targetWidth) * srcWidth;
+        const srcX0 = Math.floor(srcX);
+        const srcX1 = Math.min(srcX0 + 1, srcWidth - 1);
+
+        // Handle jagged arrays safely
+        const v00 = data[srcY0][srcX0] ?? 0;
+        const v01 = data[srcY0][srcX1] ?? 0;
+        const v10 = (data[srcY1] ? data[srcY1][srcX0] : data[srcY0][srcX0]) ??
+          0;
+        const v11 = (data[srcY1] ? data[srcY1][srcX1] : data[srcY0][srcX1]) ??
+          0;
+
+        const dx = srcX - srcX0;
+        const dy = srcY - srcY0;
+        const value = v00 * (1 - dx) * (1 - dy) +
+          v01 * dx * (1 - dy) +
+          v10 * (1 - dx) * dy +
+          v11 * dx * dy;
+        row.push(value);
+      }
+      result.push(row);
+    }
+    return result;
+  }
+}

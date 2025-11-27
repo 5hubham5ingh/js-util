@@ -1,69 +1,90 @@
-import { clearScreen as clear, cursorDown, cursorHide, cursorShow, cursorUp, eraseDown } from "../justjs/cursor.js";
-import { getTerminalSize, handleKeysPressSync, keySequences } from "../justjs/terminal.js";
-import { printf } from "std"
+import {
+  clearScreen as clear,
+  cursorDown,
+  cursorHide,
+  cursorShow,
+  cursorUp,
+  eraseDown,
+} from "../justjs/cursor.js";
+import {
+  getTerminalSize,
+  handleKeysPressSync,
+  keySequences,
+} from "../justjs/terminal.js";
+import { printf } from "std";
 import { ttySetRaw } from "../qjs-ext-lib/src/os.js";
-import { setInterval, clearInterval } from "../qjs-ext-lib/src/timers.js";
+import { clearInterval, setInterval } from "../qjs-ext-lib/src/timers.js";
 
 export const loader = (message) => {
-  if (message && typeof message !== 'string') throw TypeError('The "message" argument be of type "string".')
+  if (message && typeof message !== "string") {
+    throw TypeError('The "message" argument be of type "string".');
+  }
 
   const worker = new os.Worker("./worker.js");
 
-  const [terminalWidth, _] = getTerminalSize()
+  const [terminalWidth, _] = getTerminalSize();
 
-  const frames = message ? ["◜", "◝", "◞", "◟"].map(stateSymbol => `${stateSymbol.style(['bold', 'yellow'])} ${message}`)
+  const frames = message
+    ? ["◜", "◝", "◞", "◟"].map((stateSymbol) =>
+      `${stateSymbol.style(["bold", "yellow"])} ${message}`
+    )
     : ((length = parseInt(terminalWidth / 20)) => {
       const frames = [];
       for (let i = 0; i < length; i++) {
-        const frame = new Array(length).fill('●');
-        frame[i] = '◖◗';
-        frames.push(frame.join('').style(['bold', 'yellow']));
+        const frame = new Array(length).fill("●");
+        frame[i] = "◖◗";
+        frames.push(frame.join("").style(["bold", "yellow"]));
       }
       return [...frames, ...frames.reverse().slice(1)].slice(0, -1)
-        .map(frame => {
+        .map((frame) => {
           const frameLength = frame.stripStyle().length;
           const padStart = Math.floor((terminalWidth - frameLength) / 2);
           return frame.padStart(padStart + frame.length);
         });
-    })()
+    })();
 
   worker.postMessage({ type: "start", data: frames });
 
-  return () => new Promise((resolve) => {
-    worker.postMessage({ type: "abort" });
-    worker.onmessage = e => {
-      if (e.data === 'stopped') {
-        worker.onmessage = null
-        os.exec(['stty', 'sane'])
-        resolve()
-      }
-    };
-  });
-}
+  return () =>
+    new Promise((resolve) => {
+      worker.postMessage({ type: "abort" });
+      worker.onmessage = (e) => {
+        if (e.data === "stopped") {
+          worker.onmessage = null;
+          os.exec(["stty", "sane"]);
+          resolve();
+        }
+      };
+    });
+};
 
 export const pages = (content, pageHeight) => {
-  if (typeof content !== 'string') {
+  if (typeof content !== "string") {
     throw new TypeError('The "content" argument must be a string.');
   }
   if (content.length === 0) {
     throw new Error('The "content" string cannot be empty.');
   }
-  if (pageHeight !== undefined && typeof pageHeight !== 'number') {
-    throw new TypeError('The "pageHeight" argument must be a number if provided.');
+  if (pageHeight !== undefined && typeof pageHeight !== "number") {
+    throw new TypeError(
+      'The "pageHeight" argument must be a number if provided.',
+    );
   }
   if (pageHeight !== undefined && pageHeight < 1) {
     throw new Error('The "pageHeight" must be a positive number.');
   }
 
   const [terminalWidth, terminalHeight] = getTerminalSize();
-  if (pageHeight && pageHeight > terminalHeight - 3) pageHeight = terminalHeight - 3
+  if (pageHeight && pageHeight > terminalHeight - 3) {
+    pageHeight = terminalHeight - 3;
+  }
   const contentWidth = terminalWidth - 4;
 
-  const formattedLines = content.stripEmojis().replace(/\r/g, '').split('\n')
-    .flatMap(line => {
+  const formattedLines = content.stripEmojis().replace(/\r/g, "").split("\n")
+    .flatMap((line) => {
       const strippedLength = line.stripStyle().length;
       if (strippedLength > contentWidth) {
-        return line.wrap(contentWidth).split('\n');
+        return line.wrap(contentWidth).split("\n");
       }
       return strippedLength < contentWidth
         ? [line.padEnd(contentWidth + line.length - strippedLength)]
@@ -90,7 +111,7 @@ export const pages = (content, pageHeight) => {
       const isLastPage = currentPage === pages.length - 1;
       const isOverFlowPage = currentPage >= overflowThreshold;
 
-      dots = new Array(indicatorMaxLength).fill('∙');
+      dots = new Array(indicatorMaxLength).fill("∙");
       if (isOverFlowPage && !isLastPage) {
         activeIndex = indicatorMaxLength - 2;
       } else if (isLastPage) {
@@ -99,16 +120,20 @@ export const pages = (content, pageHeight) => {
         activeIndex = currentPage;
       }
     } else {
-      dots = new Array(pages.length).fill('∙');
+      dots = new Array(pages.length).fill("∙");
       activeIndex = currentPage;
     }
 
-    dots[activeIndex] = '●';
-    const indicator = '◖'.style('grey') + dots.join('').style(['bold', '#000000', 'bg-grey']) + '◗'.style('grey');
+    dots[activeIndex] = "●";
+    const indicator = "◖".style("grey") +
+      dots.join("").style(["bold", "#000000", "bg-grey"]) + "◗".style("grey");
 
     return shouldUseCompactIndicator
       ? indicator
-      : indicator.padStart(Math.floor((terminalWidth - 4 - indicator.stripStyle().length) / 2) + indicator.length);
+      : indicator.padStart(
+        Math.floor((terminalWidth - 4 - indicator.stripStyle().length) / 2) +
+          indicator.length,
+      );
   };
 
   const renderUI = () => {
@@ -117,8 +142,15 @@ export const pages = (content, pageHeight) => {
     }
 
     const page = pages[currentPage];
-    const helperText = " Continue:Enter | Navigation:Arrows ".style(['#000000', 'bold', 'bg-grey'])
-    const content = [...page, helperText.padStart(helperText.stripStyle().length + terminalWidth - 13)].join('\n').border('rounded');
+    const helperText = " Continue:Enter | Navigation:Arrows ".style([
+      "#000000",
+      "bold",
+      "bg-grey",
+    ]);
+    const content = [
+      ...page,
+      helperText.padStart(helperText.stripStyle().length + terminalWidth - 13),
+    ].join("\n").border("rounded");
 
     const pageIndicator = createPageIndicator();
     print(content, pageIndicator);
@@ -152,14 +184,14 @@ export const pages = (content, pageHeight) => {
   renderUI();
 
   handleKeysPressSync({
-    'l': nextPage,
+    "l": nextPage,
     [keySequences.ArrowRight]: nextPage,
-    'h': prevPage,
+    "h": prevPage,
     [keySequences.ArrowLeft]: prevPage,
     [keySequences.Enter]: nextOrQuit,
-    'q': (_, quit) => quit()
+    "q": (_, quit) => quit(),
   });
-  os.exec(['stty', 'sane'])
+  os.exec(["stty", "sane"]);
   printf(cursorShow);
 };
 
@@ -170,99 +202,128 @@ export const levels = (levels, animate = true) => {
   for (let i = 0; i < levels.length; i++) {
     const level = levels[i];
     if (!Array.isArray(level) || level.length < 3) {
-      throw new Error(`Each item in the "levels" array must be an array of at least 3 elements. Invalid item at index ${i}.`);
+      throw new Error(
+        `Each item in the "levels" array must be an array of at least 3 elements. Invalid item at index ${i}.`,
+      );
     }
     const [currentLevel, maxLevel, title] = level;
-    if (typeof currentLevel !== 'number' || typeof maxLevel !== 'number' || typeof title !== 'string') {
-      throw new TypeError(`Invalid data types for item at index ${i}. Expected [number, number, string].`);
+    if (
+      typeof currentLevel !== "number" || typeof maxLevel !== "number" ||
+      typeof title !== "string"
+    ) {
+      throw new TypeError(
+        `Invalid data types for item at index ${i}. Expected [number, number, string].`,
+      );
     }
     if (currentLevel < 0 || maxLevel <= 0 || currentLevel > maxLevel) {
-      throw new Error(`Invalid level values at index ${i}. "currentLevel" and "maxLevel" must be positive numbers, and "currentLevel" cannot exceed "maxLevel".`);
+      throw new Error(
+        `Invalid level values at index ${i}. "currentLevel" and "maxLevel" must be positive numbers, and "currentLevel" cannot exceed "maxLevel".`,
+      );
     }
   }
-  if (typeof animate !== 'boolean') {
+  if (typeof animate !== "boolean") {
     throw new TypeError('The "animate" argument must be a boolean.');
   }
-  const allFrames = []
-  const maxTitleLength = Math.max(...levels.map(level => level[2].length))
+  const allFrames = [];
+  const maxTitleLength = Math.max(...levels.map((level) => level[2].length));
   for (const [currentLevel, maxLevel, title, desc = false] of levels) {
     const frames = [];
     const start = desc ? maxLevel : 0;
     const end = desc ? currentLevel : currentLevel;
     const step = desc ? -1 : 1;
     for (let i = start; desc ? i >= end : i <= end; i += step) {
-      const filled = i > 0 ? '█'.repeat(i) : '';
+      const filled = i > 0 ? "█".repeat(i) : "";
       const emptySpaces = Math.max(0, maxLevel - i - 1);
-      const empty = '◗' + ' '.repeat(emptySpaces);
-      const bar = (filled + empty).style(['grey', emptySpaces >= 0 ? 'bg-white' : '']);
-      frames.push(title.padEnd(maxTitleLength + 1) + '◖'.style('grey') + bar + '◗'.style('white'));
+      const empty = "◗" + " ".repeat(emptySpaces);
+      const bar = (filled + empty).style([
+        "grey",
+        emptySpaces >= 0 ? "bg-white" : "",
+      ]);
+      frames.push(
+        title.padEnd(maxTitleLength + 1) + "◖".style("grey") + bar +
+          "◗".style("white"),
+      );
     }
-    allFrames.push(frames)
+    allFrames.push(frames);
   }
   if (!animate) {
-    const finalFrames = allFrames.map(frames => frames[frames.length - 1]).join('\n\n');
-    print(finalFrames.border())
+    const finalFrames = allFrames.map((frames) => frames[frames.length - 1])
+      .join("\n\n");
+    print(finalFrames.border());
     return;
   }
   printf(cursorHide);
   ttySetRaw();
-  const maxNoOfFrames = Math.max(...allFrames.map(frame => frame.length))
+  const maxNoOfFrames = Math.max(...allFrames.map((frame) => frame.length));
   let prevCursorPos;
   for (let i = 0; i < maxNoOfFrames; i++) {
     if (prevCursorPos) printf(prevCursorPos);
     // Fixed: Use the last frame when current frame index doesn't exist
-    const frames = allFrames.map(frames => frames[i] || frames[frames.length - 1]).join('\n\n')
-    print(frames.border('rounded'))
+    const frames = allFrames.map((frames) =>
+      frames[i] || frames[frames.length - 1]
+    ).join("\n\n");
+    print(frames.border("rounded"));
     os.sleep(700 / maxNoOfFrames);
-    prevCursorPos = (cursorUp(allFrames.length * 2 + 1) + eraseDown)
+    prevCursorPos = cursorUp(allFrames.length * 2 + 1) + eraseDown;
   }
-  os.exec(['stty', 'sane'])
+  os.exec(["stty", "sane"]);
   printf(cursorShow);
 };
 
 export const line = (style = "grey") => {
-  const [terminalWidth] = getTerminalSize()
-  "─".repeat(terminalWidth).style(style).log()
-}
+  const [terminalWidth] = getTerminalSize();
+  "─".repeat(terminalWidth).style(style).log();
+};
 
 export const startSection = (style = "grey") => {
-  const [terminalWidth] = getTerminalSize()
-  print(("╔" + "═".repeat(terminalWidth - 2) + "╗").style(style))
-}
+  const [terminalWidth] = getTerminalSize();
+  print(("╔" + "═".repeat(terminalWidth - 2) + "╗").style(style));
+};
 
 export const endSection = (style = "grey") => {
-  const [terminalWidth] = getTerminalSize()
-  print(("╚" + "═".repeat(terminalWidth - 2) + "╝").style(style))
-}
+  const [terminalWidth] = getTerminalSize();
+  print(("╚" + "═".repeat(terminalWidth - 2) + "╝").style(style));
+};
 
 export const timer = (till) => {
-  print(cursorHide)
+  print(cursorHide);
   const stop = () => {
     clearInterval(intervalId);
-    print(cursorShow, cursorDown(7))
-  }
+    print(cursorShow, cursorDown(7));
+  };
   const intervalId = setInterval(() => {
     const now = Date.now();
     const diff = Math.abs(till - now);
 
-
     const totalSeconds = Math.floor(diff / 1000);
-    const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
-    const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
-    const seconds = String(Math.floor(totalSeconds % 60)).padStart(2, '0');
+    const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
+    const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(
+      2,
+      "0",
+    );
+    const seconds = String(Math.floor(totalSeconds % 60)).padStart(2, "0");
 
-    const milliseconds = String(Math.floor(diff % 1000 / 10)).padStart(2, '0');
+    const milliseconds = String(Math.floor(diff % 1000 / 10)).padStart(2, "0");
 
     const timeString = `${hours}:${minutes}:${seconds}:${milliseconds}`;
 
     const blockNumber = draw.blockDigits(timeString);
-    const padStart = Math.abs((getTerminalSize()[0] - blockNumber.lines()[0].length) / 2);
+    const padStart = Math.abs(
+      (getTerminalSize()[0] - blockNumber.lines()[0].length) / 2,
+    );
 
-    print(blockNumber.border("double").lines().map(l => l.padStart(padStart + l.length)).join('\n'), cursorUp(7));
+    print(
+      blockNumber.border("double").lines().map((l) =>
+        l.padStart(padStart + l.length)
+      ).join("\n"),
+      cursorUp(7),
+    );
 
-    if (diff < 10) stop()
+    if (diff < 10) stop();
   }, 10);
-  return stop
-}
+  return stop;
+};
 
 export const clearScreen = () => printf(clear);
+
+export const heatMap = (data) => draw.heatMap(data);
