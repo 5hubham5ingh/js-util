@@ -1,4 +1,5 @@
 // global.d.ts
+
 declare global {
   /**
    * Terminal rendering & animation helpers
@@ -88,6 +89,8 @@ declare global {
      * @returns Function to stop the timer early
      */
     timer(till: number): () => void;
+
+    heatMap: typeof draw.heatMap;
   };
 
   /**
@@ -220,6 +223,23 @@ declare global {
      * @returns Multi-line ASCII art string
      */
     blockDigits(str: string, scale?: number): string;
+
+    /**
+     * Creates an ASCII heatmap from a 2D array of values
+     *
+     * The input data can contain ANY numbers (negative, positive, decimals, large ranges).
+     * The function automatically:
+     * - Finds the minimum and maximum values
+     * - Normalizes everything to 0–1
+     * - Maps to 8 intensity levels (light to dark green)
+     *
+     * Higher values = darker blocks
+     *
+     * @param {number[][]} data - 2D array of numbers (jagged arrays supported)
+     *                            Values can be in ANY range — auto-normalization is applied
+     * @returns {string} ASCII heatmap using colored block characters
+     */
+    heatMap(data: number[][]): string;
   };
 
   /**
@@ -916,6 +936,681 @@ declare global {
 
   /** Full stdin content (cached) */
   const stdin: string;
+
+  // ──────────────────────────────────────────────────────────────
+  // os module types
+  // ──────────────────────────────────────────────────────────────
+  type FileDescriptor = number & { __brand: "FileDescriptor" };
+  type Success = 0;
+  type NegativeErrno = number;
+  type Errno = number;
+  type ExitStatus = number;
+  type WaitStatus = number;
+  type OpenOption = number;
+  type Result<T> = T | NegativeErrno;
+  type ResultTuple<T> = [T, Success | Errno];
+  type Signal = number & { __brand: "Signal" };
+  type Pid = number & { __brand: "Pid" };
+  type Callback = () => void;
+  type TimerHandle = unknown & { __brand: "TimeHandle" };
+  type Platform = "linux" | "darwin" | "win32" | "js";
+  type WorkerMessage = any;
+
+  interface ExecOptions {
+    /**
+     * Boolean (default = `true`). If `true`, wait until the process is
+     * terminated. In this case, exec return the exit code if positive or the
+     * negated signal number if the process was interrupted by a signal. If
+     * false, do not block and return the process id of the child.
+     */
+    block?: boolean;
+    /**
+     * Boolean (default = `true`). If `true`, the file is searched in the PATH
+     * environment variable.
+     */
+    usePath?: boolean;
+    /**
+     * String (default = `args[0]`). Set the file to be executed.
+     */
+    file?: string;
+    /**
+     * String. If present, set the working directory of the new process.
+     */
+    cwd?: string;
+    /**
+     * If present, set the handle in the child for stdin, stdout or stderr.
+     */
+    stdin?: FileDescriptor;
+    /**
+     * If present, set the handle in the child for stdin, stdout or stderr.
+     */
+    stdout?: FileDescriptor;
+    /**
+     * If present, set the handle in the child for stdin, stdout or stderr.
+     */
+    stderr?: FileDescriptor;
+    /**
+     * Object. If present, set the process environment from the object
+     * key-value pairs. Otherwise use the same environment as the current
+     * process.
+     */
+    env?: { [key: string]: string };
+    /**
+     * Integer. If present, the process uid with `setuid`.
+     */
+    uid?: number;
+    /**
+     * Integer. If present, the process gid with `setgid`.
+     */
+    gid?: number;
+  }
+  type ExecNonBlockingOptions = ExecOptions & { block?: false };
+  type ExecBlockingOptions = ExecOptions & { block: true };
+
+  interface Stat {
+    dev: number;
+    ino: number;
+    mode: number;
+    nlink: number;
+    uid: number;
+    gid: number;
+    rdev: number;
+    size: number;
+    blocks: number;
+    atime: number;
+    mtime: number;
+    ctime: number;
+  }
+  const os: {
+    /**
+     * Open a file. Return a handle or `< 0` if error.
+     */
+    open(
+      filename: string,
+      flags?: OpenOption,
+      mode?: number,
+    ): Result<FileDescriptor>;
+    /**
+     * POSIX open flags.
+     */
+    O_APPEND: OpenOption;
+    /**
+     * POSIX open flags.
+     */
+    O_CREAT: OpenOption;
+    /**
+     * POSIX open flags.
+     */
+    O_EXCL: OpenOption;
+    /**
+     * POSIX open flags.
+     */
+    O_RDONLY: OpenOption;
+    /**
+     * POSIX open flags.
+     */
+    O_RDWR: OpenOption;
+    /**
+     * POSIX open flags.
+     */
+    O_TRUNC: OpenOption;
+    /**
+     * POSIX open flags.
+     */
+    O_WRONLY: OpenOption;
+    /**
+     * (Windows specific). Open the file in text mode. The default is binary
+     * mode.
+     */
+    O_TEXT: OpenOption;
+    /**
+     * Close the file handle `fd`.
+     */
+    close(fd: FileDescriptor): Result<Success>;
+    /**
+     * Seek in the file. Use `std.SEEK_*` for whence. `offset` is either a
+     * number or a bigint. If `offset` is a bigint, a bigint is returned too.
+     */
+    seek(
+      fd: FileDescriptor,
+      offset: number,
+      whence: number,
+    ): Result<number>;
+    /**
+     * Seek in the file. Use `std.SEEK_*` for whence. `offset` is either a
+     * number or a bigint. If `offset` is a bigint, a bigint is returned too.
+     */
+    seek(
+      fd: FileDescriptor,
+      offset: bigint,
+      whence: number,
+    ): Result<bigint>;
+    /**
+     * Read `length` bytes from the file handle `fd` to the `ArrayBuffer`
+     * buffer at byte position `offset`. Return the number of read bytes or
+     * `< 0` if error.
+     */
+    read(
+      fd: FileDescriptor,
+      offset: number,
+      whence: number,
+    ): Result<number>;
+    /**
+     * Read `length` bytes from the file handle `fd` to the `ArrayBuffer`
+     * buffer at byte position `offset`. Return the number of read bytes or
+     * `< 0` if error.
+     */
+    read(
+      fd: FileDescriptor,
+      offset: bigint,
+      whence: number,
+    ): Result<bigint>;
+    /**
+     * Write `length` bytes to the file handle `fd` from the ArrayBuffer
+     * `buffer` at byte position `offset`. Return the number of written bytes
+     * or `< 0` if error.
+     */
+    write(
+      fd: FileDescriptor,
+      offset: number,
+      whence: number,
+    ): Result<number>;
+    /**
+     * Return `true` is fd is a TTY (terminal) handle.
+     */
+    isatty(fd: FileDescriptor): boolean;
+    /**
+     * Return the TTY size as `[width, height]` or `null` if not available.
+     */
+    ttyGetWinSize(
+      fd: FileDescriptor,
+    ): [width: number, height: number] | null;
+    /**
+     * Set the TTY in raw mode.
+     */
+    ttySetRaw(fd: FileDescriptor): void;
+    /**
+     * Remove a file. Return 0 if OK or `-errno`.
+     */
+    remove(filename: string): Result<Success>;
+    /**
+     * Rename a file. Return 0 if OK or `-errno`.
+     */
+    rename(filename: string): Result<Success>;
+    /**
+     * Return `[str, err]` where `str` is the canonicalized absolute pathname
+     * of `path` and `err` the error code.
+     */
+    realpath(filename: string): ResultTuple<string>;
+    /**
+     * Return `[str, err]` where `str` is the current working directory and
+     * `err` the error code.
+     */
+    getcwd(): ResultTuple<string>;
+    /**
+     * Change the current directory. Return 0 if OK or `-errno`.
+     */
+    chdir(): Result<Success>;
+    /**
+     * Create a directory at `path`. Return 0 if OK or `-errno`.
+     */
+    mkdir(path: string, mode?: number): Result<Success>;
+    /**
+     * Return `[obj, err]` where `obj` is an object containing the file status
+     * of `path`. `err` is the error code. The following fields are defined in
+     * `obj`: `dev`, `ino`, `mode`, `nlink`, `uid`, `gid`, `rdev`, `size`,
+     * `blocks`, `atime`, `mtime`, `ctim`e. The times are specified in
+     * milliseconds since 1970. `lstat()` is the same as `stat()` excepts that
+     * it returns information about the link itself.
+     */
+    stat(path: string): ResultTuple<Stat>;
+    /**
+     * Return `[obj, err]` where `obj` is an object containing the file status
+     * of `path`. `err` is the error code. The following fields are defined in
+     * `obj`: `dev`, `ino`, `mode`, `nlink`, `uid`, `gid`, `rdev`, `size`,
+     * `blocks`, `atime`, `mtime`, `ctim`e. The times are specified in
+     * milliseconds since 1970. `lstat()` is the same as `stat()` excepts that
+     * it returns information about the link itself.
+     */
+    lstat(path: string): ResultTuple<Stat>;
+    /**
+     * Constants to interpret the mode property returned by `stat()`. They
+     * have the same value as in the C system header `sys/stat.h`.
+     */
+    S_IFBLK: number;
+    /**
+     * Constants to interpret the mode property returned by `stat()`. They
+     * have the same value as in the C system header `sys/stat.h`.
+     */
+    S_IFCHR: number;
+    /**
+     * Constants to interpret the mode property returned by `stat()`. They
+     * have the same value as in the C system header `sys/stat.h`.
+     */
+    S_IFDIR: number;
+    /**
+     * Constants to interpret the mode property returned by `stat()`. They
+     * have the same value as in the C system header `sys/stat.h`.
+     */
+    S_IFIFO: number;
+    /**
+     * Constants to interpret the mode property returned by `stat()`. They
+     * have the same value as in the C system header `sys/stat.h`.
+     */
+    S_IFLNK: number;
+    /**
+     * Constants to interpret the mode property returned by `stat()`. They
+     * have the same value as in the C system header `sys/stat.h`.
+     */
+    S_IFMT: number;
+    /**
+     * Constants to interpret the mode property returned by `stat()`. They
+     * have the same value as in the C system header `sys/stat.h`.
+     */
+    S_IFREG: number;
+    /**
+     * Constants to interpret the mode property returned by `stat()`. They
+     * have the same value as in the C system header `sys/stat.h`.
+     */
+    S_IFSOCK: number;
+    /**
+     * Constants to interpret the mode property returned by `stat()`. They
+     * have the same value as in the C system header `sys/stat.h`.
+     */
+    S_ISGID: number;
+    /**
+     * Constants to interpret the mode property returned by `stat()`. They
+     * have the same value as in the C system header `sys/stat.h`.
+     */
+    S_ISUID: number;
+    /**
+     * Change the access and modification times of the file `path`. The times
+     * are specified in milliseconds since 1970. Return 0 if OK or `-errno`.
+     */
+    utimes(
+      path: string,
+      atime: number,
+      mtime: number,
+    ): Result<Success>;
+    /**
+     * Create a link at `linkpath` containing the string `target`. Return 0 if
+     * OK or `-errno`.
+     */
+    symlink(target: string, linkpath: string): Result<Success>;
+    /**
+     * Return `[str, err]` where `str` is the link target and `err` the error
+     * code.
+     */
+    readlink(path: string): ResultTuple<string>;
+    /**
+     * Return `[array, err]` where `array` is an array of strings containing
+     * the filenames of the directory `path`. `err` is the error code.
+     */
+    readdir(path: string): ResultTuple<string[]>;
+    /**
+     * Add a read handler to the file handle `fd`. `func` is called each time
+     * there is data pending for `fd`. A single read handler per file handle is
+     * supported. Use `func = null` to remove the handler.
+     */
+    setReadHandler(
+      fd: FileDescriptor,
+      func: Callback | null,
+    ): void;
+    /**
+     * Add a write handler to the file handle `fd`. `func` is called each time
+     * data can be written to `fd`. A single write handler per file handle is
+     * supported. Use `func = null` to remove the handler.
+     */
+    setWriteHandler(
+      fd: FileDescriptor,
+      func: Callback | null,
+    ): void;
+    /**
+     * Call the  `func` when the signal `signal` happens. Only a single
+     * handler per signal number is supported. Use `null` to set the default
+     * handler or `undefined` to ignore the signal. Signal handlers can only be
+     * defined in the main thread.
+     */
+    signal(
+      signal: Signal,
+      func: Callback | null | undefined,
+    ): void;
+    /**
+     * POSIX signal numbers.
+     */
+    SIGABRT: Signal;
+    /**
+     * POSIX signal numbers.
+     */
+    SIGALRM: Signal;
+    /**
+     * POSIX signal numbers.
+     */
+    SIGCHLD: Signal;
+    /**
+     * POSIX signal numbers.
+     */
+    SIGCONT: Signal;
+    /**
+     * POSIX signal numbers.
+     */
+    SIGFPE: Signal;
+    /**
+     * POSIX signal numbers.
+     */
+    SIGILL: Signal;
+    /**
+     * POSIX signal numbers.
+     */
+    SIGINT: Signal;
+    /**
+     * POSIX signal numbers.
+     */
+    SIGPIPE: Signal;
+    /**
+     * POSIX signal numbers.
+     */
+    SIGQUIT: Signal;
+    /**
+     * POSIX signal numbers.
+     */
+    SIGSEGV: Signal;
+    /**
+     * POSIX signal numbers.
+     */
+    SIGSTOP: Signal;
+    /**
+     * POSIX signal numbers.
+     */
+    SIGTERM: Signal;
+    /**
+     * POSIX signal numbers.
+     */
+    SIGTSTP: Signal;
+    /**
+     * POSIX signal numbers.
+     */
+    SIGTTIN: Signal;
+    /**
+     * POSIX signal numbers.
+     */
+    SIGTTOU: Signal;
+    /**
+     * POSIX signal numbers.
+     */
+    SIGUSR1: Signal;
+    /**
+     * POSIX signal numbers.
+     */
+    SIGUSR2: Signal;
+    /**
+     * Send the signal `sig` to the process `pid`.
+     */
+    kill(pid: Pid, signal: Signal): Result<number>;
+    /**
+     * Execute a process with the arguments args.
+     */
+    exec(
+      args: string[],
+      options?: ExecBlockingOptions,
+    ): Result<ExitStatus>;
+    /**
+     * Execute a process with the arguments args.
+     */
+    exec(
+      args: string[],
+      options: ExecNonBlockingOptions,
+    ): Result<Pid>;
+    /**
+     * `waitpid` Unix system call. Return the array `[ret, status]`. ret
+     * contains `-errno` in case of error.
+     */
+    waitpid(
+      pid: Pid,
+      options: number,
+    ): [ret: Result<Pid | Success>, status: WaitStatus];
+    /**
+     * Constant for the `options` argument of `waitpid`.
+     */
+    WNOHANG: number;
+    /**
+     * `dup` Unix system call.
+     */
+    dup(fd: FileDescriptor): Result<FileDescriptor>;
+    /**
+     * `dup2` Unix system call.
+     */
+    dup2(
+      oldFd: FileDescriptor,
+      newFd: FileDescriptor,
+    ): Result<FileDescriptor>;
+    /**
+     * `pipe` Unix system call. Return two handles as `[read_fd, write_fd]` or
+     * `null` in case of error.
+     */
+    pipe():
+      | [readFd: FileDescriptor, writeFd: FileDescriptor]
+      | null;
+    /**
+     * Sleep during `delay_ms` milliseconds.
+     */
+    sleep(delay_ms: number): Result<number>;
+    /**
+     * Call the  func after `delay` ms. Return a handle to the timer.
+     */
+    setTimeout(func: Callback, delay: number): TimerHandle;
+    /**
+     * Cancel a timer.
+     */
+    clearTimeout(handle: TimerHandle): void;
+    /**
+     * Return a string representing the platform: `"linux"`, `"darwin"`,
+     * `"win32"` or `"js"`.
+     */
+    platform: Platform;
+  };
+
+  // ──────────────────────────────────────────────────────────────
+  // std module types
+  // ──────────────────────────────────────────────────────────────
+
+  /**
+   * Represents an open FILE* stream (wrapper around libc FILE)
+   */
+  interface FILE {
+    /** Close the file. Returns 0 on success or `-errno` on error. */
+    close(): Result<Success>;
+
+    /** Output a string followed by a newline (UTF-8 encoded). */
+    puts(str: string): void;
+
+    /**
+     * Formatted printf.
+     * Supports standard C printf formats. Integer types truncate to 32-bit
+     * unless the `l` modifier is used (for 64-bit).
+     */
+    printf(format: string, ...args: any[]): number;
+
+    /** Flush buffered output. */
+    flush(): void;
+
+    /**
+     * Seek in the file. `whence` is one of std.SEEK_SET, SEEK_CUR, SEEK_END.
+     * Returns 0 on success or `-errno` on error.
+     */
+    seek(offset: number, whence: number): Result<Success>;
+    seek(offset: bigint, whence: number): Result<Success>;
+
+    /** Return current file position as number. */
+    tell(): number;
+
+    /** Return current file position as bigint. */
+    tello(): bigint;
+
+    /** Return true if end-of-file reached. */
+    eof(): boolean;
+
+    /** Return the underlying OS file descriptor. */
+    fileno(): FileDescriptor;
+
+    /** Return true if an error occurred on the stream. */
+    error(): boolean;
+
+    /** Clear the error and EOF indicators. */
+    clearerr(): void;
+
+    /**
+     * Read up to `length` bytes into `buffer` starting at `position`.
+     * Returns number of bytes read or 0 on EOF/error.
+     */
+    read(buffer: ArrayBuffer, position: number, length: number): number;
+
+    /**
+     * Write up to `length` bytes from `buffer` starting at `position`.
+     * Returns number of bytes written.
+     */
+    write(buffer: ArrayBuffer, position: number, length: number): number;
+
+    /** Read and return the next line (excluding trailing newline), or null on EOF. */
+    getline(): string | null;
+
+    /**
+     * Read up to `max_size` bytes and return as UTF-8 string.
+     * If `max_size` omitted, reads until EOF.
+     */
+    readAsString(max_size?: number): string;
+
+    /** Read and return the next byte (-1 on EOF). */
+    getByte(): number;
+
+    /** Write a single byte. Returns the byte or -1 on error. */
+    putByte(c: number): number;
+  }
+
+  interface EvalOptions {
+    /** If true, evalScript() will not appear in backtraces below it. */
+    backtrace_barrier?: boolean;
+  }
+
+  interface UrlGetOptions {
+    binary?: boolean;
+    full?: boolean;
+  }
+
+  interface UrlGetResponse<T> {
+    response: T | null;
+    status: number;
+    responseHeaders: string;
+  }
+
+  const std: {
+    /** Terminate the process with the given exit status. Never returns. */
+    exit(n: ExitStatus): never;
+
+    /** Evaluate a string as global script code. */
+    evalScript(str: string, options?: EvalOptions): any;
+
+    /** Load and evaluate a script file (global eval). */
+    loadScript(filename: string): any;
+
+    /** Load a file as UTF-8 string. Returns null on I/O error. */
+    loadFile(filename: string): string | null;
+
+    /** fopen() wrapper. Returns FILE | null. */
+    open(filename: string, flags?: string): FILE | null;
+
+    /** popen() wrapper. Returns FILE | null. */
+    popen(command: string, flags: string): FILE | null;
+
+    /** fdopen() wrapper. Returns FILE | null. */
+    fdopen(fd: FileDescriptor, flags: string): FILE | null;
+
+    /** tmpfile() wrapper. Returns a new temporary FILE. */
+    tmpfile(): FILE;
+
+    /** Convenience: std.out.puts(str) */
+    puts(str: string): void;
+
+    /** Convenience: std.out.printf(...) */
+    printf(format: string, ...args: any[]): number;
+
+    /** sprintf() equivalent – returns formatted string. */
+    sprintf(format: string, ...args: any[]): string;
+
+    /** Standard input stream (stdin). */
+    in: FILE;
+
+    /** Standard output stream (stdout). */
+    out: FILE;
+
+    /** Standard error stream (stderr). */
+    err: FILE;
+
+    /** Seek constants */
+    SEEK_SET: number;
+    SEEK_CUR: number;
+    SEEK_END: number;
+
+    /** Common errno values */
+    Error: {
+      readonly EACCES: number;
+      readonly ENOENT: number;
+      readonly EBADF: number;
+      readonly ENOSPC: number;
+      readonly EBUSY: number;
+      readonly ENOSYS: number;
+      readonly EEXIST: number;
+      readonly EPERM: number;
+      readonly EINVAL: number;
+      readonly EPIPE: number;
+      readonly EIO: number;
+    };
+
+    /** Convert errno to human-readable string. */
+    strerror(errno: Errno): string;
+
+    /** Force garbage collection (cycle removal). */
+    gc(): void;
+
+    /** Get environment variable. */
+    getenv(name: string): string | undefined;
+
+    /** Set environment variable. */
+    setenv(name: string, value: string): void;
+
+    /** Unset environment variable. */
+    unsetenv(name: string): void;
+
+    /** Return full environment as object. */
+    getenviron(): { [key: string]: string };
+
+    /**
+     * Download URL using curl.
+     * Behavior depends on options (see overloads below).
+     */
+    urlGet(
+      url: string,
+      options?: UrlGetOptions & { full?: false; binary?: false },
+    ): string | null;
+    urlGet(
+      url: string,
+      options: UrlGetOptions & { full?: false; binary: true },
+    ): ArrayBuffer | null;
+    urlGet(
+      url: string,
+      options: UrlGetOptions & { full: true; binary?: false },
+    ): UrlGetResponse<string>;
+    urlGet(
+      url: string,
+      options: UrlGetOptions & { full: true; binary: true },
+    ): UrlGetResponse<ArrayBuffer>;
+
+    /**
+     * Extended JSON parser supporting comments, trailing commas,
+     * unquoted keys, single-quoted strings, etc.
+     */
+    parseExtJSON(str: string): any;
+  };
 }
 
 // Required for global augmentation to work
