@@ -128,12 +128,10 @@ export const pages = (content, pageHeight) => {
     const indicator = "◖".style("grey") +
       dots.join("").style(["bold", "#000000", "bg-grey"]) + "◗".style("grey");
 
-    return shouldUseCompactIndicator
-      ? indicator
-      : indicator.padStart(
-        Math.floor((terminalWidth - 4 - indicator.stripStyle().length) / 2) +
-          indicator.length,
-      );
+    return shouldUseCompactIndicator ? indicator : indicator.padStart(
+      Math.floor((terminalWidth - 4 - indicator.stripStyle().length) / 2) +
+        indicator.length,
+    );
   };
 
   const renderUI = () => {
@@ -326,4 +324,4 @@ export const timer = (till) => {
 
 export const clearScreen = () => printf(clear);
 
-export const heatMap = (data) => draw.heatMap(data);
+export const heatMap = (data) => draw.heatMap(data).log();
