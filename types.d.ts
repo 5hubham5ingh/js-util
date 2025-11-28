@@ -719,12 +719,6 @@ declare global {
 
     /** Align text (center/right) */
     align(alignment: "center" | "right", width?: number): string;
-
-    /** Smart padEnd that respects ANSI codes */
-    padEnd2(maxLength: number, fillString?: string): string;
-
-    /** Smart padStart that respects ANSI codes */
-    padStart2(maxLength: number, fillString?: string): string;
   }
 
   // ──────────────────────────────────────────────────────────────

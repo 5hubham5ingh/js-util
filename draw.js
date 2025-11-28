@@ -202,25 +202,33 @@ const ALIGN = {
 export const stack = (firstString, secondString, align = ALIGN.LEFT) => {
   const linesFromFirstString = firstString.split("\n");
   const linesFromSecondString = secondString.split("\n");
-  const combinedLines = [...linesFromFirstString, ...linesFromSecondString];
+  const combinedText = [...linesFromFirstString, ...linesFromSecondString];
   const maxLineWidth = Math.max(
-    ...combinedLines.map((line) => line.stripStyle().length),
+    ...combinedText.map((line) => line.stripStyle().length),
   );
 
   const stackedLines = [];
   switch (align) {
     case ALIGN.LEFT:
       stackedLines.push(
-        ...combinedLines.map((line) => line.padEnd2(maxLineWidth)),
+        ...combinedText.map((text) =>
+          text.lines().map((line) =>
+            line.padEnd(maxLineWidth + line.length - line.stripStyle().length)
+          ).join("\n")
+        ),
       );
       break;
     case ALIGN.RIGHT:
       stackedLines.push(
-        ...combinedLines.map((line) => line.padStart2(maxLineWidth)),
+        ...combinedText.map((text) =>
+          text.lines().map((line) =>
+            line.padStart(maxLineWidth + line.length - line.stripStyle().length)
+          ).join("\n")
+        ),
       );
       break;
     case ALIGN.CENTER:
-      stackedLines.push(...combinedLines.map((line) => {
+      stackedLines.push(...combinedText.map((line) => {
         const lineVisibleLength = line.stripStyle().length;
         const gap = maxLineWidth - lineVisibleLength;
         const leftPaddingCount = parseInt(gap / 2);
@@ -285,14 +293,22 @@ export const message = (label, message, details, color = "white") => {
   const formatedLabel = ` ${label}`.style(["bold", "#000000", `bg-${color}`]) +
     "◗".style(color);
 
-  const formatedMessage = message.padEnd2(
-    terminalWidth - 3 - formatedLabel.stripStyle().length,
-  ).style(color);
+  const visualLength = terminalWidth - 3 - formatedLabel.stripStyle().length;
+  const formatedMessage = message.wrap(visualLength).lines().map((line) =>
+    line.padEnd(visualLength + line.length - line.stripStyle().length).style(
+      color,
+    )
+  ).join("\n");
 
   const formatedDetail = details?.lines()
-    .map((l) =>
-      l.wrap(terminalWidth - 6)
-        .padEnd2(terminalWidth - 6)
+    .map((text) =>
+      text.wrap(terminalWidth - 6)
+        .lines()
+        .map((line) =>
+          line.padEnd(
+            terminalWidth - 6 + line.length - line.stripStyle().length,
+          )
+        ).join("\n")
     )
     .join("\n")
     ?.border("rounded");
