@@ -22,6 +22,7 @@ $JS "render.pages(read('examples.sh'))"                                         
 $JS "stop = render.loader(); os.sleep(3000); stop()"                                                            # Generic loader
 $JS "stop = render.loader('Processing data...'); os.sleep(3000); stop()"                                        # Loader with custom message
 $JS "render.levels([[10, 20, 'Progress A', false], [5, 15, 'Progress B', true], [7, 10, 'Progress C', false]])" # Animated level bars
+$JS "render.heatMap([[0, 1, 2, 3, 4, 5, 6, 7], [0, 1, 2, 3, 4, 5, 6, 7]])"
 
 # Draw functions for text-based graphics
 $JS "draw.table([{ id: 1, name: 'Alice' }, { id: 2, name: 'Bob', age: 30 }]).log()"
