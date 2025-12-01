@@ -47,6 +47,10 @@ globalThis.clearInterval = clearInterval;
 globalThis.wait = wait;
 
 const resolvePath = (path) => {
+  if (path && typeof path !== "string") {
+    throw TypeError('The "path" argument be of type "string".');
+  }
+
   if (path.startsWith("/")) return path;
 
   if (path.startsWith("~")) return HOME + path.slice(1);

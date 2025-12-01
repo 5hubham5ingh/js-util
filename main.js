@@ -12,9 +12,10 @@ const scriptPath = args[0];
 
 const [st, err] = scriptPath ? os.stat(scriptPath) : [null, -1];
 
+const VERSION = "1.21.0";
 Object.defineProperty(globalThis, "__version", {
   get() {
-    print("1.21.0");
+    print(VERSION);
   },
 });
 
@@ -35,18 +36,43 @@ try {
     } else {
       const __history = [];
 
-      Object.defineProperty(globalThis, "clear", {
+      Object.defineProperty(globalThis, "__clear", {
         get() {
           printf("\x1b[2J\x1b[H");
         },
       });
-      Object.defineProperty(globalThis, "redo", {
+
+      Object.defineProperty(globalThis, "__redo", {
         get() {
           return enquire.describe(enquire.search(__history)).eval();
         },
       });
 
+      Object.defineProperty(globalThis, "__help", {
+        get() {
+          print(`
+Commands:
+- ${"'__clear'".style("italic")}: clear RELP screen
+- ${"'__redo'".style("italic")}: re-evaluate a command from history
+`);
+        },
+      });
+
+      render.startSection("grey");
+      printf(
+        `
+ ${"'js'".style("bold")} version ${VERSION}
+  Run '__help' for help
+${
+          (" Press 'ctrl+c' to exit ".style(["bold", "bg-grey", "black"]) + " ")
+            .align(
+              "right",
+            )
+        }`,
+      );
+
       while (true) {
+        render.line();
         printf("❯ ");
         const expression = std.in.getline();
         if (expression === null) break;
@@ -54,7 +80,6 @@ try {
           print(
             await std.evalScript(expression, {
               backtrace_barrier: true,
-              async: true,
             }),
           );
         } catch (error) {
@@ -80,12 +105,11 @@ try {
 }
 
 async function update() {
-  "Checking for latest release".style("yellow").log();
+  log.info("Checking for latest release");
   const stopLoader = render.loader();
-  const latest =
-    (exec(
-      "curl -s https://api.github.com/repos/5hubham5ingh/js-util/releases/latest",
-    )).parseJson();
+  const latest = (exec(
+    "curl -s https://api.github.com/repos/5hubham5ingh/js-util/releases/latest",
+  )).parseJson();
   await stopLoader();
   const newVersionDownloadUrl = latest.assets[0].browser_download_url;
   const latestVersion = newVersionDownloadUrl.split("/").at(-2).slice(1);
@@ -93,9 +117,7 @@ async function update() {
     ("Error: Failed to parse version for the latest release from GitHub.\nUnexpected format detected: " +
       latestVersion).style("red").log();
   }
-  print(
-    ("Detected latest available version: " + latestVersion).style("yellow"),
-  );
+  log.info("Detected latest available version: " + latestVersion);
   let currentVersion;
   try {
     currentVersion = exec("js '__version'");
