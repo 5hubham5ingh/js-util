@@ -12,12 +12,24 @@ export const info = (msg, det) => {
 
 export const error = (msg, det) => {
   const label = "ERROR", color = "#FFA07A";
-  std.err.puts(draw.message(label, msg, det, color), "\n");
+  if (msg instanceof Error) {
+    std.err.puts(
+      draw.message(msg.name, msg.message + (msg.cause ?? ""), msg.stack, color),
+      "\n",
+    );
+  } else std.err.puts(draw.message(label, msg, det, color), "\n");
 };
 
 export const fatal = (msg, det) => {
   const label = "FATAL", color = "#c91d1a";
-  std.err.puts(draw.message(label, msg, det, color), "\n", cursorShow);
+  if (msg instanceof Error) {
+    std.err.puts(
+      draw.message(msg.name, msg.message + (msg.cause ?? ""), msg.stack, color),
+      "\n",
+    );
+  } else {
+    std.err.puts(draw.message(label, msg, det, color), "\n", cursorShow);
+  }
   os.exec(["stty", "sane"]);
   std.exit();
 };

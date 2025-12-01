@@ -83,7 +83,7 @@ ${
             }),
           );
         } catch (error) {
-          print(error);
+          log.error(error);
         }
         __history.unshift(expression);
       }
