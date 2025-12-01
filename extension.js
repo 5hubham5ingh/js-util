@@ -6,9 +6,9 @@ import {
 } from "../qjs-ext-lib/src/process.js";
 import { clearInterval, setInterval, wait } from "../qjs-ext-lib/src/timers.js";
 import * as os from "os";
-import { ansi } from "../justjs/ansiStyle.js";
+import { ansi } from "./ansiStyle.js";
 import * as enquire from "./enquire.js";
-import { getTerminalSize } from "../justjs/terminal.js";
+import { getTerminalSize } from "./terminal.js";
 import * as render from "./render.js";
 import * as draw from "./draw.js";
 import * as csvParser from "./csvParser.js";

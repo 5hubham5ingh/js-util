@@ -1,4 +1,4 @@
-import { getTerminalSize } from "../justjs/terminal.js";
+import { getTerminalSize } from "./terminal.js";
 
 export const table = (data, columns) => {
   if (typeof data !== "object" || data === null) {

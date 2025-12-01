@@ -648,7 +648,7 @@ declare global {
   }
 
   // ──────────────────────────────────────────────────────────────
-  // String.prototype extensions (your masterpiece!)
+  // String.prototype extensions
   // ──────────────────────────────────────────────────────────────
   interface String {
     /** Pretty-print string */
@@ -1025,36 +1025,44 @@ declare global {
       mode?: number,
     ): Result<FileDescriptor>;
     /**
-     * POSIX open flags.
+     * ✍️ **Append Mode:** If the file exists, the file pointer is set to the
+     * end of the file. All subsequent writes will append data to the end
+     * of the file, regardless of any seeks performed.
      */
     O_APPEND: OpenOption;
     /**
-     * POSIX open flags.
+     * ✨ **Create File:** If the file specified by the path does not exist,
+     * it will be created. This flag requires permission settings (mode) to also be specified.
      */
     O_CREAT: OpenOption;
     /**
-     * POSIX open flags.
+     * ⛔ **Exclusive Use:** When used with O_CREAT, it ensures that the file is
+     * created and that the caller is the creator. If the file *already exists*,
+     * the open call fails. This is often used for creating lock files.
      */
     O_EXCL: OpenOption;
     /**
-     * POSIX open flags.
+     * 📖 **Read Only:** The file is opened for reading only.
      */
     O_RDONLY: OpenOption;
     /**
-     * POSIX open flags.
+     * ✍️📖 **Read and Write:** The file is opened for both reading and writing.
      */
     O_RDWR: OpenOption;
     /**
-     * POSIX open flags.
+     * 🗑️ **Truncate:** If the file exists and is a regular file, and it is
+     * opened for writing (O_WRONLY or O_RDWR), its length is truncated to 0.
      */
     O_TRUNC: OpenOption;
     /**
-     * POSIX open flags.
+     * ✍️ **Write Only:** The file is opened for writing only.
      */
     O_WRONLY: OpenOption;
     /**
-     * (Windows specific). Open the file in text mode. The default is binary
-     * mode.
+     * (Windows specific) 📝 **Text Mode:** Open the file in text mode. In text mode,
+     * carriage return/line feed (CRLF) pairs are translated to a single
+     * line feed (LF) on input, and LF is translated to CRLF on output.
+     * The default is binary mode.
      */
     O_TEXT: OpenOption;
     /**

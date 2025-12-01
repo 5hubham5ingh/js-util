@@ -5,12 +5,12 @@ import {
   cursorShow,
   cursorUp,
   eraseDown,
-} from "../justjs/cursor.js";
+} from "./cursor.js";
 import {
   getTerminalSize,
   handleKeysPressSync,
   keySequences,
-} from "../justjs/terminal.js";
+} from "./terminal.js";
 import { printf } from "std";
 import { ttySetRaw } from "../qjs-ext-lib/src/os.js";
 import { clearInterval, setInterval } from "../qjs-ext-lib/src/timers.js";
