@@ -1630,6 +1630,319 @@ declare global {
      */
     parseExtJSON(str: string): any;
   };
+
+
+  /**
+ * A function that, when called, exits the key handling loop.
+ */
+  type QuitFunction = () => void;
+
+  /**
+   * Handler for a specific key sequence.
+   *
+   * @param sequence The exact escape sequence that was matched
+   * @param quit     Call this to exit the key handling loop
+   */
+  type KeyHandler = (sequence: string, quit: QuitFunction) => void | Promise<void>;
+
+  /**
+   * Default handler (called when no exact match is found)
+   */
+  type DefaultHandler = (sequence: string) => void | Promise<void>;
+
+  /**
+   * Object mapping key sequences (or special group names) to handlers.
+   *
+   * You can use the strings `"capitalLetters"`, `"smallLetters"`, `"numbers"`
+   * as keys — they will be automatically expanded to all letters/numbers.
+   */
+  interface KeyHandlers {
+    [key: string]: KeyHandler | "capitalLetters" | "smallLetters" | "numbers";
+    /** Optional fallback when no exact match is found */
+    default?: DefaultHandler;
+  }
+
+
+
+  const terminal: {
+    keySequences: {
+      // Arrow keys
+      readonly ArrowUp: "\x1b[A";
+      readonly ArrowDown: "\x1b[B";
+      readonly ArrowRight: "\x1b[C";
+      readonly ArrowLeft: "\x1b[D";
+
+      // Function keys
+      readonly F1: "\x1bOP";
+      readonly F2: "\x1bOQ";
+      readonly F3: "\x1bOR";
+      readonly F4: "\x1bOS";
+      readonly F5: "\x1b[15~";
+      readonly F6: "\x1b[17~";
+      readonly F7: "\x1b[18~";
+      readonly F8: "\x1b[19~";
+      readonly F9: "\x1b[20~";
+      readonly F10: "\x1b[21~";
+      readonly F11: "\x1b[23~";
+      readonly F12: "\x1b[24~";
+
+      // Control keys
+      readonly Home: "\x1b[H";
+      readonly End: "\x1b[F";
+      readonly PageUp: "\x1b[5~";
+      readonly PageDown: "\x1b[6~";
+      readonly Insert: "\x1b[2~";
+      readonly Delete: "\x1b[3~";
+
+      // Special characters
+      readonly Space: " ";
+      readonly Enter: "\r";
+      readonly Escape: "\x1b";
+      readonly Tab: "\t";
+      readonly ShiftTab: "\x1b[Z";
+      readonly Backspace: "\x7F";
+
+      // Ctrl+A to Ctrl+Z
+      readonly "Ctrl+A": "\x01";
+      readonly "Ctrl+B": "\x02";
+      readonly "Ctrl+C": "\x03";
+      readonly "Ctrl+D": "\x04";
+      readonly "Ctrl+E": "\x05";
+      readonly "Ctrl+F": "\x06";
+      readonly "Ctrl+G": "\x07";
+      readonly "Ctrl+H": "\x08";
+      readonly "Ctrl+I": "\x09";
+      readonly "Ctrl+J": "\x0A";
+      readonly "Ctrl+K": "\x0B";
+      readonly "Ctrl+L": "\x0C";
+      readonly "Ctrl+M": "\x0D";
+      readonly "Ctrl+N": "\x0E";
+      readonly "Ctrl+O": "\x0F";
+      readonly "Ctrl+P": "\x10";
+      readonly "Ctrl+Q": "\x11";
+      readonly "Ctrl+R": "\x12";
+      readonly "Ctrl+S": "\x13";
+      readonly "Ctrl+T": "\x14";
+      readonly "Ctrl+U": "\x15";
+      readonly "Ctrl+V": "\x16";
+      readonly "Ctrl+W": "\x17";
+      readonly "Ctrl+X": "\x18";
+      readonly "Ctrl+Y": "\x19";
+      readonly "Ctrl+Z": "\x1A";
+
+      // Key groups (used as placeholders for bulk mapping)
+      readonly capitalLetters: "capitalLetters";
+      readonly smallLetters: "smallLetters";
+      readonly numbers: "numbers";
+    };
+
+    /**
+     * Sets up a key press handler for the specified key sequences.
+     *
+     * @param keysAndCb - An object where keys are key sequences (either from keySequences or custom strings) and values are handler functions.
+     *
+     * @example
+     * handleKeysPress({
+     *   'j': () => console.log('j pressed'),
+     *   [keySequences.ArrowUp]: () => console.log('Arrow up pressed'),
+     *   [keySequences.Enter]: (quit) => { console.log('Enter pressed'); quit(); }
+     * });
+     *
+     * @description
+     * - The function sets the terminal to raw mode for direct key input.
+     * - It continuously reads input until the quit function is called.
+     * - Each key handler receives a `quit` function as an argument, which can be called to exit the handling loop.
+     * - The Escape key is treated specially: pressing it twice will terminate the key press handler if no specific Escape handler is provided.
+     * - For other keys, their corresponding handler functions are called when the key sequence is matched.
+     */
+    handleKeysPress(keysAndCb: KeyHandlers): Promise<void>;
+
+    /**
+     * Synchronous version of `handleKeysPress`.
+     *
+     * Identical behavior to `handleKeysPress` but does not support async handlers.
+     */
+    handleKeysPressSync(keysAndCb: KeyHandlers): void;
+
+    /**
+     * Retrieves the current size of the terminal window.
+     *
+     * @returns An array containing the width and height of the terminal in characters.
+     *
+     * @description
+     * This function attempts to determine the size of the terminal window using the following methods:
+     * 1. If the output is connected to a TTY (terminal), it uses the ttyGetWinSize function.
+     * 2. If not connected to a TTY, it tries to read the COLUMNS and LINES environment variables.
+     * 3. If neither method works, it returns a default size of [50, 10].
+     *
+     * @example
+     * const [width, height] = getTerminalSize();
+     * console.log(`Terminal size: ${width}x${height}`);
+     */
+    getTerminalSize(): [number, number];
+
+    /**
+ * Moves cursor to a specific position (zero-based coordinates).
+ *
+ * @param x Column number (0 = leftmost)
+ * @param y Row number (0 = topmost). If omitted, moves to column `x` on current line.
+ * @returns ANSI escape sequence
+ *
+ * @example
+ * cursorTo(5, 10);     // → moves to column 5, row 10
+ * cursorTo(0);         // → moves to first column of current line
+ */
+    cursorTo(x: number, y?: number): string;
+
+    /**
+     * Moves cursor by offset (relative movement).
+     *
+     * @param x Positive = right, negative = left
+     * @param y Positive = down, negative = up
+     * @returns ANSI escape sequence
+     *
+     * @example
+     * cursorMove(5, -2);   // move 5 columns right and 2 rows up
+     */
+    cursorMove(x: number, y: number): string;
+
+    /**
+     * Moves cursor up by count rows.
+     * @param count Number of rows (default: 1)
+     */
+    cursorUp(count?: number): string;
+
+    /**
+     * Moves cursor down by count rows.
+     * @param count Number of rows (default: 1)
+     */
+    cursorDown(count?: number): string;
+
+    /**
+     * Moves cursor forward (right) by count columns.
+     * @param count Number of columns (default: 1)
+     */
+    cursorForward(count?: number): string;
+
+    /**
+     * Moves cursor backward (left) by count columns.
+     * @param count Number of columns (default: 1)
+     */
+    cursorBackward(count?: number): string;
+
+    /**
+     * Moves cursor to the leftmost column (column 0).
+     */
+    cursorLeft: "\u001B[G";
+
+    /**
+     * Saves current cursor position.
+     */
+    cursorSavePosition: "\u001B7";
+
+    /**
+     * Restores cursor to the last saved position.
+     */
+    cursorRestorePosition: "\u001B8";
+
+    /**
+     * Requests cursor position report (response comes via stdin as `\u001B[<row>;<col>R`).
+     */
+    cursorGetPosition: "\u001B[6n";
+
+    /**
+     * Moves cursor to the beginning of the next line.
+     */
+    cursorNextLine: "\u001B[E";
+
+    /**
+     * Moves cursor to the beginning of the previous line.
+     */
+    cursorPrevLine: "\u001B[F";
+
+    /**
+     * Hides the cursor.
+     */
+    cursorHide: "\u001B[?25l";
+
+    /**
+     * Shows the cursor.
+     */
+    cursorShow: "\u001B[?25h";
+
+    /**
+     * Erases count lines starting from the current line and moves cursor up.
+     * @param count Number of lines to erase
+     */
+    eraseLines(count: number): string;
+
+    /**
+     * Erases from cursor to the end of the line.
+     */
+    eraseEndLine: "\u001B[K";
+
+    /**
+     * Erases from cursor to the start of the line.
+     */
+    eraseStartLine: "\u001B[1K";
+
+    /**
+     * Erases the entire current line.
+     */
+    eraseLine: "\u001B[2K";
+
+    /**
+     * Erases from cursor down to the bottom of the screen.
+     */
+    eraseDown: "\u001B[J";
+
+    /**
+     * Erases from cursor up to the top of the screen.
+     */
+    eraseUp: "\u001B[1J";
+
+    /**
+     * Erases the entire screen (cursor position unchanged).
+     */
+    eraseScreen: "\u001B[2J";
+
+    /**
+     * Scrolls the page up by one line.
+     */
+    scrollUp: "\u001B[S";
+
+    /**
+     * Scrolls the page down by one line.
+     */
+    scrollDown: "\u001B[T";
+
+    /**
+     * Clears the terminal screen (soft reset).
+     */
+    clearScreen: "\u001Bc";
+
+    /**
+     * Fully clears the terminal including scrollback buffer.
+     * Behavior differs between platforms.
+     */
+    clearTerminal: `\u001B[2J\u001B[3J\u001B[H`;
+
+    /**
+     * Switches to the alternative screen buffer.
+     */
+    enterAlternativeScreen: "\u001B[?1049h";
+
+    /**
+     * Exits the alternative screen buffer.
+     */
+    exitAlternativeScreen: "\u001B[?1049l";
+
+    /**
+     * Emits a terminal bell (beep).
+     */
+    beep: "\u0007";
+
+  }
 }
 
 // Required for global augmentation to work

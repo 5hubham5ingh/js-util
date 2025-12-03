@@ -233,14 +233,4 @@ const getTerminalSize = () => {
   return !width && !height ? [50, 10] : [width, height];
 };
 
-let count = 0;
-// handleKeysPress({
-//   j: () => { print('j pressed'); count++ },
-//   k: () => { print('k pressed'); count++ },
-//   [keySequences.ArrowUp]: () => print('arrow up'),
-//   [keySequences.Enter]: (key, quit) => { print('count: ', count); quit() },
-//   [keySequences.Escape]: (key, quit) => { print('Bye!!!'); quit() },
-//   [keySequences.Backspace]: (key, quit) => { print('back!!'); quit() }
-// })
-
 export { getTerminalSize, handleKeysPress, handleKeysPressSync, keySequences };
