@@ -71,7 +71,17 @@ Now, `js` should be available globally in your terminal.
 **Build from source:**
 Run `curl -fsSL https://raw.githubusercontent.com/5hubham5ingh/js-util/main/build.sh | sh`
 
+## Update
+Run `js "__update"` to check and download update from Github releases.
+
 ## Usage
+
+Run `js "__version"` to check version.
+
+Run [examples.sh](https://github.com/5hubham5ingh/js-util/blob/main/examples.sh) bash script to see a demo:
+```bash
+bash examples.sh js
+```
 
 ### Use in terminal
 
