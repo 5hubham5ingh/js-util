@@ -1,3 +1,4 @@
+import { link } from "./cursor.js";
 import { getTerminalSize } from "./terminal.js";
 
 export const table = (data, columns) => {
@@ -185,8 +186,7 @@ export const border = (str, type = "normal", style, padX = 1, padY = 0) => {
   const horizontalPadding = " ".repeat(padX);
 
   const middleContent = lines.map((line) =>
-    `${chars.y}${horizontalPadding}${
-      line.padEnd(contentWidth + line.length - line.stripStyle().length)
+    `${chars.y}${horizontalPadding}${line.padEnd(contentWidth + line.length - line.stripStyle().length)
     }${horizontalPadding}${chars.y}`
   ).join("\n");
 
@@ -551,3 +551,5 @@ export function heatMap(data) {
     return result;
   }
 }
+
+export const url = link
