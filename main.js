@@ -5,7 +5,7 @@ import "extension.js";
 
 try {
   std.loadScript(HOME.concat("/", ".js"));
-} catch {}
+} catch { }
 
 const args = scriptArgs.slice(1);
 const scriptPath = args[0];
@@ -36,11 +36,7 @@ try {
     } else {
       const __history = [];
 
-      Object.defineProperty(globalThis, "__clear", {
-        get() {
-          printf("\x1b[2J\x1b[H");
-        },
-      });
+      globalThis.__clear = ("\x1b[2J\x1b[H")
 
       Object.defineProperty(globalThis, "__redo", {
         get() {
@@ -48,26 +44,20 @@ try {
         },
       });
 
-      Object.defineProperty(globalThis, "__help", {
-        get() {
-          print(`
+      globalThis.__help = (`
 Commands:
 - ${"'__clear'".style("italic")}: clear RELP screen
 - ${"'__redo'".style("italic")}: re-evaluate a command from history
-`);
-        },
-      });
+`)
 
-      render.startSection("grey");
       printf(
         `
  ${"'js'".style("bold")} version ${VERSION}
   Run '__help' for help
-${
-          (" Press 'ctrl+c' to exit ".style(["bold", "bg-grey", "black"]) + " ")
-            .align(
-              "right",
-            )
+${(" Press 'ctrl+c' to exit ".style(["bold", "bg-grey", "black"]) + " ")
+          .align(
+            "right",
+          )
         }`,
       );
 
