@@ -1,7 +1,7 @@
 import { ansi } from "./ansiStyle.js";
 import { hsvToRgb, rgbToHex, rgbToHsl } from "./color.js";
 import { printf } from "std";
-import { ttyGetWinSize, ttySetRaw } from "../qjs-ext-lib/src/os.js";
+import { ttySetRaw } from "../qjs-ext-lib/src/os.js";
 import { handleKeysPressSync, keySequences } from "./terminal.js";
 import {
   cursorBackward,
@@ -91,7 +91,7 @@ const BORDER_CHARS = {
 let actualTerminalWidth, terminalWidth;
 
 export function colorPicker() {
-  [actualTerminalWidth] = ttyGetWinSize();
+  [actualTerminalWidth] = terminal.getTerminalSize()
   terminalWidth = actualTerminalWidth - 2;
   ttySetRaw();
   printf(cursorHide);
@@ -239,9 +239,8 @@ export function colorPicker() {
       case SELECTED_MODE.hsl: {
         const { r, g, b } = hsvToRgb(h, s, v);
         const hsl = rgbToHsl(parseInt(r), parseInt(g), parseInt(b));
-        selectedColor = `${Math.round(hsl.h * 360)},${
-          Math.round(hsl.s * 100)
-        },${Math.round(hsl.l * 100)}`;
+        selectedColor = `${Math.round(hsl.h * 360)},${Math.round(hsl.s * 100)
+          },${Math.round(hsl.l * 100)}`;
       }
     }
     quit();
@@ -369,8 +368,7 @@ const generateKeybindView = () => {
     );
     const hexColor = rgbToHex(r, g, b);
     const styledChunks = currentLine.map((item) =>
-      ` ${ansi.bgHex(`#${hexColor}`)}${
-        ansi.hex("#000000")
+      ` ${ansi.bgHex(`#${hexColor}`)}${ansi.hex("#000000")
       }${ansi.style.bold} ${item} ${ansi.style.reset} `
     );
     const lineStr = styledChunks.join("");
@@ -393,8 +391,7 @@ const generateKeybindView = () => {
   for (const keyBind of keyDescriptions) {
     const testLine = [...currentLine, keyBind];
     const testStyled = testLine.map((item) =>
-      ` ${ansi.bgHex(`#${hexColor}`)}${
-        ansi.hex("#000000")
+      ` ${ansi.bgHex(`#${hexColor}`)}${ansi.hex("#000000")
       }${ansi.style.bold} ${item} ${ansi.style.reset} `
     ).join("");
     const testVisibleLength = testStyled.replace(/\x1b\[[0-9;]*m/g, "").length;
@@ -452,9 +449,8 @@ function generateHues() {
     ) {
       const { r, g, b } = hsvToRgb(hue, 100, 100);
       const hexColor = rgbToHex(r, g, b);
-      const colorBlock = `${
-        hue === state.selectedColor.h ? ansi.hex("#000000") : ansi.hex(hexColor)
-      }█`;
+      const colorBlock = `${hue === state.selectedColor.h ? ansi.hex("#000000") : ansi.hex(hexColor)
+        }█`;
 
       if (!uniqueHues.has(colorBlock)) {
         uniqueHues.add(colorBlock);
@@ -495,9 +491,8 @@ function generateColorRange(type, viewWidth) {
     const isSelected = (type === SELECTED_SECTION.saturations)
       ? i === state.selectedColor.s
       : i === state.selectedColor.v;
-    const colorBlock = `${
-      isSelected ? ansi.hex("#000000") : ansi.hex(hexColor)
-    }█`;
+    const colorBlock = `${isSelected ? ansi.hex("#000000") : ansi.hex(hexColor)
+      }█`;
     colorBlocks.push(colorBlock);
   }
 
@@ -524,8 +519,7 @@ function createColorDisplay(colorBlocks, viewWidth, borderStyle) {
         line.push(ansi.style.reset, " ".repeat(maxBlocksPerLine - line.length));
       }
       output.push(
-        `${borderStyle.y} ${
-          line.join("")
+        `${borderStyle.y} ${line.join("")
         }${ansi.style.reset} ${borderStyle.y}\n`,
       );
     }
@@ -582,8 +576,7 @@ function generateResultsView() {
   const hexBox = createColorValueBox(SELECTED_MODE.hex, hexValue);
   const hslBox = createColorValueBox(
     SELECTED_MODE.hsl,
-    `${Math.round(hslValue.h * 360)},${Math.round(hslValue.s * 100)},${
-      Math.round(hslValue.l * 100)
+    `${Math.round(hslValue.h * 360)},${Math.round(hslValue.s * 100)},${Math.round(hslValue.l * 100)
     }`,
   );
 
@@ -625,8 +618,7 @@ function displayColorSections() {
   const result = [];
   for (let i = 0; i < saturationLines.length; i++) {
     result.push(
-      `${padding}${saturationLines[i]}${valueLines[i]}${
-        i !== saturationLines.length - 1 ? "\n" : ""
+      `${padding}${saturationLines[i]}${valueLines[i]}${i !== saturationLines.length - 1 ? "\n" : ""
       }`,
     );
   }
