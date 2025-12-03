@@ -24,13 +24,6 @@ else
   echo "\"qjs-ext-lib\" found, skipping \"qjs-ext-lib\" download and installation."
 fi
 
-## Fetch helper scripts
-if ! [ -d "justjs" ]; then
-  git clone --depth 1 https://github.com/5hubham5ingh/justjs.git
-else
-  echo "\"justjs\" found, skipping \"justjs\" download."
-fi
-
 ## Clone the js-util project
 if ! [ -d "js-util" ]; then
   git clone --depth 1 https://github.com/5hubham5ingh/js-util.git
