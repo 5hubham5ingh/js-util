@@ -1,32 +1,48 @@
-# `js`: A javascript based QuickJS-powered Shell Scripting Enhancer
+# `js` – QuickJS-powered JavaScript interpreter for shell scripting
 
-`js` is a versatile command-line utility that supercharges your shell scripting with the power of QuickJS. It provides a rich set of built-in functions and powerful prototype extensions for JavaScript primitives, enabling:
+A fast, lightweight (~3 MB RAM), battery-included JavaScript runner built on QuickJS exclusively for writing clean, interactive, declarative and readable scripts.
 
-*   **Interactive Prompts:** Build engaging CLI experiences with `ask`, `confirm`, `choose`, `select`, `search`, `pick` (file/dir picker), `describe` (multi-line input), and a `color` picker.
-*   **Dynamic UI Elements:** Create animated loaders, paginated text displays, and progress bars with `render.loader`, `render.pages`, and `render.levels`.
-*   **Text-Based Graphics:** Generate formatted tables, borders, and stack/join strings with `draw.table`, `String.prototype.border`, `String.prototype.stack`, and `String.prototype.join`.
-*   **System Integration:** Seamlessly interact with your OS for file system operations (`cwd`, `ls`, `cd`, `stat`, `ensureDir`), execute shell commands (`exec`, `execAsync`), and integrate with your `$EDITOR`.
-*   **Data Manipulation:** Effortlessly parse and stringify JSON, INI, TOML, and CSV formats.
-*   **Powerful Prototypes:** Extend JavaScript `String`, `Array`, `Object`, and `Number` prototypes with numerous utility methods for styling, stripping, wrapping, parsing, and more – making your scripts incredibly concise and expressive.
+## Key Features
 
-`js` transforms complex shell tasks into elegant, readable JavaScript, making your CLI tools more interactive, visually appealing, and robust.
+- **Rich Interactive Prompts**  
+  `ask()`, `confirm()`, `choose()`, `select()`, `search()`, `pick()` (file/dir picker), `describe()` (multiline), color picker
 
-## Why
-- Traditional shell scripting is great for running commands, but they're slow for complex scripting because they have to start a new process for almost everything. 
-- By performing complex logic, data manipulation, and arithmetic directly in the optimized JavaScript engine, `js` avoids the significant overhead of creating new processes for every operation.
-- Also, it brings the simplicity and readability of a modern scripting language over cryptic and numerous syntax for different tools like awk, sed, jq, etc to your commands and give you the power to write declarative scripts using built-in TUIs.
+- **Dynamic Terminal UI**  
+  Animated loaders, progress bars, paginated views: `render.loader()`, `render.levels()`, `render.pages()`
 
-## Features
+- **Text Graphics**  
+  Tables (`draw.table()`), boxed text (`.border()`), stacking/joining strings
 
-*   **Seamless JS Execution:** Run JavaScript code directly from your terminal.
-*   **Shell-like Globals:** Access environment variables (`HOME`, `PATH`, etc.) and common commands (`ls`, `cd`, `cwd`) as global JavaScript variables.
-*   **Powerful Piping:** Chain commands and functions together with an intuitive `.pipe()` method available on Objects, Arrays, Strings, and Numbers.
-*   **Effortless I/O:** Read from `stdin` or files (`read()`) and write to files (`.write()`) with ease.
-*   **Process Execution:** Run external commands synchronously (`exec`) or asynchronously (`execAsync`).
-*   **Built-in Data Conversion:** Convert between CSV and JSON formats effortlessly.
-*   **Advanced String & Array Manipulation:** A rich set of prototype methods for common data manipulation tasks.
-*   **Styled Output:** Add colors, styles, and borders to your output for better readability.
-*   **TUIs:** Built-in terminal based interactive interface for various user input and output.
+- **Deep System Integration**  
+  `ls`, `cd`, `cwd`, `stat`, `ensureDir`, `exec()` / `execAsync()`, launch `$EDITOR`
+
+- **Multi-format Parsing**  
+  Built-in JSON, TOML, INI, CSV parsers/stringifiers
+
+- **Enhanced Prototypes**  
+  Dozens of utility methods on `String`, `Array`, `Object`, `Number` (colors, wrapping, trimming, etc.)
+
+- **Powerful Piping**  
+  Chain operations with `.pipe()` on any value
+
+- **Easy I/O**  
+  `read()`, `.write()`, automatic stdin handling
+
+- **LSP Support**  
+  Drop [types.d.ts](https://github.com/5hubham5ingh/js-util/blob/main/types.d.ts) next to your script → full TypeScript autocompletion, types, and diagnostics
+
+- **Shell Globals**  
+  `$HOME`, `$PATH`, `argv`, etc. available directly
+
+## Why use `js` instead of bash/awk/sed/jq?
+
+- No process spawning for logic → dramatically faster for complex tasks
+- One modern language instead of juggling multiple tools
+- Interactive TUIs and styled output out of the box
+- Tiny memory footprint (3 MB vs 40+ MB for Node/Deno/Bun)
+- Full type safety and IDE support
+
+Write concise, readable, and robust CLI tools in real JavaScript — without the overhead.
 
 ## Installation
 
@@ -238,6 +254,9 @@ chmod +x fzfDict.js
 ## Extensions and config file
 - Extra helper scripts can be loaded globally from `~/config/js/` with `use(scriptName)`.
 - A default script, if exist, will be loaded from `~/.js` always.
+
+> [!CAUTION]
+> The docs are auto-generated from [types.d.ts](https://github.com/5hubham5ingh/js-util/blob/main/types.d.ts). For better reference, use the [types.d.ts](https://github.com/5hubham5ingh/js-util/blob/main/types.d.ts).
 
 ## Global Objects and Functions
 
