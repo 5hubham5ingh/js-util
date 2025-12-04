@@ -61,9 +61,11 @@ ${(" Press 'ctrl+c' to exit ".style(["bold", "bg-grey", "black"]) + " ")
         }`,
       );
 
+      let color = 'green'
       while (true) {
-        render.line();
-        printf("❯ ");
+        render.line(['underline', color]);
+        printf("❯ ".style(color));
+        color = 'green'
         const expression = std.in.getline();
         if (expression === null) break;
         try {
@@ -74,6 +76,7 @@ ${(" Press 'ctrl+c' to exit ".style(["bold", "bg-grey", "black"]) + " ")
           );
         } catch (error) {
           log.error(error);
+          color = 'red'
         }
         __history.unshift(expression);
       }
