@@ -34,7 +34,7 @@ A fast, lightweight (~3 MB RAM), battery-included JavaScript runner built on Qui
 - **Shell Globals**  
   `$HOME`, `$PATH`, `argv`, etc. available directly
 
-## Why use `js` instead of bash/awk/sed/jq?
+## Why use `js` instead of zx/awk/sed/jq?
 
 - No process spawning for logic → dramatically faster for complex tasks
 - One modern language instead of juggling multiple tools
