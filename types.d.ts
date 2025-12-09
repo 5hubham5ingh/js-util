@@ -1943,6 +1943,40 @@ declare global {
     beep: "\u0007";
 
   }
+
+  /**
+     * Runs a process.
+     * Equivalent to 'exec(command)', runs without an explicit shell wrapper.
+     * @example
+     * const res = $`ls`
+     * @param all - The command and its arguments (strings, numbers, etc.).
+     * @returns A Promise resolving to the command execution result.
+     */
+  function $(
+    cmd: string
+  ): string;
+
+  /**
+   * Runs a command explicitly using the system default shell ('/bin/sh').
+   * @example
+   * const res = sh`echo 'hi'`
+   * @param all - The command and its arguments.
+   * @returns A Promise resolving to the command execution result.
+   */
+  function sh(
+    cmd: string
+  ): string;
+
+  /**
+   * Runs a command explicitly using the Bash shell ('/usr/bin/bash').
+   * @example
+   * const res = bash`echo 'hi'`
+   * @param all - The command and its arguments.
+   * @returns A Promise resolving to the command execution result.
+   */
+  function bash(
+    cmd: string
+  ): string;
 }
 
 // Required for global augmentation to work

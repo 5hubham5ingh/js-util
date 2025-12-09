@@ -479,3 +479,32 @@ Object.defineProperty(Number.prototype, "weeks", {
   },
   configurable: true,
 });
+
+function constructCmd(strings, ...values) {
+  let cmd = strings[0];
+  for (let i = 0; i < values.length; i++) {
+    cmd += values[i] + strings[i + 1];
+  }
+  return cmd
+}
+
+globalThis.$ = function(...all) {
+  const cmd = constructCmd(...all)
+  return cmd.exec();
+};
+
+globalThis.sh = function(...all) {
+  const cmd = constructCmd(...all)
+  return exec(cmd, {
+    useShell: true
+  });
+};
+
+globalThis.bash = function(...all) {
+  const cmd = constructCmd(...all)
+  return exec(cmd, {
+    useShell: true,
+    shell: "/usr/bin/bash"
+  });
+};
+
