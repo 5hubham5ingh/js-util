@@ -32,14 +32,14 @@ A fast, lightweight (~3 MB RAM), battery-included JavaScript runner built on Qui
   Drop [types.d.ts](https://github.com/5hubham5ingh/js-util/blob/main/types.d.ts) next to your script → full TypeScript autocompletion, types, and diagnostics
 
 - **Shell Globals**  
-  `$HOME`, `$PATH`, `argv`, etc. available directly
+  `$HOME`, `$PATH`, `cwd`, etc. available directly
 
 ## Why use `js` instead of zx/awk/sed/jq?
 
 - No process spawning for logic → dramatically faster for complex tasks
 - One modern language instead of juggling multiple tools
 - Interactive TUIs and styled output out of the box
-- Tiny memory footprint (3 MB vs 40+ MB for Node/Deno/Bun)
+- Tiny memory footprint (~3-4 MB vs 40-60 MB for Node/Deno/Bun)
 - Full type safety and IDE support
 
 Write concise, readable, and robust CLI tools in real JavaScript — without the overhead.
