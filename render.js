@@ -325,3 +325,31 @@ export const timer = (till) => {
 export const clearScreen = () => printf(clear);
 
 export const heatMap = (data) => draw.heatMap(data).log();
+
+export function img(base64, options) {
+  // const base64 = await execAsync(["base64", "-w", "0", imagePath], {
+  //   bufferSize: 5000,
+  // });
+
+  let offset = 0;
+  const chunkSize = 4096;
+
+  while (offset < base64.length) {
+    const chunk = base64.substring(offset, offset + chunkSize);
+    const more = offset + chunk.length < base64.length ? 1 : 0;
+
+    if (offset === 0) {
+      std.out.printf(
+        `\x1b_Ga=T,f=100,c=${options?.columns ?? ""},r=${
+          options?.rows ?? ""
+        },m=${more};${chunk}\x1b\\`,
+      );
+    } else {
+      std.out.printf(`\x1b_Gm=${more};${chunk}\x1b\\`);
+    }
+
+    // STD.out.flush();
+    offset += chunk.length;
+  }
+  std.out.flush();
+}
