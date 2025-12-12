@@ -480,7 +480,7 @@ Object.defineProperty(Number.prototype, "weeks", {
   configurable: true,
 });
 
-function constructCmd(strings, ...values) {
+function reconstructString(strings, ...values) {
   let cmd = strings[0];
   for (let i = 0; i < values.length; i++) {
     cmd += values[i] + strings[i + 1];
@@ -489,21 +489,32 @@ function constructCmd(strings, ...values) {
 }
 
 globalThis.$ = function (...all) {
-  const cmd = constructCmd(...all);
+  const cmd = reconstructString(...all);
   return cmd.exec();
 };
 
 globalThis.sh = function (...all) {
-  const cmd = constructCmd(...all);
+  const cmd = reconstructString(...all);
   return exec(cmd, {
     useShell: true,
   });
 };
 
 globalThis.bash = function (...all) {
-  const cmd = constructCmd(...all);
+  const cmd = reconstructString(...all);
   return exec(cmd, {
     useShell: true,
     shell: "/usr/bin/bash",
   });
 };
+
+for (let size = 1; size <= 7; size++) {
+  globalThis[`h${size}`] = function (...all) {
+    const text = reconstructString(...all);
+    return draw.text(text, 8 - size) + "\n".repeat(8 - size);
+  };
+  globalThis[`t${size}`] = function (...all) {
+    const text = reconstructString(...all);
+    return draw.text(text, size);
+  };
+}

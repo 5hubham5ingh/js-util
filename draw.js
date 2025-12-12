@@ -186,7 +186,8 @@ export const border = (str, type = "normal", style, padX = 1, padY = 0) => {
   const horizontalPadding = " ".repeat(padX);
 
   const middleContent = lines.map((line) =>
-    `${chars.y}${horizontalPadding}${line.padEnd(contentWidth + line.length - line.stripStyle().length)
+    `${chars.y}${horizontalPadding}${
+      line.padEnd(contentWidth + line.length - line.stripStyle().length)
     }${horizontalPadding}${chars.y}`
   ).join("\n");
 
@@ -552,4 +553,14 @@ export function heatMap(data) {
   }
 }
 
-export const url = link
+export const url = link;
+
+export const text = (text, size = 1) => {
+  if (typeof text !== "string") {
+    throw TypeError("text must be of type 'string'.");
+  }
+  if (typeof size !== "number" || size > 7 || size < 1) {
+    throw TypeError("Invalid size: It must be 1 <= size <= 7");
+  }
+  return `\x1b]66;s=${size};${text}\x07`;
+};

@@ -361,3 +361,6 @@ export async function png(pngSource, size) {
 
   std.out.flush();
 }
+
+export const heading = (heading, size = 1) =>
+  std.out.printf(globalThis[`h${size}`]([heading]));

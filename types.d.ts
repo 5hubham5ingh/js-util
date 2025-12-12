@@ -106,6 +106,14 @@ declare global {
       png: { base64: string; filePath: string },
       size?: { columns: number; rows: number },
     ): void;
+
+    /**
+     * Displays heading in the terminal using kitty
+     * text protocol
+     * @param {string} [text] - The text to display
+     * @param {number} [size] - The text size
+     */
+    heading(text: string, size: number): void;
   };
 
   /**
@@ -272,6 +280,15 @@ declare global {
      * @returns {string} The complete, encoded ANSI/OSC string required to render the clickable link.
      */
     url(text: string, link: string): string;
+
+    /**
+     * Format text size for the terminal using kitty
+     * text protocol
+     * @param {string} [text] - The text to display
+     * @param {number} [size] - The text size
+     * @returns {string} - The formatted text
+     */
+    text(text: string, size: number): string;
   };
 
   /**
@@ -1991,6 +2008,96 @@ declare global {
   function bash(
     cmd: string,
   ): string;
+
+  /**
+   * Formats text using the terminal's text sizing protocol.
+   * Corresponds to the SMALLEST scale factor (size 1) in the draw.text utility.
+   * @example
+   * h1`Small print details`
+   * @param strings - The string segments of the template literal.
+   * @returns A string containing the terminal control sequence for text formatting.
+   */
+  function h1(strings: TemplateStringsArray): string;
+
+  /**
+   * Formats text using the terminal's text sizing protocol (size 2).
+   */
+  function h2(strings: TemplateStringsArray): string;
+
+  /**
+   * Formats text using the terminal's text sizing protocol (size 3).
+   */
+  function h3(strings: TemplateStringsArray): string;
+
+  /**
+   * Formats text using the terminal's text sizing protocol (size 4, Medium).
+   */
+  function h4(strings: TemplateStringsArray): string;
+
+  /**
+   * Formats text using the terminal's text sizing protocol (size 5).
+   */
+  function h5(strings: TemplateStringsArray): string;
+
+  /**
+   * Formats text using the terminal's text sizing protocol (size 6).
+   */
+  function h6(strings: TemplateStringsArray): string;
+
+  /**
+   * Formats text using the terminal's text sizing protocol.
+   * Corresponds to the LARGEST scale factor (size 7) in the draw.text utility.
+   * @example
+   * h7`Welcome to ${project}`
+   * @param strings - The string segments of the template literal.
+   * @returns A string containing the terminal control sequence for text formatting.
+   */
+  function h7(strings: TemplateStringsArray): string;
+
+  // --- Text Functions (t1 - t7): Direct Size Mapping ---
+
+  /**
+   * Formats text using the terminal's text sizing protocol (size 1, smallest).
+   * @example
+   * t1`A tiny footnote.`
+   * @param strings - The string segments of the template literal.
+   * @returns A string containing the terminal control sequence for text formatting.
+   */
+  function t1(strings: TemplateStringsArray): string;
+
+  /**
+   * Formats text using the terminal's text sizing protocol (size 2).
+   */
+  function t2(strings: TemplateStringsArray): string;
+
+  /**
+   * Formats text using the terminal's text sizing protocol (size 3).
+   */
+  function t3(strings: TemplateStringsArray): string;
+
+  /**
+   * Formats text using the terminal's text sizing protocol (size 4, Default/Medium).
+   */
+  function t4(strings: TemplateStringsArray): string;
+
+  /**
+   * Formats text using the terminal's text sizing protocol (size 5).
+   */
+  function t5(strings: TemplateStringsArray): string;
+
+  /**
+   * Formats text using the terminal's text sizing protocol (size 6).
+   */
+  function t6(strings: TemplateStringsArray): string;
+
+  /**
+   * Formats text using the terminal's text sizing protocol (size 7, largest).
+   * @example
+   * t7`Giant banner text!`
+   * @param strings - The string segments of the template literal.
+   * @returns A string containing the terminal control sequence for text formatting.
+   */
+  function t7(strings: TemplateStringsArray): string;
 }
 
 // Required for global augmentation to work
