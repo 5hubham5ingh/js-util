@@ -326,30 +326,41 @@ export const clearScreen = () => printf(clear);
 
 export const heatMap = (data) => draw.heatMap(data).log();
 
-export function img(base64, options) {
-  // const base64 = await execAsync(["base64", "-w", "0", imagePath], {
-  //   bufferSize: 5000,
-  // });
+/**
+ * Displays an image in a compatible terminal
+ * using Kitty Graphics Protocol.
+ * * @param {string} imagePath - The path to the image file.
+ * @param {object} [size] - Optional parameters for the display.
+ * @param {number} [size.columns] - Width in columns.
+ * @param {number} [size.rows] - Height in rows.
+ */
+export async function image(imagePath, size = {}) {
+  const base64 = await execAsync(["base64", "-w", "0", imagePath], {
+    bufferSize: 5000,
+  });
 
-  let offset = 0;
+  let params = "a=T,f=100"; //'Action=Transfer', 'Format=base64'
+
+  if (size?.columns) params += `,c=${size.columns}`;
+  if (size?.rows) params += `,c=${size.rows}`;
+
   const chunkSize = 4096;
+  let offset = 0;
 
   while (offset < base64.length) {
     const chunk = base64.substring(offset, offset + chunkSize);
     const more = offset + chunk.length < base64.length ? 1 : 0;
 
+    let escapeSequence;
     if (offset === 0) {
-      std.out.printf(
-        `\x1b_Ga=T,f=100,c=${options?.columns ?? ""},r=${
-          options?.rows ?? ""
-        },m=${more};${chunk}\x1b\\`,
-      );
+      escapeSequence = `\x1b_G${params},m=${more};${chunk}\x1b\\`;
     } else {
-      std.out.printf(`\x1b_Gm=${more};${chunk}\x1b\\`);
+      escapeSequence = `\x1b_Gm=${more};${chunk}\x1b\\`;
     }
 
-    // STD.out.flush();
+    std.out.printf(escapeSequence);
     offset += chunk.length;
   }
+
   std.out.flush();
 }
