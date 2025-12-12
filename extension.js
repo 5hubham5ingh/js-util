@@ -15,22 +15,22 @@ import * as csvParser from "./csvParser.js";
 import * as iniParser from "./iniParser.js";
 import * as tomlParser from "./tomlParser.js";
 import * as log from "./log.js";
-import * as cursor from "./cursor.js"
-import * as terminal from "./terminal.js"
+import * as cursor from "./cursor.js";
+import * as terminal from "./terminal.js";
 
 globalThis.std = std;
 globalThis.os = os;
 globalThis.exec = exec;
 globalThis.execAsync = execAsync;
 globalThis.read = std.loadFile;
-globalThis.use = function(scriptName) {
+globalThis.use = function (scriptName) {
   const scriptPath = HOME.concat("/.config/js/", scriptName, ".js");
   std.loadScript(scriptPath);
 };
-globalThis.cd = function(dir = std.getenv("HOME")) {
+globalThis.cd = function (dir = std.getenv("HOME")) {
   return os.chdir(dir) === 0 ? true : false;
 };
-globalThis.eval = function(expression) {
+globalThis.eval = function (expression) {
   return std.evalScript(expression);
 };
 globalThis.enquire = enquire;
@@ -50,8 +50,8 @@ globalThis.wait = wait;
 
 globalThis.terminal = {
   ...cursor,
-  ...terminal
-}
+  ...terminal,
+};
 
 const resolvePath = (path) => {
   if (path && typeof path !== "string") {
@@ -65,7 +65,7 @@ const resolvePath = (path) => {
   return os.getcwd()[0] + "/" + path;
 };
 
-globalThis.stat = function(path) {
+globalThis.stat = function stat(path) {
   const resolvedPath = resolvePath(path);
   const [stats, statErr] = os.stat(resolvedPath);
   if (statErr) {
@@ -94,7 +94,7 @@ globalThis.stat = function(path) {
   };
 };
 
-globalThis.ensureDir = (dir) => {
+globalThis.ensureDir = function ensureDir(dir) {
   if (typeof dir !== "string" || dir.trim() === "") {
     throw new TypeError("Invalid directory path provided.");
   }
@@ -184,11 +184,11 @@ Object.defineProperty(globalThis, "stdin", {
   get: () => stdinCached ?? (stdinCached = std.in.readAsString()),
 });
 
-Object.prototype.stringify = function(replacer = null, space = 2) {
+Object.prototype.stringify = function (replacer = null, space = 2) {
   return JSON.stringify(this, replacer, space);
 };
 
-Object.prototype.pipe = function(cb) {
+Object.prototype.pipe = function (cb) {
   if (typeof cb === "function") return cb(this);
   else if (typeof cb === "string" || Array.isArray(cb)) {
     const input = typeof this === "string" ? this : (
@@ -206,49 +206,49 @@ Object.prototype.pipe = function(cb) {
   );
 };
 
-Object.prototype.log = function() {
+Object.prototype.log = function () {
   print(JSON.stringify(this, null, 1));
   return this;
 };
 
-Object.prototype.entries = function() {
+Object.prototype.entries = function () {
   return Object.entries(this);
 };
 
-Object.prototype.keys = function() {
+Object.prototype.keys = function () {
   return Object.keys(this);
 };
 
-Object.prototype.values = function() {
+Object.prototype.values = function () {
   return Object.values(this);
 };
 
-Object.prototype.assign = function(entries) {
+Object.prototype.assign = function (entries) {
   return Object.assign(this, entries);
 };
 
-Object.prototype.table = function(columns) {
+Object.prototype.table = function (columns) {
   return draw.table(this, columns);
 };
 
-Object.prototype.toIni = function() {
+Object.prototype.toIni = function () {
   return iniParser.toIni(this);
 };
 
-Object.prototype.toToml = function() {
+Object.prototype.toToml = function () {
   return tomlParser.toToml(this);
 };
 
-Array.prototype.stringify = function(replacer = null, space = 2) {
+Array.prototype.stringify = function (replacer = null, space = 2) {
   return JSON.stringify(this, replacer, space);
 };
 
-Array.prototype.for = function(cb) {
+Array.prototype.for = function (cb) {
   for (const e of this) cb(e);
   return this;
 };
 
-Array.prototype.remove = function(...items) {
+Array.prototype.remove = function (...items) {
   for (const item of items) {
     const index = this.indexOf(item);
     if (index !== -1) {
@@ -258,7 +258,7 @@ Array.prototype.remove = function(...items) {
   return this;
 };
 
-Array.prototype.removeAll = function(...items) {
+Array.prototype.removeAll = function (...items) {
   for (const item of items) {
     let index;
     while ((index = this.indexOf(item)) !== -1) {
@@ -268,32 +268,32 @@ Array.prototype.removeAll = function(...items) {
   return this;
 };
 
-Array.prototype.toCsvText = function(delimiter = ",") {
+Array.prototype.toCsvText = function (delimiter = ",") {
   return csvParser.csvArrayToCsvText(this, delimiter);
 };
 
-Array.prototype.toCsvArray = function() {
+Array.prototype.toCsvArray = function () {
   return csvParser.csvJsonToCsvArray(this);
 };
 
-Array.prototype.toCsvJson = function(delimiter = ",") {
+Array.prototype.toCsvJson = function (delimiter = ",") {
   return csvParser.csvArrayToCsvJson(this, delimiter);
 };
 
-Array.prototype.exec = function() {
+Array.prototype.exec = function () {
   return exec(this);
 };
 
-Array.prototype.execAsync = function() {
+Array.prototype.execAsync = function () {
   return execAsync(this);
 };
 
-Array.prototype.log = function() {
+Array.prototype.log = function () {
   print(JSON.stringify(this, null, 1));
   return this;
 };
 
-String.prototype.body = function(start, end, line, word) {
+String.prototype.body = function (start, end, line, word) {
   let file = this;
   if (!file) return "";
   file = file.split("\n").slice(start, end);
@@ -307,7 +307,7 @@ String.prototype.body = function(start, end, line, word) {
   return file?.join("\n") || "";
 };
 
-String.prototype.write = function(path, mode = "w+") {
+String.prototype.write = function (path, mode = "w+") {
   const file = std.open(path, mode);
   if (!file) throw Error("Failed to open file " + path);
   file.puts(this);
@@ -315,90 +315,90 @@ String.prototype.write = function(path, mode = "w+") {
   return this;
 };
 
-String.prototype.parseJson = function() {
+String.prototype.parseJson = function () {
   return JSON.parse(this);
 };
 
-String.prototype.toCsvArray = function(delimiter = ",") {
+String.prototype.toCsvArray = function (delimiter = ",") {
   return csvParser.csvTextToCsvArray(this, delimiter);
 };
 
-String.prototype.toCsvJson = function(delimiter = ",") {
+String.prototype.toCsvJson = function (delimiter = ",") {
   return csvParser.csvTextToCsvJson(this, delimiter);
 };
 
-String.prototype.parseIni = function(options) {
+String.prototype.parseIni = function (options) {
   return iniParser.ini(this, options);
 };
 
-String.prototype.parseToml = function() {
+String.prototype.parseToml = function () {
   return tomlParser.toml(this);
 };
 
-String.prototype.exec = function() {
+String.prototype.exec = function () {
   return exec(this);
 };
 
-String.prototype.execAsync = function() {
+String.prototype.execAsync = function () {
   return execAsync(this);
 };
 
-String.prototype.log = function() {
+String.prototype.log = function () {
   print(this);
   return this;
 };
 
-String.prototype.lines = function() {
+String.prototype.lines = function () {
   return this.split(/\r\n|\r|\n/);
 };
 
-String.prototype.words = function() {
+String.prototype.words = function () {
   return this.split(/\s+/).filter((w) => w.length);
 };
 
-String.prototype.style = function(styles) {
+String.prototype.style = function (styles) {
   return ansi.format(this, styles);
 };
 
-String.prototype.stripStyle = function() {
+String.prototype.stripStyle = function () {
   const ansiRegex =
     /[\u001b\u009b][[()#;?]*.{0,2}(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
   return this.replace(ansiRegex, "");
 };
 
-String.prototype.stripEmojis = function() {
+String.prototype.stripEmojis = function () {
   return this.replace(/\p{Emoji}/gu, "");
 };
 
-String.prototype.border = function(...all) {
+String.prototype.border = function (...all) {
   return draw.border(this, ...all);
 };
 
-String.prototype.stripBorder = function() {
+String.prototype.stripBorder = function () {
   return this.replace(
     new RegExp("─|│|┌|┐|└|┘|━|┃|┏|┓|┗|┛|═|║|╔|╗|╚|╝|╭|╮|╰|╯| ", "g"),
     "",
   );
 };
 
-String.prototype.eval = function() {
+String.prototype.eval = function () {
   return eval(this);
 };
 
-String.prototype.join = function(secondString) {
+String.prototype.join = function (secondString) {
   return draw.join(this, secondString);
 };
 
-String.prototype.stack = function(...all) {
+String.prototype.stack = function (...all) {
   return draw.stack(this, ...all);
 };
 
-String.prototype.chunks = function(size) {
+String.prototype.chunks = function (size) {
   if (this.length === 0) return this;
   return this.match(new RegExp(`.{1,${size}}`, "gs"));
 };
 
-String.prototype.wrap = function(
+String.prototype.wrap = function (
   maxLength = getTerminalSize()[0],
   byWords = true,
 ) {
@@ -421,7 +421,7 @@ String.prototype.wrap = function(
   return this.chunks(maxLength).join("\n");
 };
 
-String.prototype.align = function(alignment, width = getTerminalSize()[0]) {
+String.prototype.align = function (alignment, width = getTerminalSize()[0]) {
   switch (alignment) {
     case "center":
       return this.lines().map((l) => {
@@ -440,41 +440,41 @@ String.prototype.align = function(alignment, width = getTerminalSize()[0]) {
   }
 };
 
-Number.prototype.log = function() {
+Number.prototype.log = function () {
   print(this);
   return this;
 };
 
 Object.defineProperty(Number.prototype, "seconds", {
-  get: function() {
+  get: function () {
     return this * 1000;
   },
   configurable: true,
 });
 
 Object.defineProperty(Number.prototype, "minutes", {
-  get: function() {
+  get: function () {
     return this * 60 * 1000;
   },
   configurable: true,
 });
 
 Object.defineProperty(Number.prototype, "hours", {
-  get: function() {
+  get: function () {
     return this * 60 * 60 * 1000;
   },
   configurable: true,
 });
 
 Object.defineProperty(Number.prototype, "days", {
-  get: function() {
+  get: function () {
     return this * 24 * 60 * 60 * 1000;
   },
   configurable: true,
 });
 
 Object.defineProperty(Number.prototype, "weeks", {
-  get: function() {
+  get: function () {
     return this * 7 * 24 * 60 * 60 * 1000;
   },
   configurable: true,
@@ -485,26 +485,25 @@ function constructCmd(strings, ...values) {
   for (let i = 0; i < values.length; i++) {
     cmd += values[i] + strings[i + 1];
   }
-  return cmd
+  return cmd;
 }
 
-globalThis.$ = function(...all) {
-  const cmd = constructCmd(...all)
+globalThis.$ = function (...all) {
+  const cmd = constructCmd(...all);
   return cmd.exec();
 };
 
-globalThis.sh = function(...all) {
-  const cmd = constructCmd(...all)
-  return exec(cmd, {
-    useShell: true
-  });
-};
-
-globalThis.bash = function(...all) {
-  const cmd = constructCmd(...all)
+globalThis.sh = function (...all) {
+  const cmd = constructCmd(...all);
   return exec(cmd, {
     useShell: true,
-    shell: "/usr/bin/bash"
   });
 };
 
+globalThis.bash = function (...all) {
+  const cmd = constructCmd(...all);
+  return exec(cmd, {
+    useShell: true,
+    shell: "/usr/bin/bash",
+  });
+};
