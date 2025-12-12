@@ -91,6 +91,21 @@ declare global {
     timer(till: number): () => void;
 
     heatMap: typeof draw.heatMap;
+
+    /**
+     * Displays an PNG image in a compatible terminal
+     * using Kitty Graphics Protocol.
+     * @param {object} [png] - The png source
+     * @param {string} [png.base64] - Base64 encoded png
+     * @param {string} [png.filePath] - File path of the png file
+     * @param {object} [size] - Optional parameters for the display.
+     * @param {number} [size.columns] - Width in columns.
+     * @param {number} [size.rows] - Height in rows.
+     */
+    png(
+      png: { base64: string; filePath: string },
+      size?: { columns: number; rows: number },
+    ): void;
   };
 
   /**
@@ -242,20 +257,20 @@ declare global {
     heatMap(data: number[][]): string;
 
     /**
-    * Generates a clickable hyperlink for display in a modern terminal emulator.
-    *
-    * @example
-    * const webLink = draw.url("google","https://www.google.com") // Standard web page (secure).
-    * const ftpLink = draw.url("File on FTP","ftp://user@server.com/file.zip") // File on an FTP server.
-    * const mailLink = draw.url("Contact Support","mailto:support@domain.com") // Opens your default email client to send a message.
-    * const fileLink = draw.url("Local Report",`file:///${HOME}/Documents/report.pdf`) // A file on your local computer's hard drive.
-    * const sshLink = draw.url("Connect SSH","ssh://user@remote-server") // Opens an SSH client session.
-    * @param {string} text - The visible, clickable text that the user will see (the anchor text).
-    * @param {string} link - The target URL (Uniform Resource Locator) or URI (Uniform Resource Identifier)
-    * that the link should navigate to when clicked. This can be 'http', 'https',
-    * 'mailto', 'tel', or any other valid URI scheme.
-    * @returns {string} The complete, encoded ANSI/OSC string required to render the clickable link.
-    */
+     * Generates a clickable hyperlink for display in a modern terminal emulator.
+     *
+     * @example
+     * const webLink = draw.url("google","https://www.google.com") // Standard web page (secure).
+     * const ftpLink = draw.url("File on FTP","ftp://user@server.com/file.zip") // File on an FTP server.
+     * const mailLink = draw.url("Contact Support","mailto:support@domain.com") // Opens your default email client to send a message.
+     * const fileLink = draw.url("Local Report",`file:///${HOME}/Documents/report.pdf`) // A file on your local computer's hard drive.
+     * const sshLink = draw.url("Connect SSH","ssh://user@remote-server") // Opens an SSH client session.
+     * @param {string} text - The visible, clickable text that the user will see (the anchor text).
+     * @param {string} link - The target URL (Uniform Resource Locator) or URI (Uniform Resource Identifier)
+     * that the link should navigate to when clicked. This can be 'http', 'https',
+     * 'mailto', 'tel', or any other valid URI scheme.
+     * @returns {string} The complete, encoded ANSI/OSC string required to render the clickable link.
+     */
     url(text: string, link: string): string;
   };
 
@@ -1631,10 +1646,9 @@ declare global {
     parseExtJSON(str: string): any;
   };
 
-
   /**
- * A function that, when called, exits the key handling loop.
- */
+   * A function that, when called, exits the key handling loop.
+   */
   type QuitFunction = () => void;
 
   /**
@@ -1643,7 +1657,10 @@ declare global {
    * @param sequence The exact escape sequence that was matched
    * @param quit     Call this to exit the key handling loop
    */
-  type KeyHandler = (sequence: string, quit: QuitFunction) => void | Promise<void>;
+  type KeyHandler = (
+    sequence: string,
+    quit: QuitFunction,
+  ) => void | Promise<void>;
 
   /**
    * Default handler (called when no exact match is found)
@@ -1661,8 +1678,6 @@ declare global {
     /** Optional fallback when no exact match is found */
     default?: DefaultHandler;
   }
-
-
 
   const terminal: {
     keySequences: {
@@ -1782,16 +1797,16 @@ declare global {
     getTerminalSize(): [number, number];
 
     /**
- * Moves cursor to a specific position (zero-based coordinates).
- *
- * @param x Column number (0 = leftmost)
- * @param y Row number (0 = topmost). If omitted, moves to column `x` on current line.
- * @returns ANSI escape sequence
- *
- * @example
- * cursorTo(5, 10);     // → moves to column 5, row 10
- * cursorTo(0);         // → moves to first column of current line
- */
+     * Moves cursor to a specific position (zero-based coordinates).
+     *
+     * @param x Column number (0 = leftmost)
+     * @param y Row number (0 = topmost). If omitted, moves to column `x` on current line.
+     * @returns ANSI escape sequence
+     *
+     * @example
+     * cursorTo(5, 10);     // → moves to column 5, row 10
+     * cursorTo(0);         // → moves to first column of current line
+     */
     cursorTo(x: number, y?: number): string;
 
     /**
@@ -1941,19 +1956,18 @@ declare global {
      * Emits a terminal bell (beep).
      */
     beep: "\u0007";
-
-  }
+  };
 
   /**
-     * Runs a process.
-     * Equivalent to 'exec(command)', runs without an explicit shell wrapper.
-     * @example
-     * const res = $`ls`
-     * @param all - The command and its arguments (strings, numbers, etc.).
-     * @returns A Promise resolving to the command execution result.
-     */
+   * Runs a process.
+   * Equivalent to 'exec(command)', runs without an explicit shell wrapper.
+   * @example
+   * const res = $`ls`
+   * @param all - The command and its arguments (strings, numbers, etc.).
+   * @returns A Promise resolving to the command execution result.
+   */
   function $(
-    cmd: string
+    cmd: string,
   ): string;
 
   /**
@@ -1964,7 +1978,7 @@ declare global {
    * @returns A Promise resolving to the command execution result.
    */
   function sh(
-    cmd: string
+    cmd: string,
   ): string;
 
   /**
@@ -1975,9 +1989,9 @@ declare global {
    * @returns A Promise resolving to the command execution result.
    */
   function bash(
-    cmd: string
+    cmd: string,
   ): string;
 }
 
 // Required for global augmentation to work
-export { };
+export {};

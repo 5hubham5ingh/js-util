@@ -326,30 +326,27 @@ export const clearScreen = () => printf(clear);
 
 export const heatMap = (data) => draw.heatMap(data).log();
 
-/**
- * Displays an image in a compatible terminal
- * using Kitty Graphics Protocol.
- * * @param {string} imagePath - The path to the image file.
- * @param {object} [size] - Optional parameters for the display.
- * @param {number} [size.columns] - Width in columns.
- * @param {number} [size.rows] - Height in rows.
- */
-export async function image(imagePath, size = {}) {
-  const base64 = await execAsync(["base64", "-w", "0", imagePath], {
-    bufferSize: 5000,
+export async function png(pngSource, size) {
+  pngSource.base64 ??= await execAsync([
+    "base64",
+    "-w",
+    "0",
+    pngSource.filePath,
+  ], {
+    bufferSize: stat(pngSource.filePath).size.bytes,
   });
 
   let params = "a=T,f=100"; //'Action=Transfer', 'Format=base64'
 
   if (size?.columns) params += `,c=${size.columns}`;
-  if (size?.rows) params += `,c=${size.rows}`;
+  if (size?.rows) params += `,r=${size.rows}`;
 
   const chunkSize = 4096;
   let offset = 0;
 
-  while (offset < base64.length) {
-    const chunk = base64.substring(offset, offset + chunkSize);
-    const more = offset + chunk.length < base64.length ? 1 : 0;
+  while (offset < pngSource.base64.length) {
+    const chunk = pngSource.base64.substring(offset, offset + chunkSize);
+    const more = offset + chunk.length < pngSource.base64.length ? 1 : 0;
 
     let escapeSequence;
     if (offset === 0) {
