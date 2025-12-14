@@ -5,14 +5,14 @@ import "extension.js";
 
 try {
   std.loadScript(HOME.concat("/", ".js"));
-} catch { }
+} catch {}
 
 const args = scriptArgs.slice(1);
 const scriptPath = args[0];
 
 const [st, err] = scriptPath ? os.stat(scriptPath) : [null, -1];
 
-const VERSION = "1.21.0";
+const VERSION = "1.22.0";
 Object.defineProperty(globalThis, "__version", {
   get() {
     print(VERSION);
@@ -36,7 +36,7 @@ try {
     } else {
       const __history = [];
 
-      globalThis.__clear = ("\x1b[2J\x1b[H")
+      globalThis.__clear = "\x1b[2J\x1b[H";
 
       Object.defineProperty(globalThis, "__redo", {
         get() {
@@ -44,28 +44,29 @@ try {
         },
       });
 
-      globalThis.__help = (`
+      globalThis.__help = `
 Commands:
 - ${"'__clear'".style("italic")}: clear RELP screen
 - ${"'__redo'".style("italic")}: re-evaluate a command from history
-`)
+`;
 
       printf(
         `
  ${"'js'".style("bold")} version ${VERSION}
   Run '__help' for help
-${(" Press 'ctrl+c' to exit ".style(["bold", "bg-grey", "black"]) + " ")
-          .align(
-            "right",
-          )
+${
+          (" Press 'ctrl+c' to exit ".style(["bold", "bg-grey", "black"]) + " ")
+            .align(
+              "right",
+            )
         }`,
       );
 
-      let color = 'green'
+      let color = "green";
       while (true) {
-        render.line(['underline', color]);
+        render.line(["underline", color]);
         printf("❯ ".style(color));
-        color = 'green'
+        color = "green";
         const expression = std.in.getline();
         if (expression === null) break;
         try {
@@ -76,7 +77,7 @@ ${(" Press 'ctrl+c' to exit ".style(["bold", "bg-grey", "black"]) + " ")
           );
         } catch (error) {
           log.error(error);
-          color = 'red'
+          color = "red";
         }
         __history.unshift(expression);
       }
