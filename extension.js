@@ -17,6 +17,7 @@ import * as tomlParser from "./tomlParser.js";
 import * as log from "./log.js";
 import * as cursor from "./cursor.js";
 import * as terminal from "./terminal.js";
+import Color from "./color.js";
 
 globalThis.std = std;
 globalThis.os = os;
@@ -52,6 +53,8 @@ globalThis.terminal = {
   ...cursor,
   ...terminal,
 };
+
+globalThis.Color = Color;
 
 const resolvePath = (path) => {
   if (path && typeof path !== "string") {
