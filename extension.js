@@ -425,13 +425,17 @@ String.prototype.align = function (alignment, width = getTerminalSize()[0]) {
   switch (alignment) {
     case "center":
       return this.lines().map((l) => {
-        const padStart = Math.abs((width - l.stripStyle().length) / 2);
-        return l.padStart(l.length + padStart);
+        const fullWidth = width - l.stripStyle().length;
+        const padStart = Math.abs(fullWidth / 2);
+        const padEnd = fullWidth - padStart;
+        return l.padStart(l.length + padStart).padEnd(
+          l.length + padStart + padEnd,
+        );
       }).join("\n");
 
     case "right":
       return this.lines().map((l) => {
-        const padLeft = Math.abs(width - l.stripStyle().length);
+        const padLeft = width - l.stripStyle().length;
         return l.padStart(l.length + padLeft);
       }).join("\n");
 
