@@ -12,7 +12,7 @@ const scriptPath = args[0];
 
 const [st, err] = scriptPath ? os.stat(scriptPath) : [null, -1];
 
-const VERSION = "1.22.1";
+const VERSION = "1.23.0";
 Object.defineProperty(globalThis, "__version", {
   get() {
     print(VERSION);
@@ -184,6 +184,18 @@ async function update() {
       );
     }
     log.info("'js' update completed successfully!");
+    const typesFilePath = HOME + "/.config/js/types.d.ts";
+    log.info(`Updating the ${typesFilePath}`);
+    const cmd = [
+      "curl",
+      "--create-dirs",
+      "-Lo",
+      "~/.config/js/types.d.ts",
+      "https://raw.githubusercontent.com/5hubham5ingh/js-util/refs/heads/main/types.d.ts",
+    ];
+    if (os.exec(cmd)) {
+      log.warn("Update failed", `Please run ${cmd.join(" ")}`);
+    }
   } else {
     log.info(
       "'js' is already at the latest version. No update needed at this time.",
