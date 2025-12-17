@@ -12,7 +12,7 @@ const scriptPath = args[0];
 
 const [st, err] = scriptPath ? os.stat(scriptPath) : [null, -1];
 
-const VERSION = "1.22.0";
+const VERSION = "1.22.1";
 Object.defineProperty(globalThis, "__version", {
   get() {
     print(VERSION);
@@ -166,8 +166,11 @@ async function update() {
         ].join("\n"),
       );
     }
-    await stopLoader()`Download complete. Package saved successfully.\nMoving the new 'js' binary to "${installationDir}"`
-      .style("yellow").log();
+    await stopLoader();
+    log.info(
+      `Download complete. Package saved successfully.\nMoving the new 'js' binary to "${installationDir}"`
+        .style("yellow"),
+    );
     if (os.exec(["chmod", "+x", "js"])) {
       log.fatal("Failed to make 'js' executable\nTry running 'chmod +x js'");
     }
