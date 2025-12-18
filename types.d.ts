@@ -289,6 +289,19 @@ declare global {
      * @returns {string} - The formatted text
      */
     text(text: string, size: number): string;
+
+    /**
+     * Justifies text elements for the terminal using the Kitty text protocol.
+     * @param {string[]} textElements - The text elements to justify.
+     * @param {"between" | "around" | "even"} [type='between'] - The justification strategy.
+     * @param {number} [width] - The width (defaults to terminal width).
+     * @returns {string} The justified text.
+     */
+    justify(
+      textElements: string[],
+      type: "between" | "around" | "even",
+      width?: number,
+    ): string;
   };
 
   /**
