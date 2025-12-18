@@ -147,55 +147,52 @@ async function update() {
     log.info(
       `Downloading new release package: '${newReleasePackageName}' to temporary location: '${packageDestinationDir}' (saved as 'js').\nThis might take a moment...`,
     );
-    const stopLoader = render.loader();
     if (
       os.exec([
         "curl",
-        "-so",
+        "-o",
         packageDestinationDir,
         "-L",
         newVersionDownloadUrl,
       ])
     ) {
-      await stopLoader();
       log.fatal(
+        "Download failed.",
         [
-          "Download failed.",
           "Failed to download the new 'js' release.",
-          " Please ensure 'curl' is installed on your system and you have an active internet connection.",
+          "Please ensure 'curl' is installed on your system and you have an active internet connection.",
         ].join("\n"),
       );
     }
-    await stopLoader();
+
     log.info(
-      `Download complete. Package saved successfully.\nMoving the new 'js' binary to "${installationDir}"`
-        .style("yellow"),
+      "Download complete.",
+      `Package saved successfully.\nMoving the new 'js' binary to "${installationDir}"`,
     );
     if (os.exec(["chmod", "+x", "js"])) {
       log.fatal("Failed to make 'js' executable\nTry running 'chmod +x js'");
     }
     if (os.rename("js", installationDir)) {
-      log.fatal(
+      log.error(
+        `Installation failed.`,
         [
-          `Installation failed.`,
           `Failed to move the new 'js' executable to '${installationDir}'.`,
-          ` This usually happens due to insufficient permissions. Please try running 'sudo mv js ${installationDir}' manually for a system-wide installation, or ensure your user has write access to the directory.`,
+          `This usually happens due to insufficient permissions. Please try running 'sudo mv js ${installationDir}' manually for a system-wide installation.`,
         ].join("\n"),
       );
-    }
-    log.info("'js' update completed successfully!");
+    } else log.info("'js' update completed successfully!");
     const typesFilePath = HOME + "/.config/js/types.d.ts";
     log.info(`Updating the ${typesFilePath}`);
     const cmd = [
       "curl",
       "--create-dirs",
       "-Lo",
-      "~/.config/js/types.d.ts",
+      HOME + "/.config/js/types.d.ts",
       "https://raw.githubusercontent.com/5hubham5ingh/js-util/refs/heads/main/types.d.ts",
     ];
     if (os.exec(cmd)) {
-      log.warn("Update failed", `Please run ${cmd.join(" ")}`);
-    }
+      log.error("Update failed", `Please run ${cmd.join(" ")}`);
+    } else log.info(`"${typesFilePath}" updated successfully!`);
   } else {
     log.info(
       "'js' is already at the latest version. No update needed at this time.",
