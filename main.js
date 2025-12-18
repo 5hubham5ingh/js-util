@@ -12,7 +12,7 @@ const scriptPath = args[0];
 
 const [st, err] = scriptPath ? os.stat(scriptPath) : [null, -1];
 
-const VERSION = "1.23.0";
+const VERSION = "1.24.0";
 Object.defineProperty(globalThis, "__version", {
   get() {
     print(VERSION);
