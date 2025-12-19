@@ -161,9 +161,10 @@ declare global {
      *
      * @param data - Flat array (header + row-major cells) or array of objects
      * @param columns - Optional array of column keys when data is objects
+     * @param addSeparator - Add line separator between rows, Default- false
      * @returns Multi-line table string
      */
-    table(data: any[] | Record<string, any>[], columns?: string[]): string;
+    table(data: any[] | Record<string, any>[], columns?: string[], addSeparator?: boolean): string;
 
     /**
      * Creates multiple static progress bars (same as render.levels but static version exists in draw too)

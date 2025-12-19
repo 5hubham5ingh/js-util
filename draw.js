@@ -34,14 +34,16 @@ export const table = (data, columns, addSeparator = false) => {
   ].map((row) => row.map((cell) => cell.split("\n")));
 
   // Compute column widths: max length of any single line across all cells in that column
-  const colWidths = header.map((_, colIndex) =>
-    Math.max(
+  const colWidths = header.map((_, colIndex) => {
+    const headerStr = getString(header[colIndex]);
+    
+    return Math.max(
       ...allCellLines.flatMap((row) =>
         row[colIndex].map((line) => line.stripStyle?.()?.length ?? line.length)
       ),
-      header[colIndex].stripStyle?.()?.length ?? header[colIndex].length,
-    )
-  );
+      headerStr.stripStyle?.()?.length ?? headerStr.length,
+    );
+  });
 
   const pad = (line, colIndex) =>
     line.padEnd(
@@ -80,7 +82,7 @@ export const table = (data, columns, addSeparator = false) => {
       const rowStr = "║ " + parts.join(" │ ") + " ║";
       lines.push(rowStr);
     }
-    if(addSeparator) lines.push(separator);
+    if (addSeparator) lines.push(separator);
   });
 
   // Remove the last separator and add bottom
