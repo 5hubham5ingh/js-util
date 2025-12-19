@@ -149,6 +149,8 @@ export const border = (
   padY = 0,
   contentStyle,
 ) => {
+  if(typeof str !== 'string') throw TypeError("'str' must be of type string")
+  if(typeof padX !== 'number' || typeof padY !== 'number') throw TypeError("'padX' and 'pady' must be of type number") 
   const borderChars = {
     normal: {
       x: "─".style(style),
