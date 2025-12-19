@@ -567,104 +567,135 @@ export const text = (text, size = 1) => {
 
 export function justify(textElements, type = "between", width) {
   if (textElements.length === 0) return "";
-  if (textElements.length === 1) return textElements[0] + "\n";
+  if (textElements.length === 1) {
+    return textElements[0] + (textElements[0].endsWith("\n") ? "" : "\n");
+  }
+
+  // Split every element into its lines (preserve trailing newline if present, but rare)
+  const lineArrays = textElements.map((el) => el.split("\n"));
+
+  // Find the maximum number of lines (height of the block)
+  const maxLines = Math.max(...lineArrays.map((lines) => lines.length));
+
+  // Pad shorter elements with empty lines at the bottom (top-aligned)
+  const padded = lineArrays.map((lines) => {
+    if (lines.length < maxLines) {
+      return lines.concat(Array(maxLines - lines.length).fill(""));
+    }
+    return lines;
+  });
+
+  // Transpose: build an array of rows, where each row is [line0_of_el0, line0_of_el1, ...]
+  const rows = [];
+  for (let i = 0; i < maxLines; i++) {
+    const rowElements = padded.map((col) => col[i]);
+    rows.push(rowElements);
+  }
 
   if (width === undefined) {
     const [termWidth] = getTerminalSize() || [80, 30];
     width = termWidth;
   }
 
-  const getVisibleLength = (el) => el.stripStyle().length;
-
-  const totalLength = textElements.reduce(
-    (sum, el) => sum + getVisibleLength(el),
-    0,
+  // For each row, compute its visible length to check overflow
+  const rowLengths = rows.map((row) =>
+    row.reduce((sum, el) => sum + el.stripStyle().length, 0)
   );
 
-  const spaceToDistribute = width - totalLength;
-  if (spaceToDistribute < 0) {
-    // If content is wider than terminal, just left-align
-    return textElements.join(" ") + "\n";
-  }
+  const maxRowLength = Math.max(...rowLengths);
 
   let result = "";
 
-  if (type === "between") {
-    // Spaces ONLY between elements (no leading/trailing)
-    // Remaining space divided among (n-1) gaps
-    const gaps = textElements.length - 1;
-    const spacePerGap = Math.floor(spaceToDistribute / gaps);
-    const extraSpaces = spaceToDistribute % gaps;
-
-    const baseSpaces = " ".repeat(spacePerGap);
-
-    for (let i = 0; i < textElements.length; i++) {
-      if (i > 0) {
-        const extra = i - 1 < extraSpaces ? 1 : 0; // distribute extras left-to-right
-        result += " ".repeat(extra) + baseSpaces;
-      }
-      result += textElements[i];
+  if (maxRowLength > width) {
+    // Fallback if any row would overflow: just concatenate with single space between columns
+    for (let i = 0; i < maxLines; i++) {
+      result += padded.map((col) => col[i]).join(" ") + "\n";
     }
-  } else if (type === "around") {
-    // Equal space AROUND each element (before and after every word)
-    // Total gaps = 2 * n (before first, between, after last)
-    const n = textElements.length;
-    const totalGaps = 2 * n;
-    const spacePerSide = Math.floor(spaceToDistribute / totalGaps);
-    const extraSpaces = spaceToDistribute % totalGaps;
-
-    const basePadding = " ".repeat(spacePerSide);
-
-    // Distribute extra spaces one by one to each side, starting from left
-    let extraIndex = 0;
-
-    for (let i = 0; i < n; i++) {
-      // Left padding
-      const leftExtra = extraIndex < extraSpaces ? 1 : 0;
-      result += " ".repeat(leftExtra) + basePadding;
-      extraIndex++;
-
-      result += textElements[i];
-
-      // Right padding
-      const rightExtra = extraIndex < extraSpaces ? 1 : 0;
-      result += basePadding + " ".repeat(rightExtra);
-      extraIndex++;
-    }
-
-    // Trim the final trailing padding (we added one too many on the last right)
-    result = result.slice(
-      0,
-      -basePadding.length - (extraIndex - 1 < extraSpaces ? 1 : 0),
-    );
-  } else if (type === "even") {
-    // Elements are equidistant from each other AND from left/right edges
-    // → Equal spacing in (n + 1) gaps: before first, between, after last
-    const n = textElements.length;
-    const totalGaps = n + 1;
-    const spacePerGap = Math.floor(spaceToDistribute / totalGaps);
-    const extraSpaces = spaceToDistribute % totalGaps;
-
-    const baseSpaces = " ".repeat(spacePerGap);
-
-    // Leading spaces
-    result += baseSpaces + (extraSpaces > 0 ? " " : "");
-    let remainingExtras = Math.max(0, extraSpaces - 1);
-
-    for (let i = 0; i < n; i++) {
-      result += textElements[i];
-      if (i < n - 1) {
-        const extra = remainingExtras > 0 ? 1 : 0;
-        result += " ".repeat(extra) + baseSpaces;
-        remainingExtras -= extra;
-      }
-    }
-
-    // Trailing spaces
-    result += baseSpaces + " ".repeat(remainingExtras);
-  } else {
-    throw new TypeError('Invalid type: must be "between", "around", or "even"');
+    return result;
   }
 
-  return result + "\n";
+  // Otherwise, justify each row independently
+  for (const row of rows) {
+    // Temporary single-line elements for this row
+    const totalLength = row.reduce(
+      (sum, el) => sum + el.stripStyle().length,
+      0,
+    );
+    const spaceToDistribute = width - totalLength;
+
+    let line = "";
+    if (type === "between") {
+      const gaps = row.length - 1;
+      if (gaps === 0) {
+        line = row[0];
+      } else {
+        const spacePerGap = Math.floor(spaceToDistribute / gaps);
+        const extraSpaces = spaceToDistribute % gaps;
+        const baseSpaces = " ".repeat(spacePerGap);
+
+        for (let i = 0; i < row.length; i++) {
+          if (i > 0) {
+            const extra = i - 1 < extraSpaces ? 1 : 0;
+            line += " ".repeat(extra) + baseSpaces;
+          }
+          line += row[i];
+        }
+      }
+    } else if (type === "around") {
+      // Equal padding around each element
+      const n = row.length;
+      const totalGaps = 2 * n;
+      const spacePerSide = Math.floor(spaceToDistribute / totalGaps);
+      const extraSpaces = spaceToDistribute % totalGaps;
+      const basePadding = " ".repeat(spacePerSide);
+
+      let extraIndex = 0;
+      for (let i = 0; i < n; i++) {
+        const leftExtra = extraIndex < extraSpaces ? 1 : 0;
+        line += " ".repeat(leftExtra) + basePadding;
+        extraIndex++;
+
+        line += row[i];
+
+        const rightExtra = extraIndex < extraSpaces ? 1 : 0;
+        line += basePadding + " ".repeat(rightExtra);
+        extraIndex++;
+      }
+      // Remove the excess trailing padding after the last element
+      const trailingToRemove = basePadding.length +
+        (extraIndex - 1 < extraSpaces ? 1 : 0);
+      line = line.slice(0, -trailingToRemove);
+    } else if (type === "even") {
+      // Equal gaps including before first and after last
+      const n = row.length;
+      const totalGaps = n + 1;
+      const spacePerGap = Math.floor(spaceToDistribute / totalGaps);
+      const extraSpaces = spaceToDistribute % totalGaps;
+      const baseSpaces = " ".repeat(spacePerGap);
+
+      // Leading
+      line += baseSpaces + (extraSpaces > 0 ? " " : "");
+      let remainingExtras = Math.max(0, extraSpaces - 1);
+
+      for (let i = 0; i < n; i++) {
+        line += row[i];
+        if (i < n - 1) {
+          const extra = remainingExtras > 0 ? 1 : 0;
+          line += " ".repeat(extra) + baseSpaces;
+          remainingExtras -= extra;
+        }
+      }
+
+      // Trailing
+      line += baseSpaces + " ".repeat(remainingExtras);
+    } else {
+      throw new TypeError(
+        'Invalid type: must be "between", "around", or "even"',
+      );
+    }
+
+    result += line + "\n";
+  }
+
+  return result;
 }
