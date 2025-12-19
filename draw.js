@@ -1,7 +1,7 @@
 import { link } from "./cursor.js";
 import { getTerminalSize } from "./terminal.js";
 
-export const table = (data, columns) => {
+export const table = (data, columns, addSeparator = false) => {
   if (typeof data !== "object" || data === null) {
     throw TypeError(
       'The "data" argument must be an array or a non-null object.',
@@ -10,45 +10,45 @@ export const table = (data, columns) => {
   if (columns !== undefined && !Array.isArray(columns)) {
     throw TypeError('The "columns" argument, if provided, must be an array.');
   }
-
   let table = "";
   const isArray = Array.isArray(data);
   const rows = isArray
     ? data
     : Object.entries(data).map(([key, value]) => ({ key, value }));
-
   if (!rows.length) {
     table += "╔════╗\n║ [] ║\n╚════╝\n";
-    return;
+    return table;
   }
-
   const keys = columns && columns.length
     ? columns
     : [...new Set(rows.flatMap((row) => Object.keys(row)))];
-
   const header = [...keys];
 
   const getString = (v) =>
     v === null ? "null" : v === undefined ? "undefined" : String(v);
 
-  const allRows = [
-    header,
-    ...rows.map((row) => {
-      return keys.map((k) => getString(row[k]));
-    }),
-  ];
+  // Split all cells (header + data rows) into arrays of lines
+  const allCellLines = [
+    header.map(getString), // header is single-line
+    ...rows.map((row) => keys.map((k) => getString(row[k]))),
+  ].map((row) => row.map((cell) => cell.split("\n")));
 
+  // Compute column widths: max length of any single line across all cells in that column
   const colWidths = header.map((_, colIndex) =>
     Math.max(
-      ...allRows.map((row) => getString(row[colIndex])?.stripStyle()?.length),
+      ...allCellLines.flatMap((row) =>
+        row[colIndex].map((line) => line.stripStyle?.()?.length ?? line.length)
+      ),
+      header[colIndex].stripStyle?.()?.length ?? header[colIndex].length,
     )
   );
 
-  const pad = (s, i) =>
-    getString(s).padEnd(colWidths[i] + s.length - s.stripStyle().length, " ");
-
-  const formatRow = (row) =>
-    "║ " + row.map(pad).map((v) => v).join(" │ ") + " ║";
+  const pad = (line, colIndex) =>
+    line.padEnd(
+      colWidths[colIndex] + line.length -
+        (line.stripStyle?.()?.length ?? line.length),
+      " ",
+    );
 
   const makeLine = (left, mid, right, fill) =>
     left +
@@ -59,8 +59,32 @@ export const table = (data, columns) => {
   const separator = makeLine("╟", "┼", "╢", "─");
   const bottom = makeLine("╚", "╧", "╝", "═");
 
-  const lines = [top, formatRow(header), separator];
-  allRows.slice(1).forEach((row) => lines.push(formatRow(row)));
+  const lines = [top];
+
+  // Render header (always single line)
+  const headerLine = "║ " +
+    header.map((h, i) => pad(getString(h), i)).join(" │ ") + " ║";
+  lines.push(headerLine);
+  lines.push(makeLine("╟", "╪", "╢", "═"));
+
+  // Render data rows
+  allCellLines.slice(1).forEach((rowLines) => {
+    // Max lines in this logical row
+    const maxLinesInRow = Math.max(...rowLines.map((lines) => lines.length), 1);
+
+    for (let lineIdx = 0; lineIdx < maxLinesInRow; lineIdx++) {
+      const parts = rowLines.map((cellLines, colIdx) => {
+        const line = cellLines[lineIdx] ?? ""; // empty if fewer lines
+        return pad(line, colIdx);
+      });
+      const rowStr = "║ " + parts.join(" │ ") + " ║";
+      lines.push(rowStr);
+    }
+    if(addSeparator) lines.push(separator);
+  });
+
+  // Remove the last separator and add bottom
+  lines.pop();
   lines.push(bottom);
 
   table += lines.join("\n");
