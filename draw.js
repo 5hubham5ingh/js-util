@@ -115,7 +115,14 @@ export const levels = (levels) => {
   return finalFrames.join("\n\n");
 };
 
-export const border = (str, type = "normal", style, padX = 1, padY = 0) => {
+export const border = (
+  str,
+  type = "normal",
+  style,
+  padX = 1,
+  padY = 0,
+  contentStyle,
+) => {
   const borderChars = {
     normal: {
       x: "─".style(style),
@@ -187,7 +194,9 @@ export const border = (str, type = "normal", style, padX = 1, padY = 0) => {
 
   const middleContent = lines.map((line) =>
     `${chars.y}${horizontalPadding}${
-      line.padEnd(contentWidth + line.length - line.stripStyle().length)
+      line.padEnd(contentWidth + line.length - line.stripStyle().length).style(
+        contentStyle,
+      )
     }${horizontalPadding}${chars.y}`
   ).join("\n");
 

@@ -140,9 +140,10 @@ declare global {
     border(
       str: string,
       type?: "normal" | "thick" | "double" | "rounded" | "hidden",
-      style?: string,
+      style?: string | string[],
       padX?: number,
       padY?: number,
+      contentStyle?: string | string[],
     ): string;
 
     /**
