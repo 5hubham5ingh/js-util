@@ -22,7 +22,7 @@ export const loader = (message) => {
 
   const worker = new os.Worker("./worker.js");
 
-  const [terminalWidth, _] = getTerminalSize();
+  const [terminalWidth, _] = getTerminalSize() || [80, 30];
 
   const frames = message
     ? ["◜", "◝", "◞", "◟"].map((stateSymbol) =>
@@ -74,7 +74,7 @@ export const pages = (content, pageHeight) => {
     throw new Error('The "pageHeight" must be a positive number.');
   }
 
-  const [terminalWidth, terminalHeight] = getTerminalSize();
+  const [terminalWidth, terminalHeight] = getTerminalSize() || [80, 30];
   if (pageHeight && pageHeight > terminalHeight - 3) {
     pageHeight = terminalHeight - 3;
   }
@@ -269,17 +269,17 @@ export const levels = (levels, animate = true) => {
 };
 
 export const line = (style = "grey") => {
-  const [terminalWidth] = getTerminalSize();
+  const [terminalWidth] = getTerminalSize() || [80, 30];
   "─".repeat(terminalWidth).style(style).log();
 };
 
 export const startSection = (style = "grey") => {
-  const [terminalWidth] = getTerminalSize();
+  const [terminalWidth] = getTerminalSize() || [80, 30];
   print(("╔" + "═".repeat(terminalWidth - 2) + "╗").style(style));
 };
 
 export const endSection = (style = "grey") => {
-  const [terminalWidth] = getTerminalSize();
+  const [terminalWidth] = getTerminalSize() || [80, 30];
   print(("╚" + "═".repeat(terminalWidth - 2) + "╝").style(style));
 };
 
@@ -307,7 +307,7 @@ export const timer = (till) => {
 
     const blockNumber = draw.blockDigits(timeString);
     const padStart = Math.abs(
-      (getTerminalSize()[0] - blockNumber.lines()[0].length) / 2,
+      ((getTerminalSize() || [80])[0] - blockNumber.lines()[0].length) / 2,
     );
 
     print(

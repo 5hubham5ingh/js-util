@@ -402,7 +402,7 @@ String.prototype.chunks = function (size) {
 };
 
 String.prototype.wrap = function (
-  maxLength = getTerminalSize()[0],
+  maxLength = getTerminalSize()?.[0] || 80,
   byWords = true,
 ) {
   if (byWords) {
@@ -424,7 +424,10 @@ String.prototype.wrap = function (
   return this.chunks(maxLength).join("\n");
 };
 
-String.prototype.align = function (alignment, width = getTerminalSize()[0]) {
+String.prototype.align = function (
+  alignment,
+  width = getTerminalSize()?.[0] || 80,
+) {
   switch (alignment) {
     case "center":
       return this.lines().map((l) => {

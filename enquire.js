@@ -19,7 +19,7 @@ import { ansi } from "./ansiStyle.js";
 
 const formatLine = (line, lineNumber, totalLines) => {
   const visible = line.stripStyle();
-  const [terminalWidth] = getTerminalSize();
+  const [terminalWidth] = getTerminalSize() || [80, 30];
   const horizontalGap = terminalWidth - 2 - visible.length;
 
   if (horizontalGap > 0) {
@@ -144,7 +144,7 @@ export const choose = (options) => {
   printf("%s", cursorHide);
   ttySetRaw();
 
-  const [_terminalWidth, terminalHeight] = getTerminalSize();
+  const [_terminalWidth, terminalHeight] = getTerminalSize() || [80, 30];
   let index = 0;
   let prevCursorPos;
 
@@ -191,7 +191,7 @@ export const search = (options) => {
   printf("%s", cursorHide);
   ttySetRaw();
 
-  const [terminalWidth, terminalHeight] = getTerminalSize();
+  const [terminalWidth, terminalHeight] = getTerminalSize() || [80, 30];
   let query = "";
   let filtered = options.slice();
   let index = 0;
@@ -311,7 +311,7 @@ export const select = (options) => {
   printf("%s", cursorHide);
   ttySetRaw();
 
-  const [terminalWidth, terminalHeight] = getTerminalSize();
+  const [terminalWidth, terminalHeight] = getTerminalSize() || [80, 30];
   let index = 0;
   const selected = new Set();
   let prevCursorPos;
@@ -370,7 +370,7 @@ export const pick = () => {
     FILE_DETAILS: "📃",
   };
 
-  const [terminalWidth, terminalHeight] = getTerminalSize();
+  const [terminalWidth, terminalHeight] = getTerminalSize() || [80, 30];
   const MAX_DETAIL_HEIGHT = parseInt(terminalHeight / 4);
   const CONTENT_WIDTH = terminalWidth - 4;
 
@@ -503,7 +503,7 @@ export const describe = (buffer = "") => {
     throw TypeError('Expected one argument of type "string"');
   }
 
-  const [terminalWidth, terminalHeight] = getTerminalSize();
+  const [terminalWidth, terminalHeight] = getTerminalSize() || [80, 30];
   const CURSOR_CHAR = "█";
   const CONTENT_WIDTH = terminalWidth - 5;
   const MAX_BUFFER_HEIGHT = Math.floor(terminalHeight / 2);

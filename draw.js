@@ -290,7 +290,7 @@ export const message = (label, message, details, color = "white") => {
     throw new TypeError("message(): 'details' must be a string if provided.");
   }
 
-  const [terminalWidth] = getTerminalSize();
+  const [terminalWidth] = getTerminalSize() || [80, 30];
   const formatedLabel = ` ${label}`.style(["bold", "#000000", `bg-${color}`]) +
     "◗".style(color);
 
@@ -570,7 +570,7 @@ export function justify(textElements, type = "between", width) {
   if (textElements.length === 1) return textElements[0] + "\n";
 
   if (width === undefined) {
-    const [termWidth] = getTerminalSize();
+    const [termWidth] = getTerminalSize() || [80, 30];
     width = termWidth;
   }
 

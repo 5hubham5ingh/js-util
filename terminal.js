@@ -213,41 +213,36 @@ const handleKeysPressSync = (keysAndCb) => {
  *
  * It prioritizes getting dimensions directly from the TTY driver,
  * falls back to environment variables (COLUMNS/LINES), and finally
- * defaults to reasonable fixed dimensions if all else fails.
+ * to stty core util
  *
  * @returns An array [width, height] where both are guaranteed to be positive numbers.
  */
 const getTerminalSize = () => {
-  const DEFAULT_WIDTH = 80;
-  const DEFAULT_HEIGHT = 24;
-
-  let width, height;
-
-  if (isatty(1)) {
-    try {
-      [width, height] = ttyGetWinSize(1);
-    } catch (_) {}
+  let ttyFd = -1;
+  try {
+    ttyFd = os.open("/dev/tty", os.O_RDONLY);
+    if (ttyFd !== -1 && isatty(ttyFd)) {
+      const dimension = ttyGetWinSize(ttyFd);
+      if (dimension) return dimension; // [width, height]
+    }
+  } finally {
+    if (ttyFd !== -1) os.close(ttyFd);
   }
 
-  if (
-    typeof width === "undefined" || typeof height === "undefined" ||
-    width <= 0 || height <= 0
-  ) {
-    const envWidth = parseInt(getenv("COLUMNS") || "", 10);
-    const envHeight = parseInt(getenv("LINES") || "", 10);
+  // Fallback 1: Environment Variables
+  const envWidth = parseInt(getenv("COLUMNS"), 10);
+  const envHeight = parseInt(getenv("LINES"), 10);
+  if (!isNaN(envWidth) && !isNaN(envHeight)) return [envWidth, envHeight];
 
-    width = (envWidth > 0) ? envWidth : undefined;
-    height = (envHeight > 0) ? envHeight : undefined;
+  // Fallback 2: Shell out to stty
+  try {
+    const output = ($`stty size`).trim().split(/\s+/);
+    if (output.length === 2) {
+      return [parseInt(output[1], 10), parseInt(output[0], 10)];
+    }
+  } catch (_) {
+    return null;
   }
-
-  const finalWidth = (typeof width === "number" && width > 0)
-    ? width
-    : DEFAULT_WIDTH;
-  const finalHeight = (typeof height === "number" && height > 0)
-    ? height
-    : DEFAULT_HEIGHT;
-
-  return [finalWidth, finalHeight];
 };
 
 export { getTerminalSize, handleKeysPress, handleKeysPressSync, keySequences };
