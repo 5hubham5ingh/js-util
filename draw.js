@@ -36,7 +36,7 @@ export const table = (data, columns, addSeparator = false) => {
   // Compute column widths: max length of any single line across all cells in that column
   const colWidths = header.map((_, colIndex) => {
     const headerStr = getString(header[colIndex]);
-    
+
     return Math.max(
       ...allCellLines.flatMap((row) =>
         row[colIndex].map((line) => line.stripStyle?.()?.length ?? line.length)
@@ -141,6 +141,14 @@ export const levels = (levels) => {
   return finalFrames.join("\n\n");
 };
 
+const titleAlignmentTypes = [
+  "top-center",
+  "top-left",
+  "top-right",
+  "bottom-center",
+  "bottom-right",
+  "bottom-left",
+];
 export const border = (
   str,
   type = "normal",
@@ -148,9 +156,25 @@ export const border = (
   padX = 1,
   padY = 0,
   contentStyle,
+  title,
 ) => {
-  if(typeof str !== 'string') throw TypeError("'str' must be of type string")
-  if(typeof padX !== 'number' || typeof padY !== 'number') throw TypeError("'padX' and 'pady' must be of type number") 
+  if (typeof str !== "string") throw TypeError("'str' must be of type string");
+  if (typeof padX !== "number" || typeof padY !== "number") {
+    throw TypeError("'padX' and 'pady' must be of type number");
+  }
+
+  if (title) {
+    if (
+      typeof title.text !== "string" ||
+      !titleAlignmentTypes.includes(title.alignment)
+    ) {
+      throw TypeError(
+        `'title' must be an object: {text: string, alignment: "${
+          titleAlignmentTypes.join(" | ")
+        }"}`,
+      );
+    }
+  }
   const borderChars = {
     normal: {
       x: "─".style(style),
@@ -204,6 +228,7 @@ export const border = (
   const contentWidth = Math.max(
     0,
     ...lines.map((line) => line.stripStyle().length),
+    title?.text?.stripStyle().length,
   );
 
   // return empty box
@@ -211,10 +236,29 @@ export const border = (
     return `${chars.tl}${chars.tr}\n${chars.bl}${chars.br}`;
   }
 
-  const totalInnerWidth = contentWidth + padX * 2;
+  const totalInnerWidth =
+    Math.max(title?.text?.stripStyle().length ?? 0, contentWidth) +
+    padX * 2;
 
-  const topBorder = chars.tl + chars.x.repeat(totalInnerWidth) + chars.tr;
-  const bottomBorder = chars.bl + chars.x.repeat(totalInnerWidth) + chars.br;
+  const topBorder = chars.tl.concat(
+    title?.alignment?.includes("top")
+      ? title.text.align(
+        title.alignment.split("-")[1],
+        totalInnerWidth,
+        chars.x,
+      )
+      : chars.x.repeat(totalInnerWidth),
+    chars.tr,
+  );
+  const bottomBorder = chars.bl +
+    (title?.alignment?.includes("bottom")
+      ? title.text.align(
+        title.alignment.split("-")[1],
+        totalInnerWidth,
+        chars.x,
+      )
+      : chars.x.repeat(totalInnerWidth)) +
+    chars.br;
 
   const verticalPadding =
     (chars.y + " ".repeat(totalInnerWidth) + chars.y + "\n").repeat(padY);

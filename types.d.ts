@@ -144,6 +144,16 @@ declare global {
       padX?: number,
       padY?: number,
       contentStyle?: string | string[],
+      title?: {
+        text: string;
+        alignment:
+          | "top-center"
+          | "top-left"
+          | "top-right"
+          | "bottom-center"
+          | "bottom-right"
+          | "bottom-left";
+      },
     ): string;
 
     /**
