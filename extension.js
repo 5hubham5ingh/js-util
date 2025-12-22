@@ -1,4 +1,3 @@
-import * as std from "std";
 import {
   exec as execAsync,
   execSync as exec,
@@ -6,6 +5,7 @@ import {
 } from "../qjs-ext-lib/src/process.js";
 import { clearInterval, setInterval, wait } from "../qjs-ext-lib/src/timers.js";
 import * as os from "os";
+import * as std from "std";
 import { ansi } from "./ansiStyle.js";
 import * as enquire from "./enquire.js";
 import { getTerminalSize } from "./terminal.js";
@@ -428,26 +428,60 @@ String.prototype.align = function (
   alignment,
   width = getTerminalSize()?.[0] || 80,
 ) {
-  switch (alignment) {
-    case "center":
-      return this.lines().map((l) => {
-        const fullWidth = width - l.stripStyle().length;
-        const padStart = Math.abs(fullWidth / 2);
-        const padEnd = fullWidth - padStart;
-        return l.padStart(l.length + padStart).padEnd(
-          l.length + padStart + padEnd,
-        );
-      }).join("\n");
-
-    case "right":
-      return this.lines().map((l) => {
-        const padLeft = width - l.stripStyle().length;
-        return l.padStart(l.length + padLeft);
-      }).join("\n");
-
-    default:
-      return this;
+  if (typeof width !== "number") {
+    throw new TypeError("'width' must be of type number.");
   }
+  // Construct the padding unit
+  const unit = fillString;
+  const unitLength = unit.length; // Total length per unit (includes style overhead)
+  const visiblePerUnit = unit.stripStyle().length; // Visible chars per unit
+  const lines = this.lines();
+  const resultLines = lines.map((l) => {
+    const visibleLineLength = l.stripStyle().length;
+    let output = l;
+    const totalPadVisible = Math.max(0, width - visibleLineLength);
+    switch (alignment) {
+      case "center": {
+        const leftPadVisible = Math.floor(totalPadVisible / 2);
+        let numLeft = 0;
+        if (visiblePerUnit > 0) {
+          numLeft = Math.ceil(leftPadVisible / visiblePerUnit);
+        }
+        const leftTotalLength = numLeft * unitLength;
+        output = output.padStart(output.length + leftTotalLength, unit);
+        // Recompute current visible after left padding
+        const currentVisible = output.stripStyle().length;
+        const rightPadVisible = Math.max(0, width - currentVisible);
+        let numRight = 0;
+        if (visiblePerUnit > 0) {
+          numRight = Math.ceil(rightPadVisible / visiblePerUnit);
+        }
+        const rightTotalLength = numRight * unitLength;
+        output = output.padEnd(output.length + rightTotalLength, unit);
+        break;
+      }
+      case "right": {
+        let numLeft = 0;
+        if (visiblePerUnit > 0) {
+          numLeft = Math.ceil(totalPadVisible / visiblePerUnit);
+        }
+        const leftTotalLength = numLeft * unitLength;
+        output = output.padStart(output.length + leftTotalLength, unit);
+        break;
+      }
+      case "left": {
+        let numRight = 0;
+        if (visiblePerUnit > 0) {
+          numRight = Math.ceil(totalPadVisible / visiblePerUnit);
+        }
+        const rightTotalLength = numRight * unitLength;
+        output = output.padEnd(output.length + rightTotalLength, unit);
+        break;
+      }
+    }
+    return output;
+  });
+  return resultLines.join("\n");
 };
 
 Number.prototype.log = function () {
