@@ -426,7 +426,8 @@ String.prototype.wrap = function (
 
 String.prototype.align = function (
   alignment,
-  width = getTerminalSize()?.[0] || 80,
+  width = getTerminalSize()[0],
+  fillString = " ",
 ) {
   if (typeof width !== "number") {
     throw new TypeError("'width' must be of type number.");
