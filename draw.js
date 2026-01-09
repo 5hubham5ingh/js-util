@@ -228,7 +228,7 @@ export const border = (
   const contentWidth = Math.max(
     0,
     ...lines.map((line) => line.stripStyle().length),
-    title?.text?.stripStyle().length,
+    title?.text?.stripStyle().length ?? 0,
   );
 
   // return empty box
@@ -239,7 +239,6 @@ export const border = (
   const totalInnerWidth =
     Math.max(title?.text?.stripStyle().length ?? 0, contentWidth) +
     padX * 2;
-
   const topBorder = chars.tl.concat(
     title?.alignment?.includes("top")
       ? title.text.align(

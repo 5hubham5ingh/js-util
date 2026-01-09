@@ -30,6 +30,7 @@ $JS "({ a: 1, b: 2, c: 3 }).table().log()" # Object as table
 $JS "const t1 = ({ x: 10, y: 20 }).table(); const t2 = [{ fruit: 'apple' }, { fruit: 'banana' }].table(); t1.join(t2).log()"
 $JS "const b1 = 'Hello'.border('double'); const b2 = 'World'.border('rounded'); b1.stack(b2, 'center').log()"
 $JS "draw.levels([[15,30,'Task 1',false],[10,20,'Task 2',true],[5,10,'Task 3',false]]).log()"
+$JS "draw.border('testing\ndraw.border()'.border(),undefined,'green',1,0,'red',{text: ' test '.style('yellow'), alignment: 'top-center'}).log()"
 
 # Global utility functions
 $JS "print('Current working directory:', cwd)"
