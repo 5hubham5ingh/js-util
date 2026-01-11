@@ -174,7 +174,11 @@ declare global {
      * @param addSeparator - Add line separator between rows, Default- false
      * @returns Multi-line table string
      */
-    table(data: any[] | Record<string, any>[], columns?: string[], addSeparator?: boolean): string;
+    table(
+      data: any[] | Record<string, any>[],
+      columns?: string[],
+      addSeparator?: boolean,
+    ): string;
 
     /**
      * Creates multiple static progress bars (same as render.levels but static version exists in draw too)
@@ -771,7 +775,23 @@ declare global {
     stripEmojis(): string;
 
     /** Wrap with draw.border */
-    border(type?: string, style?: string, padX?: number, padY?: number): string;
+    border(
+      type?: "normal" | "thick" | "double" | "rounded" | "hidden",
+      style?: string | string[],
+      padX?: number,
+      padY?: number,
+      contentStyle?: string | string[],
+      title?: {
+        text: string;
+        alignment:
+          | "top-center"
+          | "top-left"
+          | "top-right"
+          | "bottom-center"
+          | "bottom-right"
+          | "bottom-left";
+      },
+    ): string;
 
     /** Remove box-drawing characters */
     stripBorder(): string;
