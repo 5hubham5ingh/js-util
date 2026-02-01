@@ -107,8 +107,8 @@ js "exec('ls -la').log()"
 # ...outputs the result of ls -la
 
 # Read from stdin and process it
-cat package.json | js "stdin.parseJson().version.log()"
-# 1.0.0
+kitty @ get-colors | js "stdin.lines().map(l => l.words()[0]?.style(l.words()[1])).join('\n').log()"
+# kitty terminal colors visualised
 
 # Create a styled border around text
 js "'Hello, World!'.border('rounded', ['green']).log()"
