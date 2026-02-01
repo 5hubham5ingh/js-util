@@ -326,7 +326,7 @@ export const clearScreen = () => printf(clear);
 
 export const heatMap = (data) => draw.heatMap(data).log();
 
-export async function png(pngSource, size) {
+export async function png(pngSource, size, position) {
   pngSource.base64 ??= await execAsync([
     "base64",
     "-w",
@@ -335,6 +335,8 @@ export async function png(pngSource, size) {
   ], {
     bufferSize: stat(pngSource.filePath).size.bytes,
   });
+
+  if (position) std.out.puts(terminal.cursorTo(position.row, position.column));
 
   let params = "a=T,f=100"; //'Action=Transfer', 'Format=base64'
 
