@@ -535,7 +535,7 @@ function reconstructString(strings, ...values) {
 
 globalThis.$ = function (...all) {
   const cmd = reconstructString(...all);
-  return cmd.exec();
+  return os.exec(cmd.split(" "));
 };
 
 globalThis.sh = function (...all) {
