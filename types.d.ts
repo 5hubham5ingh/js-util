@@ -105,6 +105,7 @@ declare global {
     png(
       png: { base64: string; filePath: string },
       size?: { columns: number; rows: number },
+      position?: { row: number; column: number },
     ): void;
 
     /**
@@ -144,6 +145,7 @@ declare global {
           rows: number;
         };
         cellPadding?: { veritcal: number; horizontal: number };
+        getHiRes?: () => { base64: string; filePath: string };
       },
     ): Promise<void>;
   };

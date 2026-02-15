@@ -377,6 +377,7 @@ export async function gallery(
     origin = "0x0",
     terminalSize,
     cellPadding = { vertical: 1, horizontal: 1 },
+    getHiRes = () => {},
   },
 ) {
   /*------------------ Args validation ---------------*/
@@ -486,6 +487,7 @@ export async function gallery(
   /*------------------ Navigation Logic -----------------*/
 
   const moveSelection = async (direction) => {
+    if (isFullScreen) return;
     // Current Global Index
     const globalIdx = (currentPage * maxCellsInGrid) + currentCell;
 
@@ -535,9 +537,11 @@ export async function gallery(
   os.ttySetRaw();
   std.out.puts(terminal.cursorHide);
   await renderPage();
+  let isFullScreen = false;
 
   /*------------------- Event handlers --------------------*/
   const moveSelectionDown = () => {
+    if (isFullScreen) return;
     if (currentCell + targetCols < maxCellsInGrid) {
       // Ensure we don't select an empty slot on the last page
       const nextGlobal = (currentPage * maxCellsInGrid) +
@@ -551,12 +555,32 @@ export async function gallery(
   };
 
   const moveSelectionUp = () => {
+    if (isFullScreen) return;
     if (currentCell - targetCols >= 0) {
       currentCell -= targetCols;
       renderHighlight(currentCell);
       const nextGlobal = (currentPage * maxCellsInGrid) + currentCell;
       return onFocus(pngs[nextGlobal], nextGlobal);
     }
+  };
+
+  const toggleFullscreen = () => {
+    const globalIndex = (currentPage * maxCellsInGrid) + currentCell;
+    if (pngs[globalIndex]) {
+      if (isFullScreen = !isFullScreen) {
+        print(terminal.enterAlternativeScreen);
+        isFullScreen = true;
+        render.png(getHiRes(pngs[globalIndex]) ?? pngs[globalIndex], {
+          columns: terminalWidth,
+          rows: terminalHeight,
+        }, { row: originX, column: originY });
+      } else print(terminal.exitAlternativeScreen);
+    }
+  };
+
+  const handleExit = (_, exit) => {
+    if (isFullScreen) print(terminal.exitAlternativeScreen);
+    exit();
   };
 
   /*--------------------- Event Loop ----------------------*/
@@ -574,6 +598,8 @@ export async function gallery(
     [terminal.keySequences.ArrowLeft]: () => moveSelection("PREV"),
     "h": () => moveSelection("PREV"),
 
+    "f": toggleFullscreen,
+
     // Selection
     [terminal.keySequences.Enter]: () => {
       const globalIndex = (currentPage * maxCellsInGrid) + currentCell;
@@ -582,7 +608,7 @@ export async function gallery(
       }
     },
 
-    "q": (_, q) => q(),
+    "q": handleExit,
   });
 
   print(terminal.cursorShow);
