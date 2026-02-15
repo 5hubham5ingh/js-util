@@ -366,3 +366,224 @@ export async function png(pngSource, size, position) {
 
 export const heading = (heading, size = 1) =>
   std.out.printf(globalThis[`h${size}`]([heading]));
+
+export async function gallery(
+  pngs,
+  {
+    gridSize = "4x3",
+    onFocus = () => {},
+    onSelect = () => {},
+    highlightType = "fill",
+    origin = "0x0",
+    terminalSize,
+    cellPadding = { vertical: 1, horizontal: 1 },
+  },
+) {
+  /*------------------ Args validation ---------------*/
+  if (!Array.isArray(pngs)) throw TypeError("'pngs' must be an array of png");
+
+  /*----------------------- Grid Setup ---------------------*/
+  const [originX, originY] = origin ? origin.split("x").map(Number) : [0, 0];
+  const [terminalWidth, terminalHeight] = terminalSize
+    ? terminalSize.split("x").map(Number)
+    : terminal.getTerminalSize();
+
+  const [targetCols, targetRows] = gridSize.split("x").map(Number);
+  const cellWidth = Math.floor(terminalWidth / targetCols);
+  const cellHeight = Math.floor(terminalHeight / targetRows);
+
+  // Calculate offsets to center the grid
+  const usedWidth = cellWidth * targetCols;
+  const usedHeight = cellHeight * targetRows;
+  const offsetX = originX + Math.floor((terminalWidth - usedWidth) / 2);
+  const offsetY = originY + Math.floor((terminalHeight - usedHeight) / 2);
+
+  const coordinates = [];
+  for (let row = 0; row < targetRows; row++) {
+    for (let col = 0; col < targetCols; col++) {
+      const x = offsetX + col * cellWidth;
+      const y = offsetY + row * cellHeight;
+      coordinates.push([x, y, cellWidth, cellHeight]);
+    }
+  }
+
+  /*------------------ State Management -----------------*/
+
+  let currentCell = 0; // Index relative to the current page
+  let currentPage = 0;
+  const maxCellsInGrid = targetCols * targetRows;
+  const totalPages = Math.ceil(pngs.length / maxCellsInGrid);
+
+  /*------------------ Rendering Helpers -----------------*/
+  const label = highlightType === "fill" ? "█" : " ";
+
+  const renderHighlight = (cellIndex) => {
+    if (cellIndex < 0 || cellIndex >= coordinates.length) return;
+
+    const [x, y, w, h] = coordinates[cellIndex];
+    const drawW = Math.floor(w);
+    const drawH = Math.floor(h);
+
+    if (drawW <= 0 || drawH <= 0) return;
+
+    std.out.puts(terminal.cursorTo(0, 0), terminal.eraseDown);
+
+    if (highlightType !== "fill") {
+      const row = label.repeat(Math.max(0, drawW - 2));
+      const block = new Array(Math.max(0, drawH - 2)).fill(row).join("\n");
+
+      const borderedLines = block.border(highlightType, "", 0, 0).lines();
+
+      for (let i = 0; i < borderedLines.length; i++) {
+        std.out.puts(terminal.cursorTo(x, y + i) + borderedLines[i]);
+      }
+    } else {
+      const row = label.repeat(drawW);
+      for (let i = 0; i < drawH; i++) {
+        std.out.puts(terminal.cursorTo(x, y + i) + row);
+      }
+    }
+    std.out.flush();
+  };
+
+  // Renders the full grid of images for the current page
+  const renderPage = async () => {
+    // Clear all images
+    std.out.puts(terminal.clearTerminal);
+
+    const startIdx = currentPage * maxCellsInGrid;
+    const promises = [];
+
+    // Loop through grid slots
+    for (let i = 0; i < maxCellsInGrid; i++) {
+      const pngIndex = startIdx + i;
+      const coord = coordinates[i];
+
+      // If we have an image, render it
+      if (pngIndex < pngs.length) {
+        promises.push(
+          render.png(pngs[pngIndex], {
+            rows: cellHeight - cellPadding.horizontal * 2,
+            columns: cellWidth - cellPadding.vertical * 2,
+          }, {
+            row: coord[0] + cellPadding.vertical,
+            column: coord[1] + cellPadding.horizontal,
+          }),
+        );
+      }
+    }
+
+    await Promise.all(promises);
+
+    renderHighlight(currentCell);
+
+    const globalIndex = (currentPage * maxCellsInGrid) + currentCell;
+    if (pngs[globalIndex]) {
+      onFocus(pngs[globalIndex], globalIndex);
+    }
+  };
+
+  /*------------------ Navigation Logic -----------------*/
+
+  const moveSelection = async (direction) => {
+    // Current Global Index
+    const globalIdx = (currentPage * maxCellsInGrid) + currentCell;
+
+    // --- NEXT PAGE Logic (Right Arrow) ---
+    if (direction === "NEXT") {
+      const isLastCellInGrid = currentCell === maxCellsInGrid - 1;
+      const isLastImage = globalIdx === pngs.length - 1;
+
+      // Case 1: Just move next in current grid
+      if (!isLastCellInGrid && !isLastImage) {
+        currentCell++;
+        renderHighlight(currentCell); // Draw new
+        onFocus(pngs[globalIdx + 1], globalIdx + 1);
+      } // Case 2: Wrap to Next Page
+      else if (isLastCellInGrid && currentPage < totalPages - 1) {
+        currentPage++;
+        currentCell = 0; // Focus first cell
+        await renderPage(); // Re-render images
+      }
+      // Case 3: End of content (Do nothing)
+      return;
+    }
+
+    // --- PREV PAGE Logic (Left Arrow) ---
+    if (direction === "PREV") {
+      const isFirstCellInGrid = currentCell === 0;
+
+      // Case 1: Just move back in current grid
+      if (!isFirstCellInGrid) {
+        currentCell--;
+        renderHighlight(currentCell);
+        onFocus(pngs[globalIdx - 1], globalIdx - 1);
+      } // Case 2: Wrap to Prev Page
+      else if (isFirstCellInGrid && currentPage > 0) {
+        currentPage--;
+        currentCell = maxCellsInGrid - 1; // Focus last cell
+        await renderPage();
+      }
+      // Case 3: Start of content (Do nothing)
+      return;
+    }
+  };
+
+  /*--------------------- Init ----------------------*/
+
+  // Initial Render
+  os.ttySetRaw();
+  std.out.puts(terminal.cursorHide);
+  await renderPage();
+
+  /*------------------- Event handlers --------------------*/
+  const moveSelectionDown = () => {
+    if (currentCell + targetCols < maxCellsInGrid) {
+      // Ensure we don't select an empty slot on the last page
+      const nextGlobal = (currentPage * maxCellsInGrid) +
+        (currentCell + targetCols);
+      if (nextGlobal < pngs.length) {
+        currentCell += targetCols;
+        renderHighlight(currentCell);
+        return onFocus(pngs[nextGlobal], nextGlobal);
+      }
+    }
+  };
+
+  const moveSelectionUp = () => {
+    if (currentCell - targetCols >= 0) {
+      currentCell -= targetCols;
+      renderHighlight(currentCell);
+      const nextGlobal = (currentPage * maxCellsInGrid) + currentCell;
+      return onFocus(pngs[nextGlobal], nextGlobal);
+    }
+  };
+
+  /*--------------------- Event Loop ----------------------*/
+  await terminal.handleKeysPress({
+    // Standard Grid Navigation (Up/Down don't change pages in grids, only rows)
+    [terminal.keySequences.ArrowDown]: moveSelectionDown,
+    "j": moveSelectionDown,
+
+    [terminal.keySequences.ArrowUp]: moveSelectionUp,
+    "k": moveSelectionUp,
+
+    // Pagination Navigation
+    [terminal.keySequences.ArrowRight]: () => moveSelection("NEXT"),
+    "l": () => moveSelection("NEXT"),
+    [terminal.keySequences.ArrowLeft]: () => moveSelection("PREV"),
+    "h": () => moveSelection("PREV"),
+
+    // Selection
+    [terminal.keySequences.Enter]: () => {
+      const globalIndex = (currentPage * maxCellsInGrid) + currentCell;
+      if (pngs[globalIndex]) {
+        return onSelect(pngs[globalIndex], globalIndex);
+      }
+    },
+
+    "q": (_, q) => q(),
+  });
+
+  print(terminal.cursorShow);
+}

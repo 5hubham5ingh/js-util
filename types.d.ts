@@ -114,6 +114,38 @@ declare global {
      * @param {number} [size] - The text size
      */
     heading(text: string, size: number): void;
+
+    /**
+     * Renders an interactive terminal gallery of PNG images.
+     * @param pngs - An array of paths or raw data for the PNG images to display.
+     * @param options - Configuration for the gallery layout and behavior.
+     * @param [options.gridSize="4x3"] - The layout dimensions in "Cols x Rows" format.
+     * @param [options.onFocus] - Callback triggered when a cell gains focus.
+     * @param [options.onSelect] - Callback triggered when a cell is selected.
+     * @param [options.highlightType="fill"] - The style of the cursor highlight.
+     * @param [options.origin="0x0"] - The starting terminal coordinates "x,y".
+     * @param options.terminalSize - The dimensions of the terminal window.
+     * @param [options.cellPadding] - The internal spacing between images.
+     */
+    gallery(
+      pngs: { base64: string; filePath: string }[],
+      options: {
+        gridSize?: string;
+        onFocus?: (
+          highlightedPng: { base64: string; filePath: string },
+        ) => Promise<void>;
+        onSelect?: (
+          selectedPng: { base64: string; filePath: string },
+        ) => Promise<void>;
+        highlightType?: string;
+        origin?: string;
+        terminalSize?: {
+          columns: number;
+          rows: number;
+        };
+        cellPadding?: { veritcal: number; horizontal: number };
+      },
+    ): Promise<void>;
   };
 
   /**
