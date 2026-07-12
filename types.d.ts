@@ -103,7 +103,7 @@ declare global {
      * @param {number} [size.rows] - Height in rows.
      */
     png(
-      png: { base64: string; filePath: string },
+      png: { filePath: string },
       size?: { columns: number; rows: number },
       position?: { row: number; column: number },
     ): void;

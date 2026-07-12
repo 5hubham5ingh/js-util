@@ -326,41 +326,50 @@ export const clearScreen = () => printf(clear);
 
 export const heatMap = (data) => draw.heatMap(data).log();
 
+function toBase64(str) {
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+  let result = "";
+  let i = 0;
+
+  while (i < str.length) {
+    const a = str.charCodeAt(i++);
+    const b = i < str.length ? str.charCodeAt(i++) : 0;
+    const c = i < str.length ? str.charCodeAt(i++) : 0;
+
+    const idx1 = a >> 2;
+    const idx2 = ((a & 3) << 4) | (b >> 4);
+    const idx3 = ((b & 15) << 2) | (c >> 6);
+    const idx4 = c & 63;
+
+    result += chars[idx1] +
+      chars[idx2] +
+      (i - 2 < str.length ? chars[idx3] : "=") +
+      (i - 1 < str.length ? chars[idx4] : "=");
+  }
+
+  return result;
+}
+
 export async function png(pngSource, size, position) {
-  pngSource.base64 ??= await execAsync([
-    "base64",
-    "-w",
-    "0",
-    pngSource.filePath,
-  ], {
-    bufferSize: stat(pngSource.filePath).size.bytes,
-  });
+  const filePath = pngSource.filePath;
+  const tempFile = filePath.endsWith(".png")
+    ? filePath
+    : `/tmp/${filePath.split("/").at(-1)}.png`;
+
+  const [_, statErr] = os.stat(tempFile);
+  if (statErr) {
+    await execAsync(["magick", filePath, "-type", "truecolor", tempFile]);
+  }
 
   if (position) std.out.puts(terminal.cursorTo(position.row, position.column));
 
-  let params = "a=T,f=100"; //'Action=Transfer', 'Format=base64'
-
+  let params = "a=T,t=f,f=100,q=2";
   if (size?.columns) params += `,c=${size.columns}`;
   if (size?.rows) params += `,r=${size.rows}`;
 
-  const chunkSize = 4096;
-  let offset = 0;
-
-  while (offset < pngSource.base64.length) {
-    const chunk = pngSource.base64.substring(offset, offset + chunkSize);
-    const more = offset + chunk.length < pngSource.base64.length ? 1 : 0;
-
-    let escapeSequence;
-    if (offset === 0) {
-      escapeSequence = `\x1b_G${params},m=${more};${chunk}\x1b\\`;
-    } else {
-      escapeSequence = `\x1b_Gm=${more};${chunk}\x1b\\`;
-    }
-
-    std.out.printf(escapeSequence);
-    offset += chunk.length;
-  }
-
+  const encodedPath = toBase64(tempFile);
+  std.out.puts(`\x1b_G${params};${encodedPath}\x1b\\`);
   std.out.flush();
 }
 
@@ -380,10 +389,8 @@ export async function gallery(
     getHiRes = () => {},
   },
 ) {
-  /*------------------ Args validation ---------------*/
   if (!Array.isArray(pngs)) throw TypeError("'pngs' must be an array of png");
 
-  /*----------------------- Grid Setup ---------------------*/
   const [originX, originY] = origin ? origin.split("x").map(Number) : [0, 0];
   const [terminalWidth, terminalHeight] = terminalSize
     ? terminalSize.split("x").map(Number)
@@ -393,7 +400,6 @@ export async function gallery(
   const cellWidth = Math.floor(terminalWidth / targetCols);
   const cellHeight = Math.floor(terminalHeight / targetRows);
 
-  // Calculate offsets to center the grid
   const usedWidth = cellWidth * targetCols;
   const usedHeight = cellHeight * targetRows;
   const offsetX = originX + Math.floor((terminalWidth - usedWidth) / 2);
@@ -408,15 +414,13 @@ export async function gallery(
     }
   }
 
-  /*------------------ State Management -----------------*/
-
-  let currentCell = 0; // Index relative to the current page
+  let currentCell = 0;
   let currentPage = 0;
+  let currentHighlight = highlightType;
   const maxCellsInGrid = targetCols * targetRows;
   const totalPages = Math.ceil(pngs.length / maxCellsInGrid);
 
-  /*------------------ Rendering Helpers -----------------*/
-  const label = highlightType === "fill" ? "█" : " ";
+  const label = () => currentHighlight === "fill" ? "█" : " ";
 
   const renderHighlight = (cellIndex) => {
     if (cellIndex < 0 || cellIndex >= coordinates.length) return;
@@ -429,17 +433,22 @@ export async function gallery(
 
     std.out.puts(terminal.cursorTo(0, 0), terminal.eraseDown);
 
-    if (highlightType !== "fill") {
-      const row = label.repeat(Math.max(0, drawW - 2));
-      const block = new Array(Math.max(0, drawH - 2)).fill(row).join("\n");
+    if (currentHighlight !== "fill") {
+      const top = "╭" + "─".repeat(Math.max(0, drawW - 2)) + "╮";
+      const middle = "│" + " ".repeat(Math.max(0, drawW - 2)) + "│";
+      const bottom = "╰" + "─".repeat(Math.max(0, drawW - 2)) + "╯";
 
-      const borderedLines = block.border(highlightType, "", 0, 0).lines();
+      const borderedLines = [top];
+      for (let i = 0; i < Math.max(0, drawH - 2); i++) {
+        borderedLines.push(middle);
+      }
+      borderedLines.push(bottom);
 
       for (let i = 0; i < borderedLines.length; i++) {
         std.out.puts(terminal.cursorTo(x, y + i) + borderedLines[i]);
       }
     } else {
-      const row = label.repeat(drawW);
+      const row = label().repeat(drawW);
       for (let i = 0; i < drawH; i++) {
         std.out.puts(terminal.cursorTo(x, y + i) + row);
       }
@@ -447,20 +456,16 @@ export async function gallery(
     std.out.flush();
   };
 
-  // Renders the full grid of images for the current page
   const renderPage = async () => {
-    // Clear all images
     std.out.puts(terminal.clearTerminal);
 
     const startIdx = currentPage * maxCellsInGrid;
     const promises = [];
 
-    // Loop through grid slots
     for (let i = 0; i < maxCellsInGrid; i++) {
       const pngIndex = startIdx + i;
       const coord = coordinates[i];
 
-      // If we have an image, render it
       if (pngIndex < pngs.length) {
         promises.push(
           render.png(pngs[pngIndex], {
@@ -484,132 +489,137 @@ export async function gallery(
     }
   };
 
-  /*------------------ Navigation Logic -----------------*/
-
-  const moveSelection = async (direction) => {
-    if (isFullScreen) return;
-    // Current Global Index
-    const globalIdx = (currentPage * maxCellsInGrid) + currentCell;
-
-    // --- NEXT PAGE Logic (Right Arrow) ---
-    if (direction === "NEXT") {
-      const isLastCellInGrid = currentCell === maxCellsInGrid - 1;
-      const isLastImage = globalIdx === pngs.length - 1;
-
-      // Case 1: Just move next in current grid
-      if (!isLastCellInGrid && !isLastImage) {
-        currentCell++;
-        renderHighlight(currentCell); // Draw new
-        onFocus(pngs[globalIdx + 1], globalIdx + 1);
-      } // Case 2: Wrap to Next Page
-      else if (isLastCellInGrid && currentPage < totalPages - 1) {
-        currentPage++;
-        currentCell = 0; // Focus first cell
-        await renderPage(); // Re-render images
-      }
-      // Case 3: End of content (Do nothing)
-      return;
-    }
-
-    // --- PREV PAGE Logic (Left Arrow) ---
-    if (direction === "PREV") {
-      const isFirstCellInGrid = currentCell === 0;
-
-      // Case 1: Just move back in current grid
-      if (!isFirstCellInGrid) {
-        currentCell--;
-        renderHighlight(currentCell);
-        onFocus(pngs[globalIdx - 1], globalIdx - 1);
-      } // Case 2: Wrap to Prev Page
-      else if (isFirstCellInGrid && currentPage > 0) {
-        currentPage--;
-        currentCell = maxCellsInGrid - 1; // Focus last cell
-        await renderPage();
-      }
-      // Case 3: Start of content (Do nothing)
-      return;
-    }
-  };
-
-  /*--------------------- Init ----------------------*/
-
-  // Initial Render
   os.ttySetRaw();
   std.out.puts(terminal.cursorHide);
-  await renderPage();
-  let isFullScreen = false;
+  try {
+    await renderPage();
+    let isFullScreen = false;
 
-  /*------------------- Event handlers --------------------*/
-  const moveSelectionDown = () => {
-    if (isFullScreen) return;
-    if (currentCell + targetCols < maxCellsInGrid) {
-      // Ensure we don't select an empty slot on the last page
-      const nextGlobal = (currentPage * maxCellsInGrid) +
-        (currentCell + targetCols);
-      if (nextGlobal < pngs.length) {
-        currentCell += targetCols;
+    const moveSelectionDown = () => {
+      if (isFullScreen) return;
+      if (currentCell + targetCols < maxCellsInGrid) {
+        const nextGlobal = (currentPage * maxCellsInGrid) +
+          (currentCell + targetCols);
+        if (nextGlobal < pngs.length) {
+          currentCell += targetCols;
+          renderHighlight(currentCell);
+          return onFocus(pngs[nextGlobal], nextGlobal);
+        }
+      }
+    };
+
+    const moveSelectionUp = () => {
+      if (isFullScreen) return;
+      if (currentCell - targetCols >= 0) {
+        currentCell -= targetCols;
         renderHighlight(currentCell);
+        const nextGlobal = (currentPage * maxCellsInGrid) + currentCell;
         return onFocus(pngs[nextGlobal], nextGlobal);
       }
-    }
-  };
+    };
 
-  const moveSelectionUp = () => {
-    if (isFullScreen) return;
-    if (currentCell - targetCols >= 0) {
-      currentCell -= targetCols;
-      renderHighlight(currentCell);
-      const nextGlobal = (currentPage * maxCellsInGrid) + currentCell;
-      return onFocus(pngs[nextGlobal], nextGlobal);
-    }
-  };
-
-  const toggleFullscreen = () => {
-    const globalIndex = (currentPage * maxCellsInGrid) + currentCell;
-    if (pngs[globalIndex]) {
-      if (isFullScreen = !isFullScreen) {
-        print(terminal.enterAlternativeScreen);
-        isFullScreen = true;
-        render.png(getHiRes(pngs[globalIndex]) ?? pngs[globalIndex], {
-          columns: terminalWidth,
-          rows: terminalHeight,
-        }, { row: originX, column: originY });
-      } else print(terminal.exitAlternativeScreen);
-    }
-  };
-
-  const handleExit = (_, exit) => {
-    if (isFullScreen) print(terminal.exitAlternativeScreen);
-    exit();
-  };
-
-  /*--------------------- Event Loop ----------------------*/
-  await terminal.handleKeysPress({
-    // Standard Grid Navigation (Up/Down don't change pages in grids, only rows)
-    [terminal.keySequences.ArrowDown]: moveSelectionDown,
-    "j": moveSelectionDown,
-
-    [terminal.keySequences.ArrowUp]: moveSelectionUp,
-    "k": moveSelectionUp,
-
-    // Pagination Navigation
-    [terminal.keySequences.ArrowRight]: () => moveSelection("NEXT"),
-    "l": () => moveSelection("NEXT"),
-    [terminal.keySequences.ArrowLeft]: () => moveSelection("PREV"),
-    "h": () => moveSelection("PREV"),
-
-    "f": toggleFullscreen,
-
-    // Selection
-    [terminal.keySequences.Enter]: () => {
+    const toggleFullscreen = async () => {
       const globalIndex = (currentPage * maxCellsInGrid) + currentCell;
       if (pngs[globalIndex]) {
-        return onSelect(pngs[globalIndex], globalIndex);
+        if (isFullScreen = !isFullScreen) {
+          print(terminal.enterAlternativeScreen);
+          render.png(getHiRes(pngs[globalIndex]) ?? pngs[globalIndex], {
+            columns: terminalWidth,
+            rows: terminalHeight,
+          }, { row: originX, column: originY });
+        } else print(terminal.exitAlternativeScreen);
       }
-    },
+    };
 
-    "q": handleExit,
-  });
+    const moveSelection = async (direction) => {
+      if (isFullScreen) return;
+      const globalIdx = (currentPage * maxCellsInGrid) + currentCell;
 
-  print(terminal.cursorShow);
+      if (direction === "NEXT") {
+        const isLastCellInGrid = currentCell === maxCellsInGrid - 1;
+        const isLastImage = globalIdx === pngs.length - 1;
+
+        if (!isLastCellInGrid && !isLastImage) {
+          currentCell++;
+          renderHighlight(currentCell);
+          onFocus(pngs[globalIdx + 1], globalIdx + 1);
+        } else if (isLastCellInGrid && currentPage < totalPages - 1) {
+          currentPage++;
+          currentCell = 0;
+          await renderPage();
+        }
+        return;
+      }
+
+      if (direction === "PREV") {
+        const isFirstCellInGrid = currentCell === 0;
+
+        if (!isFirstCellInGrid) {
+          currentCell--;
+          renderHighlight(currentCell);
+          onFocus(pngs[globalIdx - 1], globalIdx - 1);
+        } else if (isFirstCellInGrid && currentPage > 0) {
+          currentPage--;
+          currentCell = maxCellsInGrid - 1;
+          await renderPage();
+        }
+        return;
+      }
+    };
+
+    const nextPage = () => {
+      if (isFullScreen || currentPage == totalPages - 1) return;
+      currentPage++;
+      currentCell = 0;
+      return renderPage();
+    };
+
+    const prevPage = () => {
+      if (isFullScreen || currentPage === 0) return;
+      currentPage--;
+      currentCell = maxCellsInGrid - 1;
+      return renderPage();
+    };
+
+    const handleExit = (_, exit) => {
+      if (isFullScreen) print(terminal.exitAlternativeScreen);
+      exit();
+    };
+
+    await terminal.handleKeysPress({
+      [terminal.keySequences.ArrowDown]: moveSelectionDown,
+      "j": moveSelectionDown,
+
+      [terminal.keySequences.ArrowUp]: moveSelectionUp,
+      "k": moveSelectionUp,
+
+      [terminal.keySequences.ArrowRight]: () => moveSelection("NEXT"),
+      "l": () => moveSelection("NEXT"),
+      [terminal.keySequences.ArrowLeft]: () => moveSelection("PREV"),
+      "h": () => moveSelection("PREV"),
+
+      "f": toggleFullscreen,
+
+      "H": prevPage,
+      "L": nextPage,
+
+      [terminal.keySequences.Enter]: () => {
+        const globalIndex = (currentPage * maxCellsInGrid) + currentCell;
+        if (pngs[globalIndex]) {
+          return onSelect(pngs[globalIndex], globalIndex);
+        }
+      },
+
+      [terminal.keySequences.Tab]: () => {
+        currentHighlight = currentHighlight === "border" ? "fill" : "border";
+        renderHighlight(currentCell);
+      },
+
+      "q": handleExit,
+    });
+
+  } finally {
+    std.out.puts(terminal.clearTerminal);
+    print(terminal.cursorShow);
+  }
 }
